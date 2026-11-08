@@ -26,6 +26,7 @@
 #include <stdio.h>
 #include <sys/types.h>
 #include <linux/fb.h>
+#include <drm/drm_mode.h>
 #include <unistd.h>
 #include <sys/mman.h>
 #include "tinyx.h"
@@ -44,6 +45,10 @@ typedef struct _fbdevPriv {
     int				fd;
     char			*fb;
     char			*fb_base;
+    /* x8664: set when the screen came from /dev/dri (kms.c), not /dev/fb0 */
+    Bool			kms;
+    __u32			kmsCrtc, kmsConn, kmsFb, kmsHandle;
+    struct drm_mode_modeinfo	kmsMode;
 } FbdevPriv;
     
 typedef struct _fbdevScrPriv {
@@ -53,6 +58,12 @@ typedef struct _fbdevScrPriv {
 } FbdevScrPriv;
 
 extern KdCardFuncs  fbdevFuncs;
+
+/* kms.c */
+Bool kmsInitialize (FbdevPriv *priv);
+Bool kmsShow (FbdevPriv *priv);
+void kmsHide (FbdevPriv *priv);
+void kmsFini (FbdevPriv *priv);
 
 Bool
 fbdevInitialize (KdCardInfo *card, FbdevPriv *priv);

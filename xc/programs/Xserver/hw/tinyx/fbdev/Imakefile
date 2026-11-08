@@ -52,9 +52,9 @@ XCOMM $XFree86: xc/programs/Xserver/hw/tinyx/fbdev/Imakefile,v 1.2 2005/10/14 15
 DEFINES = -DXIPAQ
 #endif
 
-SRCS = 	fbdev.c fbinit.c
+SRCS = 	fbdev.c fbinit.c kms.c
 
-OBJS = 	fbdev.o fbinit.o
+OBJS = 	fbdev.o fbinit.o kms.o
 
 INCLUDES = $(TINYXINCLUDES)
 

@@ -71,6 +71,7 @@
 #define inline __inline__
 #endif
 #include "fbdev.h"
+#include <stdlib.h>
 #include <sys/ioctl.h>
 
 /* this code was used to debug MSB 24bpp code on a 16bpp frame buffer */
@@ -81,6 +82,10 @@ fbdevInitialize (KdCardInfo *card, FbdevPriv *priv)
 {
     int		    k;
     unsigned long   off;
+    priv->kms = FALSE;
+    /* x8664: no /dev/fb0 on most kernels now, so the kernel's mode-setting is first */
+    if (!getenv("X8664_FBDEV") && kmsInitialize (priv))
+	return TRUE;
     if ((priv->fd = open("/dev/fb0", O_RDWR)) < 0) {
 	perror("Error opening /dev/fb0\n");
 	return FALSE;
@@ -379,6 +384,48 @@ fbdevUpdateFake24 (ScreenPtr pScreen,
 }
 #endif /* FAKE24_ON_16 */
 
+/*
+ * x8664: with kms we always draw into a copy in ordinary memory, then copy what
+ * changed to the card's buffer and tell the kernel which boxes those were.
+ * virtual cards (qemu's, virtio) and usb screens show nothing until they're told,
+ * and on real cards it's still faster than drawing into video memory directly.
+ */
+static void
+kmsUpdate (ScreenPtr pScreen, shadowBufPtr pBuf)
+{
+    KdScreenPriv(pScreen);
+    FbdevPriv		*priv = pScreenPriv->card->driver;
+    RegionPtr		damage = &pBuf->damage;
+    int			nbox = REGION_NUM_RECTS (damage);
+    BoxPtr		pbox = REGION_RECTS (damage);
+    struct drm_clip_rect clips[64];
+    struct drm_mode_fb_dirty_cmd dirty;
+    int			i;
+
+    if (pBuf->randr != SHADOW_ROTATE_0)
+	shadowUpdateRotatePacked (pScreen, pBuf);
+    else
+	shadowUpdatePacked (pScreen, pBuf);
+
+    memset (&dirty, 0, sizeof dirty);
+    dirty.fb_id = priv->kmsFb;
+    /* turned screens and lots of little boxes: just say the whole thing changed */
+    if (pBuf->randr == SHADOW_ROTATE_0 && nbox <= 64)
+    {
+	for (i = 0; i < nbox; i++)
+	{
+	    clips[i].x1 = pbox[i].x1;
+	    clips[i].y1 = pbox[i].y1;
+	    clips[i].x2 = pbox[i].x2;
+	    clips[i].y2 = pbox[i].y2;
+	}
+	dirty.num_clips = nbox;
+	dirty.clips_ptr = (unsigned long) clips;
+    }
+    /* cards that scan our buffer out directly say ENOSYS, which is fine */
+    ioctl (priv->fd, DRM_IOCTL_MODE_DIRTYFB, &dirty);
+}
+
 static LayerPtr
 fbdevLayerCreate (ScreenPtr pScreen)
 {
@@ -393,6 +440,7 @@ fbdevLayerCreate (ScreenPtr pScreen)
     PixmapPtr		pPixmap;
     int			kind;
     KdMouseMatrix	m;
+    FbdevPriv		*kpriv = pScreenPriv->card->driver;
 
 #ifdef FAKE24_ON_16
     if (fake24)
@@ -403,7 +451,7 @@ fbdevLayerCreate (ScreenPtr pScreen)
     else
 #endif /* FAKE24_ON_16 */
     {
-	if (scrpriv->randr != RR_Rotate_0)
+	if (scrpriv->randr != RR_Rotate_0 || kpriv->kms)
 	    scrpriv->shadow = TRUE;
 	else
 	    scrpriv->shadow = FALSE;
@@ -439,7 +487,9 @@ fbdevLayerCreate (ScreenPtr pScreen)
 	else
 #endif /* FAKE24_ON_16 */
 	{
-	    if (scrpriv->randr)
+	    if (kpriv->kms)
+		update = kmsUpdate;
+	    else if (scrpriv->randr)
 		update = shadowUpdateRotatePacked;
 	    else
 		update = shadowUpdatePacked;
@@ -660,6 +710,9 @@ fbdevEnable (ScreenPtr pScreen)
     FbdevPriv		*priv = pScreenPriv->card->driver;
     int			k;
 
+    if (priv->kms)
+	return kmsShow (priv);
+
     priv->var.activate = FB_ACTIVATE_NOW|FB_CHANGE_CMAP_VBL;
     
     /* display it on the LCD */
@@ -703,6 +756,8 @@ fbdevDPMS (ScreenPtr pScreen, int mode)
     FbdevPriv	*priv = pScreenPriv->card->driver;
     static int oldmode = -1;
 
+    if (priv->kms)
+	return FALSE;	/* x8664: kms blanking comes later */
     if (mode == oldmode)
 	return TRUE;
 #ifdef FBIOPUT_POWERMODE
@@ -726,6 +781,11 @@ fbdevDPMS (ScreenPtr pScreen, int mode)
 void
 fbdevDisable (ScreenPtr pScreen)
 {
+    KdScreenPriv(pScreen);
+    FbdevPriv	*priv = pScreenPriv->card->driver;
+
+    if (priv->kms)
+	kmsHide (priv);
 }
 
 void
@@ -743,8 +803,12 @@ fbdevCardFini (KdCardInfo *card)
 {
     FbdevPriv	*priv = card->driver;
     
-    munmap (priv->fb_base, priv->fix.smem_len);
-    close (priv->fd);
+    if (priv->kms)
+	kmsFini (priv);
+    else {
+	munmap (priv->fb_base, priv->fix.smem_len);
+	close (priv->fd);
+    }
     xfree (priv);
 }
 
