@@ -2,6 +2,9 @@
    tested without any graphics hardware. the real server comes after */
 #define BuildServersOnly		YES
 #define XVirtualFramebufferServer	YES
+/* the real-screen server: tinyx's fbdev driver, which x8664 taught kms (hw/tinyx/fbdev/kms.c) */
+#define TinyXServer		YES
+#define XfbdevServer		YES
 #define XF86Server			NO
 #define BuildXF86DRI			NO
 #define XnestServer			NO
