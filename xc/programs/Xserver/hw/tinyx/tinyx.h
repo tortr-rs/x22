@@ -685,7 +685,10 @@ KdEnqueueKeyboardEvent(unsigned char	scan_code,
 #define KD_BUTTON_3	0x04
 #define KD_BUTTON_4	0x08
 #define KD_BUTTON_5	0x10
+#define KD_BUTTON_6	0x20	/* the wheel sideways */
+#define KD_BUTTON_7	0x40
 #define KD_MOUSE_DELTA	0x80000000
+#define KD_MOUSE_RAW	0x40000000	/* moved by a driver that accelerates by itself */
 
 void
 KdEnqueueMouseEvent(KdMouseInfo *mi, unsigned long flags, int x, int y);
@@ -733,6 +736,8 @@ extern KdMouseFuncs	TsFuncs;
 extern KdKeyboardFuncs	LinuxKeyboardFuncs;
 /* x8664: keyboards through /dev/input (linux/evdev.c) */
 extern KdKeyboardFuncs	EvdevKeyboardFuncs;
+extern KdMouseFuncs	LibinputMouseFuncs;
+int LibinputMouseAvailable (void);
 Bool EvdevKeyboardAvailable (void);
 extern KdOsFuncs	LinuxFuncs;
 

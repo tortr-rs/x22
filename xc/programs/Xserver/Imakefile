@@ -822,7 +822,7 @@ XCOMM
 		     $(TINYXOS) $(SHADOW) $(FB) $(MI) $(TINY_EXTENSIONS)
          FBDEVOBJS = $(TINYXDIR)/miinitext.o $(TINYXDIR)/register.o \
 		     $(TINYXDIR)/ffcheck.o
-      FBDEVSYSLIBS = $(TINY_FONTLIBS) $(SYSLIBS)
+      FBDEVSYSLIBS = $(TINY_FONTLIBS) $(SYSLIBS) -linput -ludev
 
 #if HasParallelMake
 MakeMutex($(FBDEVDIRS) $(FBDEVOBJS) $(FBDEVLIBS) $(FBDEVSYSLIBS))

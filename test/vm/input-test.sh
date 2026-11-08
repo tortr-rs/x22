@@ -31,6 +31,7 @@ for k in __import__("os").environ.get("FIRST", "").split():
 for _ in range(int(__import__("os").environ.get("PRESSES", "2"))): cmd("sendkey meta_l-j", 3)
 cmd("screendump %s/input-keys.png -f png" % sys.argv[2], 2)
 for _ in range(10): cmd("mouse_move 40 30", 0.3)
+for _ in range(3): cmd("mouse_move 0 0 1", 0.5)
 time.sleep(4)
 cmd("screendump %s/input-after.png -f png" % sys.argv[2], 2)
 PY

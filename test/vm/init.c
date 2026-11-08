@@ -16,6 +16,21 @@
 
 static void say(const char *m) { fprintf(stderr, "x8664-init: %s\n", m); }
 
+static pid_t xpid;
+
+/* children that end: say how, the X server most of all */
+static void reap(int sig)
+{
+	int st;
+	pid_t p;
+	while ((p = waitpid(-1, &st, WNOHANG)) > 0) {
+		if (p != xpid && WIFEXITED(st) && !WEXITSTATUS(st))
+			continue;
+		fprintf(stderr, "x8664-init: %s %d %s %d\n", p == xpid ? "Xfbdev" : "pid", (int) p,
+			WIFSIGNALED(st) ? "killed by signal" : "exited with", WIFSIGNALED(st) ? WTERMSIG(st) : WEXITSTATUS(st));
+	}
+}
+
 static int exists(const char *p) { struct stat st; return stat(p, &st) == 0; }
 
 /* wait up to tenths/10 seconds for a file to show up */
@@ -69,12 +84,28 @@ int main(void)
 
 	int con = open("/dev/console", O_RDWR);
 	if (con >= 0) { dup2(con, 1); dup2(con, 2); }
-	signal(SIGCHLD, SIG_IGN);   /* no zombies, we don't wait for anyone */
+	signal(SIGCHLD, reap);
 
 	say("hello");
 	loadmodules();
 	if (!waitfor("/dev/dri/card0", 100)) { say("no /dev/dri/card0, the graphics driver didn't come up"); goto idle; }
 	say("/dev/dri/card0 is there");
+
+	/* udev first: libinput asks it what each input device is */
+	mkdir("/run", 0755);
+	mount("tmpfs", "/run", "tmpfs", 0, NULL);
+	char *udevd[] = { "/bin/systemd-udevd", "--daemon", NULL };
+	run(udevd);
+	if (waitfor("/run/udev/control", 50)) {
+		char *trig[] = { "/bin/udevadm", "trigger", "--action=add", "--subsystem-match=input", NULL };
+		char *settle[] = { "/bin/udevadm", "settle", "--timeout=10", NULL };
+		signal(SIGCHLD, SIG_DFL);
+		waitpid(run(trig), NULL, 0);
+		waitpid(run(settle), NULL, 0);
+		signal(SIGCHLD, reap);
+		say("udev is up");
+	} else
+		say("udevd didn't start, the old mouse driver it is");
 
 	setenv("PATH", "/bin", 1);
 	setenv("HOME", "/root", 1);
@@ -83,9 +114,10 @@ int main(void)
 	setenv("XDG_CONFIG_HOME", "/tmp", 1);
 	setenv("X8664_EVDEV_DEBUG", "1", 1);
 	setenv("X8664_KEYMAP", "gb", 1);
+	setenv("X8664_LIBINPUT_DEBUG", "1", 1);
 
 	char *x[] = { "/bin/Xfbdev", ":0", "-ac", "-fp", "/fonts/", "vt1", NULL };
-	run(x);
+	xpid = run(x);
 	if (!waitfor("/tmp/.X11-unix/X0", 300)) { say("Xfbdev didn't start"); goto idle; }
 	say("Xfbdev is up");
 	sleep(1);

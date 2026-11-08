@@ -329,7 +329,7 @@ KdEnableInput (void)
 static int
 KdMouseProc(DeviceIntPtr pDevice, int onoff)
 {
-    BYTE	map[KD_MAX_BUTTON];
+    BYTE	map[KD_MAX_BUTTON + 1];
     DevicePtr	pDev = (DevicePtr)pDevice;
     int		i;
     
@@ -593,6 +593,9 @@ KdInitInput(KdMouseFuncs    *pMouseFuncs,
 	if (mi->nbutton > kdMouseButtonCount)
 	    kdMouseButtonCount = mi->nbutton;
     }
+    /* libinput scrolls with the wheel buttons, sideways ones too */
+    if (pMouseFuncs == &LibinputMouseFuncs)
+	kdMouseButtonCount = KD_MAX_BUTTON;
 
     kdMouseFuncs = pMouseFuncs;
     kdKeyboardFuncs = pKeyboardFuncs;
@@ -1403,8 +1406,11 @@ KdEnqueueMouseEvent(KdMouseInfo *mi, unsigned long flags, int rx, int ry)
     {
 	x = matrix[0][0] * rx + matrix[0][1] * ry;
 	y = matrix[1][0] * rx + matrix[1][1] * ry;
-	x = KdMouseAccelerate (pKdPointer, x);
-	y = KdMouseAccelerate (pKdPointer, y);
+	if (!(flags & KD_MOUSE_RAW))
+	{
+	    x = KdMouseAccelerate (pKdPointer, x);
+	    y = KdMouseAccelerate (pKdPointer, y);
+	}
 	xE.u.keyButtonPointer.pad1 = 1;
     }
     else
@@ -1423,7 +1429,7 @@ KdEnqueueMouseEvent(KdMouseInfo *mi, unsigned long flags, int rx, int ry)
 
     buttons = flags;
 
-    for (button = KD_BUTTON_1, n = 0; button <= KD_BUTTON_5; button <<= 1, n++)
+    for (button = KD_BUTTON_1, n = 0; button <= KD_BUTTON_7; button <<= 1, n++)
     {
 	if ((mi->buttonState & button) ^ (buttons & button))
 	{

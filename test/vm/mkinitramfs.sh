@@ -22,10 +22,23 @@ for b in wallset dwmstat; do
 	[ -n "$p" ] && cp "$p" "$r/bin/"
 done
 
+# udev, so libinput can find the mice and touchpads: udevd is udevadm under another name
+cp -L "$(command -v udevadm)" "$r/bin/udevadm"
+ln -s udevadm "$r/bin/systemd-udevd"
+mkdir -p "$r/usr/lib/udev/rules.d" "$r/etc/udev" "$r/run"
+for u in 50-udev-default 60-input-id 60-persistent-input 80-libinput-device-groups 90-libinput-fuzz-override; do
+	cp /usr/lib/udev/rules.d/$u.rules "$r/usr/lib/udev/rules.d/"
+done
+cp /usr/lib/udev/libinput-* "$r/usr/lib/udev/"
+mkdir -p "$r/usr/share"
+cp -r /usr/share/libinput "$r/usr/share/libinput"
+[ -f /etc/udev/hwdb.bin ] && cp /etc/udev/hwdb.bin "$r/etc/udev/"
+for b in /usr/lib/udev/libinput-*; do ldd "$b" 2>/dev/null | grep -o '/[^ ]*' >> "$r/tmp/extralibs" || true; done
+
 # every shared library, at the path the loader looks for it
 for b in "$r"/bin/*; do
 	ldd "$b" 2>/dev/null | grep -o '/[^ ]*' || true
-done | sort -u | while read -r lib; do
+done | cat - "$r/tmp/extralibs" | sort -u | while read -r lib; do
 	mkdir -p "$r$(dirname "$lib")"
 	cp -L "$lib" "$r$lib"
 done
@@ -59,5 +72,6 @@ for m in drm_kms_helper drm_shmem_helper drm_client_lib bochs; do
 	echo "$m.ko" >> "$r/modules/order"
 done
 
+rm -f "$r/tmp/extralibs"
 (cd "$r" && find . | cpio -o -H newc --quiet | gzip -1) > "$out"
 echo "$out: $(du -h "$out" | cut -f1)"
