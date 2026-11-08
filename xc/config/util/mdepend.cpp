@@ -166,7 +166,8 @@ echo '' > $DEPENDLINES
 for i in $files
 do
     $CPPCMD $i \
-      | sed -n "/^#/s;^;$i ;p"
+      | sed -n "/^#/s;^;$i ;p" \
+      | grep -v '"<[^"]*>"'
 done \
   | sed -e 's|/[^/.][^/]*/\.\.||g' -e 's|/\.[^.][^/]*/\.\.||g' \
     -e 's|"||g' -e 's| \./| |' \
@@ -234,11 +235,9 @@ then
 $magic_string
 
 END_OF_APPEND
-    ed $silent $makefile << END_OF_ED_SCRIPT
-/^$magic_string/+1,\$d
-w
-q
-END_OF_ED_SCRIPT
+XCOMM x8664: this was ed, which most systems don't have any more. same job: keep everything up to the
+XCOMM line after the magic string, drop the rest. and gcc's <built-in> and <command-line> aren't files
+    sed -i "/^$magic_string\$/{n;q}" $makefile
     echo '' >>$makefile
 fi
 

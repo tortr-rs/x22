@@ -1,0 +1,25 @@
+/* x8664: local build settings. first target is Xvfb, the server that draws into memory, so it can be
+   tested without any graphics hardware. the real server comes after */
+#define BuildServersOnly		YES
+#define XVirtualFramebufferServer	YES
+#define XF86Server			NO
+#define BuildXF86DRI			NO
+#define XnestServer			NO
+#define XprtServer			NO
+#define XdmxServer			NO
+#define BuildFonts			NO
+#define BuildDocs			NO
+#define BuildHtmlManPages		NO
+#define InstallXinitConfig		NO
+
+/* 2008 C on a 2026 compiler: the old dialect, shared globals allowed, and the checks that are errors
+   now but were warnings then turned back into warnings */
+#define X8664CompatFlags -std=gnu89 -fcommon -fno-strict-aliasing -Wno-error=incompatible-pointer-types -Wno-error=int-conversion -Wno-error=implicit-function-declaration -Wno-error=return-mismatch -Wno-error=declaration-missing-parameter-type
+#define DefaultCCOptions X8664CompatFlags
+#define OptimizedCDebugFlags -O2
+
+/* the makedepend from 2008 crashes on today's headers, gcc -M does the same job */
+#define UseCCMakeDepend			YES
+
+/* ar's l used to mean "local", today it means "libdeps" and takes an argument */
+#define ArCmd				ArCmdBase cq
