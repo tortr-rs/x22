@@ -39,6 +39,7 @@
 #include <sys/ioctl.h>
 #include <drm/drm.h>
 #include <drm/drm_mode.h>
+#include "x8664present.h"
 
 /* ioctl, again if a signal got in the way */
 static int
@@ -493,6 +494,66 @@ kmsFlipped(FbdevPriv *priv)
     kmsFlush(priv);
 }
 
+/* ---- the Present extension's clock: the kernel's vblank counter ---- */
+
+static uint64_t
+kmsMsc(FbdevPriv *priv, CARD32 seq)
+{
+    if (seq < priv->kmsMscLast && priv->kmsMscLast - seq > 0x80000000u)
+	priv->kmsMscHigh++;	/* it went round */
+    priv->kmsMscLast = seq;
+    return ((uint64_t) priv->kmsMscHigh << 32) | seq;
+}
+
+static unsigned int
+kmsPipeBits(FbdevPriv *priv)
+{
+    if (priv->kmsPipe == 0)
+	return 0;
+    if (priv->kmsPipe == 1)
+	return _DRM_VBLANK_SECONDARY;
+    return (priv->kmsPipe << _DRM_VBLANK_HIGH_CRTC_SHIFT) & _DRM_VBLANK_HIGH_CRTC_MASK;
+}
+
+static Bool
+kmsGetMsc(ScreenPtr pScreen, uint64_t *ust, uint64_t *msc)
+{
+    KdScreenPriv(pScreen);
+    FbdevPriv *priv = pScreenPriv->card->driver;
+    union drm_wait_vblank vb;
+
+    if (!priv->kms || priv->kmsNoVblank)
+	return FALSE;
+    memset(&vb, 0, sizeof vb);
+    vb.request.type = _DRM_VBLANK_RELATIVE | kmsPipeBits(priv);
+    if (kmsIoctl(priv->fd, DRM_IOCTL_WAIT_VBLANK, &vb) < 0) {
+	priv->kmsNoVblank = TRUE;
+	kmsSay("no vblank counter from the kernel, present counts 60 frames a second itself");
+	return FALSE;
+    }
+    *msc = kmsMsc(priv, vb.reply.sequence);
+    *ust = (uint64_t) vb.reply.tval_sec * 1000000 + vb.reply.tval_usec;
+    return TRUE;
+}
+
+static Bool
+kmsQueueVblank(ScreenPtr pScreen, uint64_t id, uint64_t msc)
+{
+    KdScreenPriv(pScreen);
+    FbdevPriv *priv = pScreenPriv->card->driver;
+    union drm_wait_vblank vb;
+
+    if (!priv->kms || priv->kmsNoVblank)
+	return FALSE;
+    memset(&vb, 0, sizeof vb);
+    vb.request.type = _DRM_VBLANK_ABSOLUTE | _DRM_VBLANK_EVENT | kmsPipeBits(priv);
+    vb.request.sequence = (CARD32) msc;
+    vb.request.signal = (unsigned long) id;
+    return kmsIoctl(priv->fd, DRM_IOCTL_WAIT_VBLANK, &vb) == 0;
+}
+
+static PresentHooksRec kmsPresentHooks = { kmsGetMsc, kmsQueueVblank };
+
 static void
 kmsBlock(pointer data, OSTimePtr timeout, pointer readmask)
 {
@@ -515,6 +576,13 @@ kmsWakeup(pointer data, int result, pointer readmask)
 	    break;
 	if (e->type == DRM_EVENT_FLIP_COMPLETE)
 	    kmsFlipped(priv);
+	else if (e->type == DRM_EVENT_VBLANK) {
+	    struct drm_event_vblank *v = (struct drm_event_vblank *) e;
+
+	    PresentVblankEvent(priv->kmsScreen, v->user_data,
+			       (uint64_t) v->tv_sec * 1000000 + v->tv_usec,
+			       kmsMsc(priv, v->sequence));
+	}
     }
 }
 
@@ -531,4 +599,21 @@ kmsStart(ScreenPtr pScreen)
     fcntl(priv->fd, F_SETFL, fcntl(priv->fd, F_GETFL) | O_NONBLOCK);
     AddEnabledDevice(priv->fd);
     RegisterBlockAndWakeupHandlers(kmsBlock, kmsWakeup, priv);
+
+    /* which crtc is ours, by number, so vblank requests ask about the right one */
+    {
+	struct drm_mode_card_res res;
+	__u32 *crtcs = NULL, *conns = NULL, *encs = NULL;
+	int i;
+
+	priv->kmsPipe = 0;
+	if (kmsResources(priv->fd, &res, &crtcs, &conns, &encs))
+	    for (i = 0; i < (int) res.count_crtcs; i++)
+		if (crtcs[i] == priv->kmsCrtc)
+		    priv->kmsPipe = i;
+	free(crtcs);
+	free(conns);
+	free(encs);
+    }
+    PresentSetHooks(pScreen, &kmsPresentHooks);
 }

@@ -225,6 +225,7 @@ extern void FontCacheExtensionInit(INITARGS);
 #ifdef RES
 extern void ResExtensionInit(INITARGS);
 #endif
+extern void PresentExtensionInit(INITARGS);
 #ifdef DMXEXT
 extern void DMXExtensionInit(INITARGS);
 #endif
@@ -348,6 +349,7 @@ InitExtensions(int argc, const char *argv[])
 #ifdef RES
     ResExtensionInit();
 #endif
+    PresentExtensionInit();
 #ifdef DMXEXT
     DMXExtensionInit();
 #endif

@@ -104,11 +104,17 @@ int main(void)
 	run(w1); run(w2); run(w3);
 	say("dwm and three windows started");
 
-	/* extra tests, asked for on the kernel command line: x8664.test=dpms */
+	/* extra tests, asked for on the kernel command line: x8664.test=dpms or present */
 	{
 		char cmd[512] = "";
 		int fd = open("/proc/cmdline", O_RDONLY);
 		if (fd >= 0) { if (read(fd, cmd, sizeof cmd - 1) < 0) cmd[0] = 0; close(fd); }
+		if (strstr(cmd, "x8664.test=present")) {
+			char *pr[] = { "/bin/present", NULL };
+			sleep(10);
+			say("present test");
+			run(pr);
+		}
 		if (strstr(cmd, "x8664.test=dpms")) {
 			char *dp[] = { "/bin/dpms", "20", NULL };
 			sleep(10);

@@ -60,6 +60,10 @@ typedef struct _fbdevPriv {
     RegionRec			kmsLast;	/* what the last frame changed */
     ScreenPtr			kmsScreen;
     shadowBufPtr		kmsBuf;
+    int				kmsPipe;	/* the crtc's place in the kernel's list, for vblanks */
+    Bool			kmsNoVblank;	/* the kernel has no vblank counter for it */
+    CARD32			kmsMscLast;	/* the kernel's counter is 32 bits, ours 64 */
+    CARD32			kmsMscHigh;
 } FbdevPriv;
     
 typedef struct _fbdevScrPriv {

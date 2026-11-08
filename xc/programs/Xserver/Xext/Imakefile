@@ -197,7 +197,7 @@ XCOMM $XFree86: xc/programs/Xserver/Xext/Imakefile,v 3.51 2006/02/19 15:51:16 ts
 		   $(XF86BIGFSRCS) $(XF86DGASRCS) $(SECURITYSRCS) \
 		   $(APPGROUPSRCS) xprint.c $(CUPSRCS) $(PNRXSRCS) \
 		   $(DPMSSRCS) $(EVISRCS) $(XVSRCS) $(XVMCSRCS) \
-		   $(FONTCACHESRCS) $(XRESSRCS) $(DMXSRCS)
+		   $(FONTCACHESRCS) $(XRESSRCS) $(DMXSRCS) present.c
 
             OBJS = $(SHAPEOBJS) $(SHMOBJS) $(MULTIBUFOBJ) $(MITMISCOBJS) \
 		   $(XTESTOBJS) $(SLEEPOBJS) $(BIGREQOBJS) $(SYNCOBJS) \
@@ -205,7 +205,7 @@ XCOMM $XFree86: xc/programs/Xserver/Xext/Imakefile,v 3.51 2006/02/19 15:51:16 ts
 		   $(XF86BIGFOBJS) $(XF86DGAOBJS) $(SECURITYOBJS) \
 		   $(APPGROUPOBJS) xprint.o $(CUPOBJS) $(PNRXOBJS) \
 		   $(DPMSOBJS) $(EVIOBJS) $(XVOBJS) $(XVMCOBJS) \
-		   $(FONTCACHEOBJS) $(XRESOBJS) $(DMXOBJS)
+		   $(FONTCACHEOBJS) $(XRESOBJS) present.o $(DMXOBJS)
 
 #if DoLoadableServer
            SOBJS = $(SHMOBJS) $(APPGROUPOBJS) $(SECURITYOBJS) xprint.o \
@@ -282,6 +282,7 @@ LinkSourceFile(bigreq.c,LinkDirectory)
 LinkSourceFile(cup.c,LinkDirectory)
 LinkSourceFile(dmx.c,LinkDirectory)
 LinkSourceFile(dpms.c,LinkDirectory)
+LinkSourceFile(present.c,LinkDirectory)
 LinkSourceFile(fontcache.c,LinkDirectory)
 LinkSourceFile(mbuf.c,LinkDirectory)
 LinkSourceFile(mbufbf.c,LinkDirectory)
