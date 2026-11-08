@@ -717,7 +717,7 @@ fbdevDPMS (ScreenPtr pScreen, int mode)
     static int oldmode = -1;
 
     if (priv->kms)
-	return FALSE;	/* x8664: kms blanking comes later */
+	return kmsDpms (priv, mode);
     if (mode == oldmode)
 	return TRUE;
 #ifdef FBIOPUT_POWERMODE

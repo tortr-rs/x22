@@ -288,6 +288,70 @@ kmsShow(FbdevPriv *priv)
     return TRUE;
 }
 
+/* the connector's DPMS property, found once: on, standby, suspend, off (0 to 3, the same
+ * numbers X uses) */
+static __u32
+kmsDpmsProp(FbdevPriv *priv)
+{
+    static __u32 prop = (__u32) -1;
+    struct drm_mode_obj_get_properties op;
+    struct drm_mode_get_property gp;
+    __u32 *ids;
+    __u64 *vals;
+    unsigned int i;
+
+    if (prop != (__u32) -1)
+	return prop;
+    prop = 0;
+    memset(&op, 0, sizeof op);
+    op.obj_id = priv->kmsConn;
+    op.obj_type = DRM_MODE_OBJECT_CONNECTOR;
+    if (kmsIoctl(priv->fd, DRM_IOCTL_MODE_OBJ_GETPROPERTIES, &op) < 0 || !op.count_props)
+	return prop;
+    ids = calloc(op.count_props, sizeof *ids);
+    vals = calloc(op.count_props, sizeof *vals);
+    if (ids && vals) {
+	op.props_ptr = (unsigned long) ids;
+	op.prop_values_ptr = (unsigned long) vals;
+	if (kmsIoctl(priv->fd, DRM_IOCTL_MODE_OBJ_GETPROPERTIES, &op) == 0)
+	    for (i = 0; i < op.count_props; i++) {
+		memset(&gp, 0, sizeof gp);
+		gp.prop_id = ids[i];
+		if (kmsIoctl(priv->fd, DRM_IOCTL_MODE_GETPROPERTY, &gp) == 0 &&
+		    strcmp(gp.name, "DPMS") == 0) {
+		    prop = ids[i];
+		    break;
+		}
+	    }
+    }
+    free(ids);
+    free(vals);
+    return prop;
+}
+
+/* the screensaver: really switch the monitor off, and back on */
+Bool
+kmsDpms(FbdevPriv *priv, int mode)
+{
+    struct drm_mode_obj_set_property sp;
+    __u32 prop = kmsDpmsProp(priv);
+
+    if (!prop)
+	return FALSE;
+    memset(&sp, 0, sizeof sp);
+    sp.obj_id = priv->kmsConn;
+    sp.obj_type = DRM_MODE_OBJECT_CONNECTOR;
+    sp.prop_id = prop;
+    sp.value = mode;
+    if (kmsIoctl(priv->fd, DRM_IOCTL_MODE_OBJ_SETPROPERTY, &sp) < 0) {
+	kmsSay("the monitor won't switch power modes");
+	return FALSE;
+    }
+    if (getenv("X8664_EVDEV_DEBUG"))
+	ErrorF("x8664 kms: monitor %s\n", mode == 0 ? "on" : mode == 3 ? "off" : "asleep");
+    return TRUE;
+}
+
 /* going to another vt: let the console (or whoever's there) have the card */
 void
 kmsHide(FbdevPriv *priv)

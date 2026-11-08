@@ -1379,3 +1379,54 @@ void
 OsVendorFatalError()
 {
 }
+
+#ifdef DPMSExtension
+/*
+ * x8664: what the DPMS extension needs from us, so "xset dpms force off" and
+ * screensavers that use DPMS really switch the monitor off. tinyx had the per-card
+ * hooks (cfuncs->dpms) but never these three, so DPMS was always left out.
+ */
+#include "dpmsproc.h"
+
+Bool
+DPMSSupported (void)
+{
+    int i;
+
+    for (i = 0; i < screenInfo.numScreens; i++)
+    {
+	KdPrivScreenPtr	p = KdGetScreenPriv (screenInfo.screens[i]);
+
+	if (p && p->card->cfuncs->dpms)
+	    return TRUE;
+    }
+    return FALSE;
+}
+
+void
+DPMSSet (int level)
+{
+    int i;
+
+    DPMSPowerLevel = level;
+    for (i = 0; i < screenInfo.numScreens; i++)
+    {
+	ScreenPtr	pScreen = screenInfo.screens[i];
+	KdScreenPriv (pScreen);
+
+	if (!pScreenPriv->card->cfuncs->dpms)
+	    continue;
+	/* X's levels and ours are the same numbers: on, standby, suspend, off */
+	pScreenPriv->dpmsState = level;
+	if (pScreenPriv->enabled)
+	    (*pScreenPriv->card->cfuncs->dpms) (pScreen, level);
+    }
+}
+
+int
+DPMSGet (int *level)
+{
+    *level = DPMSPowerLevel;
+    return DPMSPowerLevel;
+}
+#endif

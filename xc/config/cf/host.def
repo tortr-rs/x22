@@ -26,3 +26,18 @@
 
 /* ar's l used to mean "local", today it means "libdeps" and takes an argument */
 #define ArCmd				ArCmdBase cq
+
+/* x8664: tinyx left out most extensions to stay small. a desktop server needs some of them:
+ * DPMS (monitor off), MIT-SCREEN-SAVER, SYNC (gtk times its frames with it), DOUBLE-BUFFER,
+ * RECORD, X-Resource, XFree86-Bigfont and XINERAMA (dbe and record expect it, and several
+ * monitors will want it). still out: xkb and xinput (step 2's input work
+ * replaces them), lbx, appgroup, security, glx/dri (step 5), the old xfree86
+ * vidmode/misc/dga, evi, xtest1, xv, xtrap, fontcache, xprint and cup */
+#define TinyXExcludedExtensions \
+	XkbUndefines XInputUndefines LbxUndefines AppgroupUndefines \
+	XCSecurityUndefines GlxUndefines \
+	DRIUndefines VidModeExtensionUndefines XF86MiscExtensionUndefines \
+	XFree86DGAUndefines EVIUndefines XTest1Undefines \
+	XvExtensionUndefines XvMCExtensionUndefines XTrapUndefines \
+	FontCacheExtensionUndefines XprintUndefines CupUndefines \
+	-UXFree86LOADER

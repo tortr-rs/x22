@@ -1,6 +1,6 @@
 #!/bin/sh
 # boots the x8664 test vm, waits, takes a picture of the screen and stops it.
-# usage: run.sh [SECONDS] [SHOT.png]
+# usage: run.sh [SECONDS] [SHOT.png]     APPEND="x8664.test=dpms" adds to the kernel command line
 # the console log ends up next to the picture, as SHOT.log
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
@@ -16,7 +16,7 @@ accel=tcg
 
 qemu-system-x86_64 -machine accel=$accel -m 1024 -smp 2 \
 	-kernel "$kernel" -initrd "$img" \
-	-append "console=ttyS0 quiet loglevel=3 rdinit=/init" \
+	-append "console=ttyS0 quiet loglevel=3 rdinit=/init ${APPEND:-}" \
 	-vga std -display none -serial file:"${shot%.png}.log" \
 	-monitor unix:"$sock",server,nowait -no-reboot &
 q=$!

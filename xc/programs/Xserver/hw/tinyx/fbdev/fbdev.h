@@ -77,6 +77,7 @@ void kmsHide (FbdevPriv *priv);
 void kmsFini (FbdevPriv *priv);
 void kmsUpdate (ScreenPtr pScreen, shadowBufPtr pBuf);
 void kmsStart (ScreenPtr pScreen);
+Bool kmsDpms (FbdevPriv *priv, int mode);
 
 Bool
 fbdevInitialize (KdCardInfo *card, FbdevPriv *priv);
