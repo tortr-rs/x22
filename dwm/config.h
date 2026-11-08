@@ -5,6 +5,7 @@
 
 /* appearance */
 static const unsigned int borderpx  = 2;        /* border pixel of windows */
+static const unsigned int gappx     = 8;        /* gap between tiled windows, none when one is alone */
 static const unsigned int snap      = 16;       /* snap pixel */
 static const int showbar            = 1;        /* 0 means no bar */
 static const int topbar             = 1;        /* 0 means bottom bar */
@@ -77,11 +78,15 @@ static const char *termcmd[]  = { "kitty", NULL };
 /* a terminal that floats in the middle, for quick things */
 static const char *floatterm[] = { "kitty", "--class", "kitty-float", "-o", "initial_window_width=100c", "-o", "initial_window_height=30c", NULL };
 
-/* sound through pipewire, never past 100% */
-static const char *volup[]   = { "wpctl", "set-volume", "-l", "1", "@DEFAULT_AUDIO_SINK@", "5%+", NULL };
-static const char *voldown[] = { "wpctl", "set-volume", "@DEFAULT_AUDIO_SINK@", "5%-", NULL };
-static const char *volmute[] = { "wpctl", "set-mute", "@DEFAULT_AUDIO_SINK@", "toggle", NULL };
+/* sound through pipewire, never past 100% (the -l 1 below) */
 static const char *micmute[] = { "wpctl", "set-mute", "@DEFAULT_AUDIO_SOURCE@", "toggle", NULL };
+/* after a volume key, poke dwmstat so the bar shows the new number now, not in 20 seconds */
+#define VOL(cmd) SHCMD(cmd "; pkill -USR1 -x dwmstat")
+
+/* wallpapers: wall picks from ~/Pictures/wallpapers */
+static const char *wallmenu[] = { "wall", NULL };
+static const char *wallnext[] = { "wall", "next", NULL };
+static const char *wallprev[] = { "wall", "prev", NULL };
 
 static const Key keys[] = {
 	/* modifier                     key        function        argument */
@@ -114,10 +119,18 @@ static const Key keys[] = {
 	{ MODKEY|ShiftMask,             XK_comma,  tagmon,         {.i = -1 } },
 	{ MODKEY|ShiftMask,             XK_period, tagmon,         {.i = +1 } },
 	/* the sound keys on the keyboard */
-	{ 0,                            XF86XK_AudioRaiseVolume, spawn, {.v = volup } },
-	{ 0,                            XF86XK_AudioLowerVolume, spawn, {.v = voldown } },
-	{ 0,                            XF86XK_AudioMute,        spawn, {.v = volmute } },
+	{ 0,                            XF86XK_AudioRaiseVolume, spawn, VOL("wpctl set-volume -l 1 @DEFAULT_AUDIO_SINK@ 5%+") },
+	{ 0,                            XF86XK_AudioLowerVolume, spawn, VOL("wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-") },
+	{ 0,                            XF86XK_AudioMute,        spawn, VOL("wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle") },
 	{ 0,                            XF86XK_AudioMicMute,     spawn, {.v = micmute } },
+	/* gaps: super+minus smaller, super+equal bigger, super+shift+equal back to normal */
+	{ MODKEY,                       XK_minus,  setgaps,        {.i = -2 } },
+	{ MODKEY,                       XK_equal,  setgaps,        {.i = +2 } },
+	{ MODKEY|ShiftMask,             XK_equal,  setgaps,        {.i = 0 } },
+	/* wallpaper: super+w a menu, super+shift+w the next one, super+ctrl+w the one before */
+	{ MODKEY,                       XK_w,      spawn,          {.v = wallmenu } },
+	{ MODKEY|ShiftMask,             XK_w,      spawn,          {.v = wallnext } },
+	{ MODKEY|ControlMask,           XK_w,      spawn,          {.v = wallprev } },
 	TAGKEYS(                        XK_1,                      0)
 	TAGKEYS(                        XK_2,                      1)
 	TAGKEYS(                        XK_3,                      2)

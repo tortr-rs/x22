@@ -199,6 +199,7 @@ static void sendmon(Client *c, Monitor *m);
 static void setclientstate(Client *c, long state);
 static void setfocus(Client *c);
 static void setfullscreen(Client *c, int fullscreen);
+static void setgaps(const Arg *arg);
 static void setlayout(const Arg *arg);
 static void setmfact(const Arg *arg);
 static void setup(void);
@@ -269,6 +270,9 @@ static Window root, wmcheckwin;
 
 /* configuration, allows nested code to access above variables */
 #include "config.h"
+
+/* the gap between tiled windows right now, super+minus and super+equal change it */
+static int gap = -1;
 
 /* compile-time check if all tags fit into an unsigned int bit array. */
 struct NumTags { char limitexceeded[LENGTH(tags) > 31 ? -1 : 1]; };
@@ -1697,28 +1701,43 @@ void
 tile(Monitor *m)
 {
 	unsigned int i, n, h, mw, my, ty;
+	int g;
 	Client *c;
 
 	for (n = 0, c = nexttiled(m->clients); c; c = nexttiled(c->next), n++);
 	if (n == 0)
 		return;
+	if (gap < 0)
+		gap = gappx;
+	/* one window alone gets the whole screen, no gaps around it */
+	g = n > 1 ? gap : 0;
 
 	if (n > m->nmaster)
-		mw = m->nmaster ? m->ww * m->mfact : 0;
+		mw = m->nmaster ? (m->ww - g) * m->mfact : 0;
 	else
-		mw = m->ww;
-	for (i = my = ty = 0, c = nexttiled(m->clients); c; c = nexttiled(c->next), i++)
+		mw = m->ww - g;
+	for (i = 0, my = ty = g, c = nexttiled(m->clients); c; c = nexttiled(c->next), i++)
 		if (i < m->nmaster) {
-			h = (m->wh - my) / (MIN(n, m->nmaster) - i);
-			resize(c, m->wx, m->wy + my, mw - (2*c->bw), h - (2*c->bw), 0);
-			if (my + HEIGHT(c) < m->wh)
-				my += HEIGHT(c);
+			h = (m->wh - my) / (MIN(n, m->nmaster) - i) - g;
+			resize(c, m->wx + g, m->wy + my, mw - (2*c->bw) - g, h - (2*c->bw), 0);
+			if (my + HEIGHT(c) + g < m->wh)
+				my += HEIGHT(c) + g;
 		} else {
-			h = (m->wh - ty) / (n - i);
-			resize(c, m->wx + mw, m->wy + ty, m->ww - mw - (2*c->bw), h - (2*c->bw), 0);
-			if (ty + HEIGHT(c) < m->wh)
-				ty += HEIGHT(c);
+			h = (m->wh - ty) / (n - i) - g;
+			resize(c, m->wx + mw + g, m->wy + ty, m->ww - mw - (2*c->bw) - 2*g, h - (2*c->bw), 0);
+			if (ty + HEIGHT(c) + g < m->wh)
+				ty += HEIGHT(c) + g;
 		}
+}
+
+void
+setgaps(const Arg *arg)
+{
+	if (gap < 0)
+		gap = gappx;
+	/* .i = 0 puts it back to gappx from config.h */
+	gap = arg->i ? MAX(0, MIN(gap + arg->i, 60)) : (int)gappx;
+	arrange(selmon);
 }
 
 void
