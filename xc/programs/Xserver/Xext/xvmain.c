@@ -949,7 +949,12 @@ XvdiSelectVideoNotify(
 	{
 	  if (tpn->client == client) 
 	    {
-	      if (!onoff) tpn->client = (ClientPtr)NULL;
+	      /* free its resource too, or it outlives the entry, which can go
+	       * to another client (CVE-2022-46342) */
+	      if (!onoff) {
+		tpn->client = (ClientPtr)NULL;
+		FreeResource(tpn->id, XvRTVideoNotify);
+	      }
 	      return Success;
 	    }
 	  if (!tpn->client) fpn = tpn; /* TAKE NOTE OF FREE ENTRY */

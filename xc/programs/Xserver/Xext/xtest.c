@@ -182,7 +182,7 @@ ProcXTestFakeInput(ClientPtr client)
     int *values;
 #endif /* XINPUT */
 
-    nev = (stuff->length << 2) - sizeof(xReq);
+    nev = (client->req_len << 2) - sizeof(xReq);
     if ((nev % sizeof(xEvent)) || !nev)
 	return BadLength;
     nev /= sizeof(xEvent);

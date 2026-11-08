@@ -102,7 +102,7 @@ ProcXSetDeviceButtonMapping (client)
     REQUEST(xSetDeviceButtonMappingReq);
     REQUEST_AT_LEAST_SIZE(xSetDeviceButtonMappingReq);
 
-    if (stuff->length != (sizeof(xSetDeviceButtonMappingReq) + 
+    if (client->req_len != (sizeof(xSetDeviceButtonMappingReq) + 
 	stuff->map_length + 3)>>2)
 	{
 	SendErrorToClient(client, IReqCode, X_SetDeviceButtonMapping, 0, 

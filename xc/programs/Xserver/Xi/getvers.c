@@ -100,7 +100,7 @@ ProcXGetExtensionVersion (client)
     REQUEST(xGetExtensionVersionReq);
     REQUEST_AT_LEAST_SIZE(xGetExtensionVersionReq);
 
-    if (stuff->length != (sizeof(xGetExtensionVersionReq) + 
+    if (client->req_len != (sizeof(xGetExtensionVersionReq) + 
 	stuff->nbytes + 3)>>2)
 	{
 	SendErrorToClient(client, IReqCode, X_GetExtensionVersion, 0, 

@@ -22,154 +22,163 @@ anything in it. That was 382 handlers in 38 files.
 
 
 2007-12 / 2008-01  (Jan 17 2008)
-  CVE-2007-5760  XFree86-Misc out of bounds index             to do
-  CVE-2007-5958  security policy file existence               had it (Fopen)
-  CVE-2007-6427  XInput memory corruption                      to do
-  CVE-2007-6428  TOG-CUP memory corruption                     to do
-  CVE-2007-6429  MIT-SHM and EVI integer overflows             to do
-  CVE-2008-0006  PCF font parser overflow                      to do
+  CVE-2007-5760  XFree86-Misc out of bounds index               fixed (and the same off-by-one in TOG-CUP and DGA)
+  CVE-2007-5958  security policy file existence                 had it (Fopen)
+  CVE-2007-6427  XInput memory corruption                       to do
+  CVE-2007-6428  TOG-CUP memory corruption                      fixed
+  CVE-2007-6429  MIT-SHM and EVI integer overflows              had it
+  CVE-2008-0006  PCF font parser overflow                       to do
 
 2008-06  (Jun 11 2008)
-  CVE-2008-1377  RECORD and SECURITY memory corruption         to do
-  CVE-2008-1379  MIT-SHM arbitrary memory read                 to do
-  CVE-2008-2360  RENDER AllocateGlyph overflow                 had it
-  CVE-2008-2361  RENDER CreateCursor overflow                  had it
-  CVE-2008-2362  RENDER gradients                              not ours (no gradients in 4.8's RENDER)
+  CVE-2008-1377  RECORD and SECURITY memory corruption          had it, and big requests fixed
+  CVE-2008-1379  MIT-SHM arbitrary memory read                  had it
+  CVE-2008-2360  RENDER AllocateGlyph overflow                  had it
+  CVE-2008-2361  RENDER CreateCursor overflow                   had it
+  CVE-2008-2362  RENDER gradients                               not ours (no gradients in 4.8's RENDER)
 
 2011-10
-  CVE-2011-4028  lock file disclosure                          fixed
-  CVE-2011-4029  lock file chmod race                          had it (fchmod)
+  CVE-2011-4028  lock file disclosure                           fixed
+  CVE-2011-4029  lock file chmod race                           had it (fchmod)
 
 2013
-  CVE-2013-1940  input flushed on VT switch (Xorg evdev)       not ours
-  CVE-2013-4396  ImageText use after free                      fixed
-  CVE-2013-6462  libXfont BDF                                  to do (font library)
+  CVE-2013-1940          input flushed on VT switch (Xorg evdev) not ours
+  CVE-2013-4396  ImageText use after free                       fixed
+  CVE-2013-6462  libXfont BDF                                   to do (font library)
 
 2014-12  (Dec 9 2014)
-  CVE-2014-8091  RPC auth unchecked malloc                     fixed
-  CVE-2014-8092  dix integer overflows                         fixed (REQUEST_FIXED_SIZE, GetHosts,
+  CVE-2014-8091  RPC auth unchecked malloc                      fixed
+  CVE-2014-8092  dix integer overflows                          fixed (REQUEST_FIXED_SIZE, GetHosts,
                                                                PutImage, region sizes)
-  CVE-2014-8093  GLX                                           not ours (GLX isn't built)
-  CVE-2014-8094  DRI2                                          not ours
-  CVE-2014-8095  XInput swapped lengths                        fixed (the swapped handlers)
-  CVE-2014-8096  XC-MISC swapped length                        fixed (the swapped handlers)
-  CVE-2014-8097  DBE lengths                                   to do (swapped part fixed)
-  CVE-2014-8098  GLX                                           not ours
-  CVE-2014-8099  XVideo swapped lengths                        fixed (the swapped handlers)
-  CVE-2014-8100  RENDER lengths                                fixed (swapped), to do (QueryVersion order)
-  CVE-2014-8101  RandR swapped lengths                         fixed (the swapped handlers)
-  CVE-2014-8102  XFIXES swapped length                         fixed (the swapped handlers)
-  CVE-2014-8103  DRI3 and Present                              not ours / to do (our Present)
+  CVE-2014-8093  GLX                                            not ours (GLX isn't built)
+  CVE-2014-8094  DRI2                                           not ours
+  CVE-2014-8095  XInput swapped lengths                         fixed (the swapped handlers)
+  CVE-2014-8096  XC-MISC swapped length                         fixed (the swapped handlers)
+  CVE-2014-8097  DBE lengths                                    fixed
+  CVE-2014-8098  GLX                                            not ours
+  CVE-2014-8099  XVideo swapped lengths                         fixed (the swapped handlers)
+  CVE-2014-8100  RENDER lengths                                 fixed
+  CVE-2014-8101  RandR swapped lengths                          fixed (the swapped handlers)
+  CVE-2014-8102  XFIXES swapped length                          fixed (the swapped handlers)
+  CVE-2014-8103  DRI3 and Present                               not ours / to do (our Present)
 
 2015
-  CVE-2015-0255  XKB GetGeometry information leak              to do
-  CVE-2015-1802..1804  libXfont BDF                            to do (font library)
-  CVE-2015-3164  Xwayland open sockets                         not ours
+  CVE-2015-0255  XKB GetGeometry information leak               to do
+  CVE-2015-1802..1804    libXfont BDF                           to do (font library)
+  CVE-2015-3164  Xwayland open sockets                          not ours
 
 2017
-  CVE-2017-2624  MIT-MAGIC-COOKIE timing                       fixed
-  CVE-2017-12176 EstablishConnection length                    fixed
-  CVE-2017-12177 DBE GetVisualInfo length                      to do
-  CVE-2017-12178 XI2 ChangeHierarchy                           not ours
-  CVE-2017-12179 XI2 barriers                                  not ours
-  CVE-2017-12180..12182  hw/xfree86 extensions                 not ours
-  CVE-2017-12183 XFIXES lengths                                to do
-  CVE-2017-12184..12187  lengths in Xinerama, DGA, etc.        to do
-  CVE-2017-13721 MIT-SHM resource id                           to do
-  CVE-2017-13723 XKB text buffers                              fixed
+  CVE-2017-2624  MIT-MAGIC-COOKIE timing                        fixed
+  CVE-2017-12176 EstablishConnection length                     fixed
+  CVE-2017-12177 DBE GetVisualInfo length                       fixed
+  CVE-2017-12178 XI2 ChangeHierarchy                            not ours
+  CVE-2017-12179 XI2 barriers                                   not ours
+  CVE-2017-12180..12182  hw/xfree86 extensions                  not ours
+  CVE-2017-12183 XFIXES lengths                                 fixed
+  CVE-2017-12184..12187  lengths in Xinerama, DGA, etc.         fixed (Xinerama, saver, Xv; the rest is hw/xfree86)
+  CVE-2017-13721 MIT-SHM resource id                            had it (ShmAttach checks the id, 4.8 has no CreateSegment)
+  CVE-2017-13723 XKB text buffers                               fixed
 
 2018
-  CVE-2018-14665 -logfile/-modulepath on setuid Xorg           not ours (nothing here is setuid)
+  CVE-2018-14665 -logfile/-modulepath on setuid Xorg            not ours (nothing here is setuid)
 
 2020
-  CVE-2020-14345 XkbSetNames bounds                            fixed
-  CVE-2020-14346 XIChangeHierarchy                             not ours
-  CVE-2020-14347 uninitialised pixmap memory                   to do
-  CVE-2020-14360 XkbSetMap lengths                             fixed (every step is checked)
-  CVE-2020-14361 XkbSelectEvents underflow                     fixed
-  CVE-2020-14362 RECORD RegisterClients underflow              to do
-  CVE-2020-25712 XkbSetDeviceInfo overflows                    fixed
+  CVE-2020-14345 XkbSetNames bounds                             fixed
+  CVE-2020-14346 XIChangeHierarchy                              not ours
+  CVE-2020-14347 uninitialised pixmap memory                    to do
+  CVE-2020-14360 XkbSetMap lengths                              fixed (every step is checked)
+  CVE-2020-14361 XkbSelectEvents underflow                      fixed
+  CVE-2020-14362 RECORD RegisterClients underflow               fixed
+  CVE-2020-25712 XkbSetDeviceInfo overflows                     fixed
 
 2021
-  CVE-2021-3472  XChangeFeedbackControl underflow              to do
-  CVE-2021-4008  RENDER CompositeGlyphs swapped                to do
-  CVE-2021-4009  XFIXES pointer barriers                       not ours
-  CVE-2021-4010  SCREEN-SAVER Suspend swapped                  to do
-  CVE-2021-4011  RECORD CreateContext swapped                  to do
+  CVE-2021-3472  XChangeFeedbackControl underflow               fixed
+  CVE-2021-4008  RENDER CompositeGlyphs swapped                 fixed
+  CVE-2021-4009  XFIXES pointer barriers                        not ours
+  CVE-2021-4010  SCREEN-SAVER Suspend swapped                   not ours (4.8 has no Suspend request)
+  CVE-2021-4011  RECORD CreateContext swapped                   fixed
 
 2022
-  CVE-2022-2319  XkbSetGeometry lengths                        fixed
-  CVE-2022-2320  XkbSetDeviceInfo                              fixed (checked before it's applied, always was)
-  CVE-2022-4283  XKB radio groups in _XkbCopyNames             not ours (no _XkbCopyNames)
-  CVE-2022-46340 XTEST GenericEvent                            to do
-  CVE-2022-46341 XI passive grab detail                        to do
-  CVE-2022-46342 Xv RTVideoNotify                              to do
-  CVE-2022-46343 SCREEN-SAVER resource                         to do
-  CVE-2022-46344 XI2 ChangeProperty                            not ours
+  CVE-2022-2319  XkbSetGeometry lengths                         fixed
+  CVE-2022-2320  XkbSetDeviceInfo                               fixed (checked before it's applied, always was)
+  CVE-2022-4283  XKB radio groups in _XkbCopyNames              not ours (no _XkbCopyNames)
+  CVE-2022-46340 XTEST GenericEvent                             not ours (no GenericEvent before XI2)
+  CVE-2022-46341 XI passive grab detail                         to do
+  CVE-2022-46342 Xv RTVideoNotify                               fixed
+  CVE-2022-46343 SCREEN-SAVER resource                          fixed
+  CVE-2022-46344 XI2 ChangeProperty                             not ours
 
 2023
-  CVE-2023-0494  XI DeepCopyPointerClasses                     not ours (XI2)
-  CVE-2023-1393  Composite overlay window use after free       to do
-  CVE-2023-5367  XI2 and RandR 1.2 properties                  not ours
-  CVE-2023-5380  PointerWindows on screen switch               to do
-  CVE-2023-6377  XI XkbActions for buttons                     to do
-  CVE-2023-6478  RandR 1.2 properties                          not ours
-  CVE-2023-6816  logical button maps                           to do
-  CVE-2024-0229  XI ButtonClass                                to do
-  CVE-2024-0408  GLX                                           not ours
-  CVE-2024-0409  Xephyr/Xwayland cursor                        not ours
-  CVE-2024-21885 XI2 hierarchy events                          not ours
-  CVE-2024-21886 disabling a master device                     not ours
+  CVE-2023-0494  XI DeepCopyPointerClasses                      not ours (XI2)
+  CVE-2023-1393          Composite overlay window use after free to do
+  CVE-2023-5367  XI2 and RandR 1.2 properties                   not ours
+  CVE-2023-5380  PointerWindows on screen switch                to do
+  CVE-2023-6377  XI XkbActions for buttons                      to do
+  CVE-2023-6478  RandR 1.2 properties                           not ours
+  CVE-2023-6816  logical button maps                            to do
+  CVE-2024-0229  XI ButtonClass                                 to do
+  CVE-2024-0408  GLX                                            not ours
+  CVE-2024-0409  Xephyr/Xwayland cursor                         not ours
+  CVE-2024-21885 XI2 hierarchy events                           not ours
+  CVE-2024-21886 disabling a master device                      not ours
 
 2024
-  CVE-2024-31080..31082  XI2 / Xquartz reply lengths           not ours
-  CVE-2024-31083 RENDER AddGlyphs refcount                     to do
-  CVE-2024-9632  XkbSetCompatMap                               not ours (4.8 reallocs every time)
+  CVE-2024-31080..31082  XI2 / Xquartz reply lengths            not ours
+  CVE-2024-31083 RENDER AddGlyphs refcount                      not ours (4.8 adds each glyph whole, with its refcount)
+  CVE-2024-9632  XkbSetCompatMap                                not ours (4.8 reallocs every time)
 
 2025
-  CVE-2025-26594 root cursor                                   fixed
-  CVE-2025-26595 XkbVModMaskText                               fixed
-  CVE-2025-26596 XkbSizeKeySyms                                fixed
-  CVE-2025-26597 XkbChangeTypesOfKey                           fixed
-  CVE-2025-26598 XI2 barriers                                  not ours
-  CVE-2025-26599 Composite border clip                         to do
-  CVE-2025-26600 frozen device removal                         to do
-  CVE-2025-26601 SYNC alarms                                   to do
-  CVE-2025-49175 RENDER animated cursors                       to do
-  CVE-2025-49176 big request length overflow                   fixed
-  CVE-2025-49177 XFIXES SetClientDisconnectMode                not ours (XFIXES 3 has no such request)
-  CVE-2025-49178 input buffer ignoreBytes                      not ours (4.8 doesn't skip requests)
-  CVE-2025-49179 RECORD RegisterClients overflow               to do
-  CVE-2025-49180 RandR providers in Xorg                       not ours
-  CVE-2025-62229 Present notifies                              to do
-  CVE-2025-62230 XKB interest resource                         fixed
-  CVE-2025-62231 XkbSetCompatMap overflow                      fixed
+  CVE-2025-26594 root cursor                                    fixed
+  CVE-2025-26595 XkbVModMaskText                                fixed
+  CVE-2025-26596 XkbSizeKeySyms                                 fixed
+  CVE-2025-26597 XkbChangeTypesOfKey                            fixed
+  CVE-2025-26598 XI2 barriers                                   not ours
+  CVE-2025-26599 Composite border clip                          to do
+  CVE-2025-26600 frozen device removal                          to do
+  CVE-2025-26601 SYNC alarms                                    to do
+  CVE-2025-49175 RENDER animated cursors                        fixed
+  CVE-2025-49176 big request length overflow                    fixed
+  CVE-2025-49177 XFIXES SetClientDisconnectMode                 not ours (XFIXES 3 has no such request)
+  CVE-2025-49178 input buffer ignoreBytes                       not ours (4.8 doesn't skip requests)
+  CVE-2025-49179 RECORD RegisterClients overflow                fixed
+  CVE-2025-49180 RandR providers in Xorg                        not ours
+  CVE-2025-62229 Present notifies                               to do
+  CVE-2025-62230 XKB interest resource                          fixed
+  CVE-2025-62231 XkbSetCompatMap overflow                       fixed
 
 2026
-  CVE-2026-33999 XkbSetCompatMap buffer reuse                  not ours (4.8 reallocs every time)
-  CVE-2026-34000 XkbSetGeometry colour index                   fixed
-  CVE-2026-34001 SYNC fences                                   to do
-  CVE-2026-34002 XkbSetMap modifier map                        fixed
-  CVE-2026-34003 XkbSetMap key types                           fixed
-  CVE-2026-50256..50263  (Jun 2)                               to do
-  CVE-2026-55999 glamor fonts                                  not ours
-  CVE-2026-56000 GLX                                           not ours
-  CVE-2026-56001..56003  libXfont2                             to do (font library)
-  CVE-2026-59679, CVE-2026-44950  libXfont2 font server        to do (font library)
-  CVE-2026-88812 XkbSetGeometry doodad text                    fixed (no text, no doodad)
-  CVE-2026-93515 Present notifies                              to do
-  CVE-2026-93516 passive grabs on removed devices              to do
-  CVE-2026-93517 GLX                                           not ours
-  CVE-2026-93518 XKB map sizes 16 bits                         fixed
-  CVE-2026-93519 XI2 barriers                                  not ours
-  CVE-2026-93520 XKB key names array                           fixed
-  CVE-2026-93521 RandR provider properties                     not ours
-  CVE-2026-93522 glamor                                        not ours
-  CVE-2026-93523 XI2 passive ungrab                            not ours
-  CVE-2026-93524 XkbSetMap key widths                          fixed
-  CVE-2026-93536 XI2 gestures                                  not ours
+  CVE-2026-33999 XkbSetCompatMap buffer reuse                   not ours (4.8 reallocs every time)
+  CVE-2026-34000 XkbSetGeometry colour index                    fixed
+  CVE-2026-34001 SYNC fences                                    to do
+  CVE-2026-34002 XkbSetMap modifier map                         fixed
+  CVE-2026-34003 XkbSetMap key types                            fixed
+  CVE-2026-50256..50263  (Jun 2)                                to do
+  CVE-2026-55999 glamor fonts                                   not ours
+  CVE-2026-56000 GLX                                            not ours
+  CVE-2026-56001..56003  libXfont2                              to do (font library)
+  CVE-2026-59679,        CVE-2026-44950  libXfont2 font server  to do (font library)
+  CVE-2026-88812 XkbSetGeometry doodad text                     fixed (no text, no doodad)
+  CVE-2026-93515 Present notifies                               to do
+  CVE-2026-93516 passive grabs on removed devices               to do
+  CVE-2026-93517 GLX                                            not ours
+  CVE-2026-93518 XKB map sizes 16 bits                          fixed
+  CVE-2026-93519 XI2 barriers                                   not ours
+  CVE-2026-93520 XKB key names array                            fixed
+  CVE-2026-93521 RandR provider properties                      not ours
+  CVE-2026-93522 glamor                                         not ours
+  CVE-2026-93523 XI2 passive ungrab                             not ours
+  CVE-2026-93524 XkbSetMap key widths                           fixed
+  CVE-2026-93536 XI2 gestures                                   not ours
+
+Most of the length bugs had a second half: lengths worked out from the
+request's own length field, which is 0 in a big request. All of those use the
+real length now (client->req_len), in XInput, XKB, SHAPE, XTEST, the screen
+saver, Multi-Buffering and SECURITY.
 
 Also fixed on the way, found while porting:
   - XkbSetGeometry never checked a shape's primary and approx outline numbers
   - XkbVModIndexText wrote one byte past its buffer for C output (X.Org has this too)
   - XkbAddGeomOverlay and its rows weren't checked for running out of memory
+  - the swapped DBE SwapBuffers only swapped the first window
+  - the screen saver used its screen data after it had been freed, in two
+    places (X.Org fixed one of them in 2026)
+  - RENDER AddGlyphs leaked a glyph on a short request

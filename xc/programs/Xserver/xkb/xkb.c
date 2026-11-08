@@ -2536,7 +2536,7 @@ ProcXkbSetMap(ClientPtr client)
 	client->errorValue= error;
 	return BadValue;
     }
-    if (((tmp-((char *)stuff))/4)!=stuff->length) {
+    if (((tmp-((char *)stuff))/4)!=client->req_len) {
 	ErrorF("Internal error! Bad length in XkbSetMap (after check)\n");
 	client->errorValue = tmp-((char *)&stuff[1]);
 	return BadLength;
@@ -2587,7 +2587,7 @@ ProcXkbSetMap(ClientPtr client)
 	tmp= SetModifierMap(xkbi,stuff,(CARD8 *)tmp,&change);
     if (stuff->present&XkbVirtualModMapMask)
 	tmp= SetVirtualModMap(xkbi,stuff,(xkbVModMapWireDesc *)tmp,&change);
-    if (((tmp-((char *)stuff))/4)!=stuff->length) {
+    if (((tmp-((char *)stuff))/4)!=client->req_len) {
 	ErrorF("Internal error! Bad length in XkbSetMap (after set)\n");
 	client->errorValue = tmp-((char *)&stuff[1]);
 	return BadLength;
@@ -2804,7 +2804,7 @@ ProcXkbSetCompatMap(ClientPtr client)
 	}
     }
     data+= nGroups*SIZEOF(xkbModsWireDesc);
-    if (((data-((char *)stuff))/4)!=stuff->length) {
+    if (((data-((char *)stuff))/4)!=client->req_len) {
 	return BadLength;
     }
     data = (char *)&stuff[1];
@@ -2867,7 +2867,7 @@ ProcXkbSetCompatMap(ClientPtr client)
 	}
     }
     i= XkbPaddedSize((data-((char *)stuff)));
-    if ((i/4)!=stuff->length) {
+    if ((i/4)!=client->req_len) {
 	ErrorF("Internal length error on read in ProcXkbSetCompatMap\n");
 	return BadLength;
     }
@@ -3076,7 +3076,7 @@ ProcXkbSetIndicatorMap(ClientPtr client)
 	if (stuff->which&bit)
 	    nIndicators++;
     }
-    if (stuff->length!=((SIZEOF(xkbSetIndicatorMapReq)+
+    if (client->req_len!=((SIZEOF(xkbSetIndicatorMapReq)+
 			(nIndicators*SIZEOF(xkbIndicatorMapWireDesc)))/4)) {
 	return BadLength;
     }
@@ -3966,8 +3966,8 @@ ProcXkbSetNames(ClientPtr client)
 	    return BadAtom;
 	}
     }
-    if ((tmp-((CARD32 *)stuff))!=stuff->length) {
-	client->errorValue = stuff->length;
+    if ((tmp-((CARD32 *)stuff))!=client->req_len) {
+	client->errorValue = client->req_len;
 	return BadLength;
     }
     if (XkbAllocNames(xkb,stuff->which,stuff->nRadioGroups,
@@ -5338,7 +5338,7 @@ ProcXkbListComponents(ClientPtr client)
     if (status!=Success)
 	return status;
     len= str-((unsigned char *)stuff);
-    if ((XkbPaddedSize(len)/4)!=stuff->length)
+    if ((XkbPaddedSize(len)/4)!=client->req_len)
 	return BadLength;
     if ((status=XkbDDXList(dev,&list,client))!=Success) {
 	if (list.pool) {
@@ -5424,7 +5424,7 @@ ProcXkbGetKbdByName(ClientPtr client)
     if (status!=Success)
 	return status;
     len= str-((unsigned char *)stuff);
-    if ((XkbPaddedSize(len)/4)!=stuff->length)
+    if ((XkbPaddedSize(len)/4)!=client->req_len)
 	return BadLength;
 
     CHK_MASK_LEGAL(0x01,stuff->want,XkbGBN_AllComponentsMask);
@@ -6312,7 +6312,7 @@ xkbExtensionDeviceNotify ed;
 	if (status!=Success)
 	    return status;
     }
-    if (((wire-((char *)stuff))/4)!=stuff->length)
+    if (((wire-((char *)stuff))/4)!=client->req_len)
 	return BadLength;
 
     bzero((char *)&ed,SIZEOF(xkbExtensionDeviceNotify));
@@ -6378,7 +6378,7 @@ xkbSetDebuggingFlagsReply 	rep;
 	if (newCtrls!=xkbDebugCtrls)
 	    ErrorF("XkbDebug: Setting debug controls to 0x%lx\n",(long)newCtrls);
     }
-    extraLength= (stuff->length<<2)-sz_xkbSetDebuggingFlagsReq;
+    extraLength= (client->req_len<<2)-sz_xkbSetDebuggingFlagsReq;
     if (stuff->msgLength>0) {
 	char *msg;
 	if (extraLength<XkbPaddedSize(stuff->msgLength)) {

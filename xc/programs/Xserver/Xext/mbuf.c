@@ -447,7 +447,7 @@ ProcCreateImageBuffers(ClientPtr client)
     int				err;
 
     REQUEST_AT_LEAST_SIZE (xMbufCreateImageBuffersReq);
-    len = stuff->length - (sizeof(xMbufCreateImageBuffersReq) >> 2);
+    len = client->req_len - (sizeof(xMbufCreateImageBuffersReq) >> 2);
     if (len == 0)
 	return BadLength;
     if (!(pWin = LookupWindow (stuff->window, client)))
@@ -513,7 +513,7 @@ ProcDisplayImageBuffers(ClientPtr client)
     
 
     REQUEST_AT_LEAST_SIZE (xMbufDisplayImageBuffersReq);
-    nbuf = stuff->length - (sizeof (xMbufDisplayImageBuffersReq) >> 2);
+    nbuf = client->req_len - (sizeof (xMbufDisplayImageBuffersReq) >> 2);
     if (!nbuf)
 	return Success;
     minDelay = stuff->minDelay;
@@ -603,7 +603,7 @@ ProcSetMBufferAttributes(ClientPtr client)
     pMultibuffers = (MultibuffersPtr)LookupIDByType (pWin->drawable.id, MultibuffersResType);
     if (!pMultibuffers)
 	return BadMatch;
-    len = stuff->length - (sizeof (xMbufSetMBufferAttributesReq) >> 2);
+    len = client->req_len - (sizeof (xMbufSetMBufferAttributesReq) >> 2);
     vmask = stuff->valueMask;
     if (len != Ones (vmask))
 	return BadLength;
@@ -696,7 +696,7 @@ ProcSetBufferAttributes(ClientPtr client)
     pMultibuffer = (MultibufferPtr) LookupIDByType (stuff->buffer, MultibufferResType);
     if (!pMultibuffer)
 	return MultibufferErrorBase + MultibufferBadBuffer;
-    len = stuff->length - (sizeof (xMbufSetBufferAttributesReq) >> 2);
+    len = client->req_len - (sizeof (xMbufSetBufferAttributesReq) >> 2);
     vmask = stuff->valueMask;
     if (len != Ones (vmask))
 	return BadLength;

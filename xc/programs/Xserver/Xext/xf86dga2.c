@@ -155,7 +155,7 @@ ProcXDGAOpenFramebuffer(ClientPtr client)
     char *deviceName;
     int nameSize;
 
-    if (stuff->screen > screenInfo.numScreens)
+    if (stuff->screen >= screenInfo.numScreens)	/* screens count from 0 */
         return BadValue;
 
     if (!DGAAvailable(stuff->screen)) 
@@ -190,7 +190,7 @@ ProcXDGACloseFramebuffer(ClientPtr client)
 {
     REQUEST(xXDGACloseFramebufferReq);
 
-    if (stuff->screen > screenInfo.numScreens)
+    if (stuff->screen >= screenInfo.numScreens)	/* screens count from 0 */
         return BadValue;
 
     if (!DGAAvailable(stuff->screen)) 
@@ -212,7 +212,7 @@ ProcXDGAQueryModes(ClientPtr client)
     xXDGAModeInfo info;
     XDGAModePtr mode;
 
-    if (stuff->screen > screenInfo.numScreens)
+    if (stuff->screen >= screenInfo.numScreens)	/* screens count from 0 */
         return BadValue;
 
     REQUEST_SIZE_MATCH(xXDGAQueryModesReq);
@@ -337,7 +337,7 @@ ProcXDGASetMode(ClientPtr client)
     PixmapPtr pPix;
     int size;
 
-    if (stuff->screen > screenInfo.numScreens)
+    if (stuff->screen >= screenInfo.numScreens)	/* screens count from 0 */
         return BadValue;
 
     REQUEST_SIZE_MATCH(xXDGASetModeReq);
@@ -426,7 +426,7 @@ ProcXDGASetViewport(ClientPtr client)
 {
     REQUEST(xXDGASetViewportReq);
 
-    if (stuff->screen > screenInfo.numScreens)
+    if (stuff->screen >= screenInfo.numScreens)	/* screens count from 0 */
         return BadValue;
 
     if(DGAClients[stuff->screen] != client)
@@ -445,7 +445,7 @@ ProcXDGAInstallColormap(ClientPtr client)
     ColormapPtr cmap;
     REQUEST(xXDGAInstallColormapReq);
 
-    if (stuff->screen > screenInfo.numScreens)
+    if (stuff->screen >= screenInfo.numScreens)	/* screens count from 0 */
         return BadValue;
 
     if(DGAClients[stuff->screen] != client)
@@ -469,7 +469,7 @@ ProcXDGASelectInput(ClientPtr client)
 {
     REQUEST(xXDGASelectInputReq);
 
-    if (stuff->screen > screenInfo.numScreens)
+    if (stuff->screen >= screenInfo.numScreens)	/* screens count from 0 */
         return BadValue;
 
     if(DGAClients[stuff->screen] != client)
@@ -489,7 +489,7 @@ ProcXDGAFillRectangle(ClientPtr client)
 {
     REQUEST(xXDGAFillRectangleReq);
 
-    if (stuff->screen > screenInfo.numScreens)
+    if (stuff->screen >= screenInfo.numScreens)	/* screens count from 0 */
         return BadValue;
 
     if(DGAClients[stuff->screen] != client)
@@ -509,7 +509,7 @@ ProcXDGACopyArea(ClientPtr client)
 {
     REQUEST(xXDGACopyAreaReq);
 
-    if (stuff->screen > screenInfo.numScreens)
+    if (stuff->screen >= screenInfo.numScreens)	/* screens count from 0 */
         return BadValue;
 
     if(DGAClients[stuff->screen] != client)
@@ -530,7 +530,7 @@ ProcXDGACopyTransparentArea(ClientPtr client)
 {
     REQUEST(xXDGACopyTransparentAreaReq);
 
-    if (stuff->screen > screenInfo.numScreens)
+    if (stuff->screen >= screenInfo.numScreens)	/* screens count from 0 */
         return BadValue;
 
     if(DGAClients[stuff->screen] != client)
@@ -552,7 +552,7 @@ ProcXDGAGetViewportStatus(ClientPtr client)
     REQUEST(xXDGAGetViewportStatusReq);
     xXDGAGetViewportStatusReply rep;
 
-    if (stuff->screen > screenInfo.numScreens)
+    if (stuff->screen >= screenInfo.numScreens)	/* screens count from 0 */
         return BadValue;
 
     if(DGAClients[stuff->screen] != client)
@@ -575,7 +575,7 @@ ProcXDGASync(ClientPtr client)
     REQUEST(xXDGASyncReq);
     xXDGASyncReply rep;
 
-    if (stuff->screen > screenInfo.numScreens)
+    if (stuff->screen >= screenInfo.numScreens)	/* screens count from 0 */
         return BadValue;
 
     if(DGAClients[stuff->screen] != client)
@@ -620,7 +620,7 @@ ProcXDGAChangePixmapMode(ClientPtr client)
     xXDGAChangePixmapModeReply rep;
     int x, y;
 
-    if (stuff->screen > screenInfo.numScreens)
+    if (stuff->screen >= screenInfo.numScreens)	/* screens count from 0 */
         return BadValue;
 
     if(DGAClients[stuff->screen] != client)
@@ -651,7 +651,7 @@ ProcXDGACreateColormap(ClientPtr client)
     REQUEST(xXDGACreateColormapReq);
     int result;
 
-    if (stuff->screen > screenInfo.numScreens)
+    if (stuff->screen >= screenInfo.numScreens)	/* screens count from 0 */
         return BadValue;
 
     if(DGAClients[stuff->screen] != client)

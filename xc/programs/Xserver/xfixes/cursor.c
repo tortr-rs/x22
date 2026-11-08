@@ -367,7 +367,8 @@ ProcXFixesSetCursorName (ClientPtr client)
     REQUEST(xXFixesSetCursorNameReq);
     Atom atom;
 
-    REQUEST_AT_LEAST_SIZE(xXFixesSetCursorNameReq);
+    /* the name has to be in the request (CVE-2017-12183) */
+    REQUEST_FIXED_SIZE(xXFixesSetCursorNameReq, stuff->nbytes);
     VERIFY_CURSOR(pCursor, stuff->cursor, client, SecurityWriteAccess);
     tchar = (char *) &stuff[1];
     atom = MakeAtom (tchar, stuff->nbytes, TRUE);

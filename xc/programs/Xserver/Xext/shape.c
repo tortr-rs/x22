@@ -341,7 +341,7 @@ ProcShapeRectangles(ClientPtr client)
         return BadValue;
     }
     pScreen = pWin->drawable.pScreen;
-    nrects = ((stuff->length  << 2) - sizeof(xShapeRectanglesReq));
+    nrects = ((client->req_len  << 2) - sizeof(xShapeRectanglesReq));
     if (nrects & 4)
 	return BadLength;
     nrects >>= 3;

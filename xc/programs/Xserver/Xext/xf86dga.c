@@ -48,7 +48,7 @@ ProcXF86DGAGetVideoLL(ClientPtr client)
     unsigned int addr[2], offset, flags;
     char *name;
 
-    if (stuff->screen > screenInfo.numScreens)
+    if (stuff->screen >= screenInfo.numScreens)	/* screens count from 0 */
 	return BadValue;
 
     REQUEST_SIZE_MATCH(xXF86DGAGetVideoLLReq);
@@ -94,7 +94,7 @@ ProcXF86DGADirectVideo(ClientPtr client)
     XDGAModeRec mode;
     REQUEST(xXF86DGADirectVideoReq);
 
-    if (stuff->screen > screenInfo.numScreens)
+    if (stuff->screen >= screenInfo.numScreens)	/* screens count from 0 */
 	return BadValue;
 
     REQUEST_SIZE_MATCH(xXF86DGADirectVideoReq);
@@ -126,7 +126,7 @@ ProcXF86DGAGetViewPortSize(ClientPtr client)
     REQUEST(xXF86DGAGetViewPortSizeReq);
     xXF86DGAGetViewPortSizeReply rep;
 
-    if (stuff->screen > screenInfo.numScreens)
+    if (stuff->screen >= screenInfo.numScreens)	/* screens count from 0 */
 	return BadValue;
 
     REQUEST_SIZE_MATCH(xXF86DGAGetViewPortSizeReq);
@@ -154,7 +154,7 @@ ProcXF86DGASetViewPort(ClientPtr client)
 {
     REQUEST(xXF86DGASetViewPortReq);
 
-    if (stuff->screen > screenInfo.numScreens)
+    if (stuff->screen >= screenInfo.numScreens)	/* screens count from 0 */
 	return BadValue;
 
     REQUEST_SIZE_MATCH(xXF86DGASetViewPortReq);
@@ -184,7 +184,7 @@ ProcXF86DGAGetVidPage(ClientPtr client)
     REQUEST(xXF86DGAGetVidPageReq);
     xXF86DGAGetVidPageReply rep;
 
-    if (stuff->screen > screenInfo.numScreens)
+    if (stuff->screen >= screenInfo.numScreens)	/* screens count from 0 */
 	return BadValue;
 
     REQUEST_SIZE_MATCH(xXF86DGAGetVidPageReq);
@@ -203,7 +203,7 @@ ProcXF86DGASetVidPage(ClientPtr client)
 {
     REQUEST(xXF86DGASetVidPageReq);
 
-    if (stuff->screen > screenInfo.numScreens)
+    if (stuff->screen >= screenInfo.numScreens)	/* screens count from 0 */
 	return BadValue;
 
     REQUEST_SIZE_MATCH(xXF86DGASetVidPageReq);
@@ -241,7 +241,7 @@ ProcXF86DGAQueryDirectVideo(ClientPtr client)
     REQUEST(xXF86DGAQueryDirectVideoReq);
     xXF86DGAQueryDirectVideoReply rep;
 
-    if (stuff->screen > screenInfo.numScreens)
+    if (stuff->screen >= screenInfo.numScreens)	/* screens count from 0 */
 	return BadValue;
 
     REQUEST_SIZE_MATCH(xXF86DGAQueryDirectVideoReq);
@@ -263,7 +263,7 @@ ProcXF86DGAViewPortChanged(ClientPtr client)
     REQUEST(xXF86DGAViewPortChangedReq);
     xXF86DGAViewPortChangedReply rep;
 
-    if (stuff->screen > screenInfo.numScreens)
+    if (stuff->screen >= screenInfo.numScreens)	/* screens count from 0 */
 	return BadValue;
 
     REQUEST_SIZE_MATCH(xXF86DGAViewPortChangedReq);

@@ -354,6 +354,8 @@ AnimCursorCreate (CursorPtr *cursors, CARD32 *deltas, int ncursor, CursorPtr *pp
     int		i;
     AnimCurPtr	ac;
 
+    if (ncursor <= 0)
+	return BadValue;
     for (i = 0; i < screenInfo.numScreens; i++)
 	if (!GetAnimCurScreenIfSet (screenInfo.screens[i]))
 	    return BadImplementation;

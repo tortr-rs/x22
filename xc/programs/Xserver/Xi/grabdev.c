@@ -89,7 +89,7 @@ SProcXGrabDevice(client)
     swapl(&stuff->time, n);
     swaps(&stuff->event_count, n);
 
-    if (stuff->length != (sizeof(xGrabDeviceReq) >> 2) + stuff->event_count)
+    if (client->req_len != (sizeof(xGrabDeviceReq) >> 2) + stuff->event_count)
 	return BadLength;
 
     SwapLongs((CARD32 *)(&stuff[1]), stuff->event_count);
@@ -115,7 +115,7 @@ ProcXGrabDevice(client)
     REQUEST(xGrabDeviceReq);
     REQUEST_AT_LEAST_SIZE(xGrabDeviceReq);
 
-    if (stuff->length !=(sizeof(xGrabDeviceReq)>>2) + stuff->event_count)
+    if (client->req_len !=(sizeof(xGrabDeviceReq)>>2) + stuff->event_count)
 	{
 	SendErrorToClient (client, IReqCode, X_GrabDevice, 0, BadLength);
 	return Success;

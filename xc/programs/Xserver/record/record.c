@@ -1426,6 +1426,11 @@ RecordSanityCheckRegisterClients(RecordContextPtr pContext, ClientPtr client,
     int i;
     XID recordingClient;
 
+    /* so the sum below can't wrap round (CVE-2025-49179) */
+    if (stuff->nClients > MAXCLIENTS)
+	return BadValue;
+    if (stuff->nRanges > (0x7fffffff - 4 * stuff->nClients) / SIZEOF(xRecordRange))
+	return BadValue;
     if (((client->req_len << 2) - SIZEOF(xRecordRegisterClientsReq)) !=
 	4 * stuff->nClients + SIZEOF(xRecordRange) * stuff->nRanges)
 	return BadLength;
@@ -2664,7 +2669,7 @@ SProcRecordQueryVersion(ClientPtr client)
 
 
 static int
-SwapCreateRegister(xRecordRegisterClientsReq *stuff)
+SwapCreateRegister(ClientPtr client, xRecordRegisterClientsReq *stuff)
 {
     register char n;
     int i;
@@ -2674,16 +2679,19 @@ SwapCreateRegister(xRecordRegisterClientsReq *stuff)
     swapl(&stuff->nClients, n);
     swapl(&stuff->nRanges, n);
     pClientID = (XID *)&stuff[1];
+    /* req_len, not stuff->length: that's 0 in a big request and the
+     * subtraction wrapped round (CVE-2020-14362) */
     if (stuff->nClients >
-	(stuff->length - (sz_xRecordRegisterClientsReq >> 2)))
+	(client->req_len - (sz_xRecordRegisterClientsReq >> 2)))
 	return BadLength;
     for (i = 0; i < stuff->nClients; i++, pClientID++)
     {
 	swapl(pClientID, n);
     }
+    /* ranges are more than one word each (CVE-2021-4011) */
     if (stuff->nRanges >
-	(stuff->length - stuff->nClients -
-	 (sz_xRecordRegisterClientsReq >> 2)))
+	(client->req_len - stuff->nClients -
+	 (sz_xRecordRegisterClientsReq >> 2)) / (sz_xRecordRange >> 2))
 	return BadLength;
     RecordSwapRanges((xRecordRange *)pClientID, stuff->nRanges);
     return Success;
@@ -2700,7 +2708,7 @@ SProcRecordCreateContext(ClientPtr client)
 
     swaps(&stuff->length, n);
     REQUEST_AT_LEAST_SIZE(xRecordCreateContextReq);
-    if ((status = SwapCreateRegister((pointer)stuff)) != Success)
+    if ((status = SwapCreateRegister(client, (pointer)stuff)) != Success)
 	return status;
     return ProcRecordCreateContext(client);
 } /* SProcRecordCreateContext */
@@ -2716,7 +2724,7 @@ SProcRecordRegisterClients(ClientPtr client)
 
     swaps(&stuff->length, n);
     REQUEST_AT_LEAST_SIZE(xRecordRegisterClientsReq);
-    if ((status = SwapCreateRegister((pointer)stuff)) != Success)
+    if ((status = SwapCreateRegister(client, (pointer)stuff)) != Success)
 	return status;
     return ProcRecordRegisterClients(client);
 } /* SProcRecordRegisterClients */

@@ -108,7 +108,7 @@ ProcXChangeDeviceControl(client)
     REQUEST(xChangeDeviceControlReq);
     REQUEST_AT_LEAST_SIZE(xChangeDeviceControlReq);
 
-    len = stuff->length - (sizeof(xChangeDeviceControlReq) >>2);
+    len = client->req_len - (sizeof(xChangeDeviceControlReq) >>2);
     dev = LookupDeviceIntRec (stuff->deviceid);
     if (dev == NULL)
 	{

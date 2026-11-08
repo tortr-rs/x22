@@ -114,7 +114,7 @@ ProcXSetDeviceModifierMapping(client)
     rep.length = 0;
     rep.sequenceNumber = client->sequence;
 
-    ret = SetModifierMapping(client, dev, stuff->length,
+    ret = SetModifierMapping(client, dev, client->req_len,
 	(sizeof (xSetDeviceModifierMappingReq)>>2), stuff->numKeyPerModifier, 
 	(BYTE *)&stuff[1], &kp);
 

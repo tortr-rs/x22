@@ -117,7 +117,7 @@ ProcXChangeDeviceKeyMapping(client)
 		BadDevice);
 	return Success;
 	}
-    len = stuff->length - (sizeof(xChangeDeviceKeyMappingReq) >> 2);  
+    len = client->req_len - (sizeof(xChangeDeviceKeyMappingReq) >> 2);  
 
     ret = ChangeKeyMapping (client, dev, len, DeviceMappingNotify, 
 	stuff->firstKeyCode, stuff->keyCodes, stuff->keySymsPerKeyCode, 

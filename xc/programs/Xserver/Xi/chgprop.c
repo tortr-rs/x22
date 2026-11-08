@@ -109,7 +109,7 @@ ProcXChangeDeviceDontPropagateList (client)
     REQUEST(xChangeDeviceDontPropagateListReq);
     REQUEST_AT_LEAST_SIZE(xChangeDeviceDontPropagateListReq);
 
-    if (stuff->length !=(sizeof(xChangeDeviceDontPropagateListReq)>>2) + 
+    if (client->req_len !=(sizeof(xChangeDeviceDontPropagateListReq)>>2) + 
 	stuff->count)
 	{
 	SendErrorToClient (client, IReqCode, X_ChangeDeviceDontPropagateList, 0,

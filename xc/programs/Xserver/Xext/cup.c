@@ -196,7 +196,7 @@ ProcGetReservedColormapEntries(ClientPtr client)
 
     REQUEST_SIZE_MATCH (xXcupGetReservedColormapEntriesReq);
 
-    if (stuff->screen > screenInfo.numScreens)
+    if (stuff->screen >= screenInfo.numScreens)	/* screens count from 0 (CVE-2007-6428, CVE-2007-5760) */
 	return BadValue;
 
 #ifndef HAVE_SPECIAL_DESKTOP_COLORS

@@ -104,7 +104,7 @@ ProcXSetDeviceValuators(client)
     rep.status = Success;
     rep.sequenceNumber = client->sequence;
 
-    if (stuff->length !=(sizeof(xSetDeviceValuatorsReq)>>2) + 
+    if (client->req_len !=(sizeof(xSetDeviceValuatorsReq)>>2) + 
 	stuff->num_valuators)
 	{
 	SendErrorToClient (client, IReqCode, X_SetDeviceValuators, 0, 

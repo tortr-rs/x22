@@ -254,10 +254,11 @@ ProcRenderQueryVersion (ClientPtr client)
     register int n;
     REQUEST(xRenderQueryVersionReq);
 
+    /* the size first, then read it (CVE-2014-8100) */
+    REQUEST_SIZE_MATCH(xRenderQueryVersionReq);
     pRenderClient->major_version = stuff->majorVersion;
     pRenderClient->minor_version = stuff->minorVersion;
 
-    REQUEST_SIZE_MATCH(xRenderQueryVersionReq);
     rep.type = X_Reply;
     rep.length = 0;
     rep.sequenceNumber = client->sequence;
@@ -1103,7 +1104,10 @@ ProcRenderAddGlyphs (ClientPtr client)
 	
 	size = glyph->size - sizeof (xGlyphInfo);
 	if (remain < size)
+	{
+	    xfree (glyph);
 	    break;
+	}
 	memcpy ((CARD8 *) (glyph + 1), bits, size);
 	
 	if (size & 3)
@@ -1767,6 +1771,8 @@ ProcRenderSetPictureFilter (ClientPtr client)
     name = (char *) (stuff + 1);
     params = (xFixed *) (name + ((stuff->nbytes + 3) & ~3));
     nparams = ((xFixed *) stuff + client->req_len) - params;
+    if (nparams < 0)	/* nbytes ran past the end */
+	return BadLength;
     result = SetPictureFilter (pPicture, name, stuff->nbytes, params, nparams);
     return result;
 }
@@ -1788,6 +1794,8 @@ ProcRenderCreateAnimCursor (ClientPtr client)
     if (client->req_len & 1)
 	return BadLength;
     ncursor = (client->req_len - (SIZEOF(xRenderCreateAnimCursorReq) >> 2)) >> 1;
+    if (ncursor <= 0)	/* CVE-2025-49175 */
+	return BadValue;
     cursors = xalloc (ncursor * (sizeof (CursorPtr) + sizeof (CARD32)));
     if (!cursors)
 	return BadAlloc;
@@ -2173,14 +2181,19 @@ SProcRenderCompositeGlyphs (ClientPtr client)
 	swaps (&elt->deltay, n);
 	
 	i = elt->len;
+	/* nothing past the end of the request (CVE-2021-4008) */
 	if (i == 0xff)
 	{
+	    if (buffer + 4 > end)
+		return BadLength;
 	    swapl (buffer, n);
 	    buffer += 4;
 	}
 	else
 	{
 	    space = size * i;
+	    if (buffer + space > end)
+		return BadLength;
 	    switch (size) {
 	    case 1:
 		buffer += i;

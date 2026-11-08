@@ -91,7 +91,7 @@ SProcXSendExtensionEvent(client)
     REQUEST_AT_LEAST_SIZE(xSendExtensionEventReq);
     swapl(&stuff->destination, n);
     swaps(&stuff->count, n);
-    if (stuff->length !=
+    if (client->req_len !=
 	((sizeof(xSendExtensionEventReq) >> 2) + stuff->count +
 	 (stuff->num_events * (sizeof(xEvent) >> 2))))
 	return BadLength;
@@ -131,7 +131,7 @@ ProcXSendExtensionEvent (client)
     REQUEST(xSendExtensionEventReq);
     REQUEST_AT_LEAST_SIZE(xSendExtensionEventReq);
 
-    if (stuff->length !=(sizeof(xSendExtensionEventReq)>>2) + stuff->count +
+    if (client->req_len !=(sizeof(xSendExtensionEventReq)>>2) + stuff->count +
 	(stuff->num_events * (sizeof (xEvent) >> 2)))
 	{
 	SendErrorToClient (client, IReqCode, X_SendExtensionEvent, 0, 

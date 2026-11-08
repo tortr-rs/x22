@@ -243,7 +243,7 @@ ProcXF86MiscSetSaver(ClientPtr client)
     REQUEST(xXF86MiscSetSaverReq);
     ScrnInfoPtr vptr;
 
-    if (stuff->screen > screenInfo.numScreens)
+    if (stuff->screen >= screenInfo.numScreens)	/* screens count from 0 (CVE-2007-6428, CVE-2007-5760) */
 	return BadValue;
 
     vptr = (ScrnInfoPtr) screenInfo.screens[stuff->screen]->devPrivates[xf86ScreenIndex].ptr;
@@ -270,7 +270,7 @@ ProcXF86MiscGetSaver(ClientPtr client)
     int n;
     ScrnInfoPtr vptr;
 
-    if (stuff->screen > screenInfo.numScreens)
+    if (stuff->screen >= screenInfo.numScreens)	/* screens count from 0 (CVE-2007-6428, CVE-2007-5760) */
 	return BadValue;
 
     vptr = (ScrnInfoPtr) screenInfo.screens[stuff->screen]->devPrivates[xf86ScreenIndex].ptr;
@@ -609,7 +609,7 @@ ProcXF86MiscPassMessage(ClientPtr client)
     size+= (stuff->vallen  + 3) >> 2;
     if (client->req_len < size)
 	return BadLength;
-    if (stuff->screen > screenInfo.numScreens)
+    if (stuff->screen >= screenInfo.numScreens)	/* screens count from 0 (CVE-2007-6428, CVE-2007-5760) */
 	return BadValue;
     if (stuff->typelen) {
 	if (!(msgtype = xalloc(stuff->typelen)))

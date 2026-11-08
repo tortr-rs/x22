@@ -1137,6 +1137,8 @@ ProcPanoramiXGetScreenSize(ClientPtr client)
 	int			n;
 
 	REQUEST_SIZE_MATCH(xPanoramiXGetScreenSizeReq);
+	if (stuff->screen >= PanoramiXNumScreens)
+	    return BadMatch;
 	pWin = LookupWindow (stuff->window, client);
 	if (!pWin)
 	     return BadWindow;

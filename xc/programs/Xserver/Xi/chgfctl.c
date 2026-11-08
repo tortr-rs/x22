@@ -110,7 +110,7 @@ ProcXChangeFeedbackControl(client)
     REQUEST(xChangeFeedbackControlReq);
     REQUEST_AT_LEAST_SIZE(xChangeFeedbackControlReq);
 
-    len = stuff->length - (sizeof(xChangeFeedbackControlReq) >>2);
+    len = client->req_len - (sizeof(xChangeFeedbackControlReq) >>2);
     dev = LookupDeviceIntRec (stuff->deviceid);
     if (dev == NULL)
 	{
@@ -153,6 +153,13 @@ ProcXChangeFeedbackControl(client)
 	    {
 	    register char n;
 	    xStringFeedbackCtl *f = ((xStringFeedbackCtl *) &stuff[1]);
+	    /* the fixed part first, before num_keysyms is read from it (CVE-2021-3472) */
+	    if (len < (sizeof(xStringFeedbackCtl)>>2))
+		{
+		SendErrorToClient (client, IReqCode, X_ChangeFeedbackControl,
+			0, BadLength);
+		return Success;
+		}
 	    if (client->swapped)
 		{
 		swaps(&f->num_keysyms,n);

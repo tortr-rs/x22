@@ -559,6 +559,8 @@ CreateSaverWindow(ScreenPtr pScreen)
 	    UninstallSaverColormap (pScreen);
 	    pPriv->hasWindow = FALSE;
 	    CheckScreenPrivate (pScreen);
+	    /* that can free it */
+	    pPriv = GetScreenPrivate (pScreen);
 	}
     }
 
@@ -846,7 +848,7 @@ ScreenSaverSetAttributes(ClientPtr client)
     pScreen = pDraw->pScreen;
     pParent = WindowTable[pScreen->myNum];
 
-    len = stuff->length -  (sizeof(xScreenSaverSetAttributesReq) >> 2);
+    len = client->req_len -  (sizeof(xScreenSaverSetAttributesReq) >> 2);
     if (Ones(stuff->mask) != len)
         return BadLength;
     if (!stuff->width || !stuff->height)
@@ -1175,7 +1177,18 @@ ScreenSaverSetAttributes(ClientPtr client)
 	pVlist++;
     }
     if (pPriv->attr)
+    {
 	FreeResource(pPriv->attr->resource, AttrType);
+	/* freeing the old one can free the screen's private too */
+	if (!(pPriv = GetScreenPrivate (pScreen)) &&
+	    !(pPriv = MakeScreenPrivate (pScreen)))
+	{
+	    FreeAttrs (pAttr);
+	    xfree (pAttr);
+	    xfree (save);
+	    return BadAlloc;
+	}
+    }
     pPriv->attr = pAttr;
     pAttr->resource = FakeClientID (client->index);
     if (!AddResource (pAttr->resource, AttrType, (pointer) pAttr))
@@ -1231,7 +1244,7 @@ ProcScreenSaverSetAttributes(ClientPtr client)
                    client, stuff->drawable, XRC_DRAWABLE, SecurityWriteAccess)))
            return BadDrawable;
 
-       len = stuff->length -  (sizeof(xScreenSaverSetAttributesReq) >> 2);
+       len = client->req_len -  (sizeof(xScreenSaverSetAttributesReq) >> 2);
        if (Ones(stuff->mask) != len)
            return BadLength;
 
@@ -1298,6 +1311,8 @@ ProcScreenSaverUnsetAttributes(ClientPtr client)
        REQUEST(xScreenSaverUnsetAttributesReq);
        PanoramiXRes *draw;
        int i;
+
+       REQUEST_SIZE_MATCH(xScreenSaverUnsetAttributesReq);
 
        if(!(draw = (PanoramiXRes *)SecurityLookupIDByClass(
                    client, stuff->drawable, XRC_DRAWABLE, SecurityWriteAccess)))

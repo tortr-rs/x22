@@ -717,8 +717,10 @@ ProcDbeSwapBuffers(ClientPtr client)
         return(Success);
     }
 
-    if (nStuff > (CARD32)(-1L) / sizeof(DbeSwapInfoRec))
+    if (stuff->n > (CARD32)(-1L) / sizeof(DbeSwapInfoRec))
 	    return BadAlloc;
+    /* the swap infos have to be in the request (CVE-2014-8097) */
+    REQUEST_FIXED_SIZE(xDbeSwapBuffersReq, stuff->n * sizeof(xDbeSwapInfo));
 
     /* Get to the swap info appended to the end of the request. */
     dbeSwapInfo = (xDbeSwapInfo *)&stuff[1];
@@ -885,6 +887,8 @@ ProcDbeGetVisualInfo(ClientPtr client)
 
     if (stuff->n > (CARD32)(-1L) / sizeof(DrawablePtr))
 	    return BadAlloc;
+    /* and the drawables have to be in the request (CVE-2017-12177) */
+    REQUEST_FIXED_SIZE(xDbeGetVisualInfoReq, stuff->n * sizeof(CARD32));
     /* Make sure any specified drawables are valid. */
     if (stuff->n != 0)
     {
@@ -1273,6 +1277,7 @@ SProcDbeSwapBuffers(ClientPtr client)
     REQUEST_AT_LEAST_SIZE(xDbeSwapBuffersReq);
 
     swapl(&stuff->n, n);
+    REQUEST_FIXED_SIZE(xDbeSwapBuffersReq, stuff->n * sizeof(xDbeSwapInfo));
 
     if (stuff->n != 0)
     { 
@@ -1282,7 +1287,7 @@ SProcDbeSwapBuffers(ClientPtr client)
          * followed by a 1 byte swap action and then 3 pad bytes.  We only need
          * to swap the window information.
          */
-        for (i = 0; i < stuff->n; i++)
+        for (i = 0; i < stuff->n; i++, pSwapInfo++)
         {
             swapl(&pSwapInfo->window, n);
         }

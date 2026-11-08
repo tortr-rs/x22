@@ -687,11 +687,12 @@ SProcSecurityGenerateAuthorization(ClientPtr client)
     swapl(&stuff->valueMask, n);
     nvalues = ((stuff->nbytesAuthProto + (unsigned)3) >> 2) +
 	((stuff->nbytesAuthData + (unsigned)3) >> 2);
+    /* req_len: stuff->length is 0 in a big request */
     if (nvalues >
-	(stuff->length - (sz_xSecurityGenerateAuthorizationReq >> 2)))
+	(client->req_len - (sz_xSecurityGenerateAuthorizationReq >> 2)))
 	return BadLength;
     values = (CARD32 *)(&stuff[1]) + nvalues;
-    nvalues = (((CARD32 *)stuff) + stuff->length) - values;
+    nvalues = (((CARD32 *)stuff) + client->req_len) - values;
     SwapLongs(values, nvalues);
     return ProcSecurityGenerateAuthorization(client);
 } /* SProcSecurityGenerateAuthorization */

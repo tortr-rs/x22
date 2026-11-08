@@ -109,7 +109,7 @@ ProcXGrabDeviceKey(client)
     REQUEST(xGrabDeviceKeyReq);
     REQUEST_AT_LEAST_SIZE(xGrabDeviceKeyReq);
 
-    if (stuff->length !=(sizeof(xGrabDeviceKeyReq)>>2) + stuff->event_count)
+    if (client->req_len !=(sizeof(xGrabDeviceKeyReq)>>2) + stuff->event_count)
 	{
 	SendErrorToClient (client, IReqCode, X_GrabDeviceKey, 0, BadLength);
 	return Success;
