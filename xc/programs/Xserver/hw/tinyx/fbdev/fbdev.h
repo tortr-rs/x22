@@ -60,6 +60,10 @@ typedef struct _fbdevPriv {
     RegionRec			kmsLast;	/* what the last frame changed */
     ScreenPtr			kmsScreen;
     shadowBufPtr		kmsBuf;
+    Bool			kmsDirect;	/* the screen pixmap is ours, in memory; no layer */
+    CARD8			*kmsShadow;	/* that memory */
+    struct _damage		*kmsDamage;	/* what changed in it since the last frame */
+    Bool			kmsDamageOn;
     int				kmsPipe;	/* the crtc's place in the kernel's list, for vblanks */
     Bool			kmsNoVblank;	/* the kernel has no vblank counter for it */
     CARD32			kmsMscLast;	/* the kernel's counter is 32 bits, ours 64 */

@@ -76,6 +76,10 @@ XCOMM $XFree86: xc/programs/Xserver/Imakefile,v 3.332 2008/01/01 01:41:59 tsi Ex
           LAYERDIR = miext/layer
        ROOTLESSDIR = miext/rootless
          SHADOWDIR = miext/shadow
+         MIDAMAGEDIR = miext/damage
+             MICWDIR = miext/cw
+            MIDAMAGE = $(MIDAMAGEDIR)/LibraryTargetName(damage)
+                MICW = $(MICWDIR)/LibraryTargetName(cw)
 
            MISCDIR = Xext
 
@@ -753,8 +757,18 @@ XCOMM
      TINY_RANDRLIB = $(TINYXDIR)/$(RANDRLIB)
 #endif
 
+#if BuildComposite
+    TINY_COMPOSITE = $(TINYXDIR)/composite/LibraryTargetName(composite)
+#endif
+#if BuildDamage
+    TINY_DAMAGEEXT = $(TINYXDIR)/damageext/LibraryTargetName(damage)
+#endif
+#if BuildXfixes
+        TINY_FIXES = $(TINYXDIR)/xfixes/LibraryTargetName(xfixes)
+#endif
    TINY_STATICEXTS = $(XKBEXT) $(XINPUTEXT) $(LBXEXT) $(SITEEXTS) \
-		     $(TINY_RANDRLIB) $(TINY_RENDERLIB)
+		     $(TINY_COMPOSITE) $(TINY_DAMAGEEXT) $(MIDAMAGE) $(TINY_FIXES) \
+		     $(MICW) $(TINY_RANDRLIB) $(TINY_RENDERLIB)
       TINY_MISCEXT = $(TINYXDIR)/$(MISCEXT)
  TINY_LOADABLEEXTS = $(TINY_MISCEXT) $(DBEEXT) $(RECORDEXT) $(GLXEXT) \
 		     $(XTRAPEXT)
@@ -801,7 +815,8 @@ XCOMM
              FBDEV = $(FBDEVDIR)/LibraryTargetName(fbdev)
 
 
-         FBDEVDIRS = $(TINYXDIRS) $(FBSUBDIR) $(SHADOWDIR) $(LAYERDIR)
+         FBDEVDIRS = $(TINYXDIRS) $(FBSUBDIR) $(SHADOWDIR) $(LAYERDIR) \
+		     $(MIDAMAGEDIR) $(MICWDIR)
 
          FBDEVLIBS = $(TINY_DIX) $(TINY_OS) $(FBDEV) $(LAYER) $(TINYX) \
 		     $(TINYXOS) $(SHADOW) $(FB) $(MI) $(TINY_EXTENSIONS)
@@ -1366,14 +1381,24 @@ XCOMM
 #if BuildXTrap
       XVFBXTRAPEXT = $(XVFBDDXDIR)/$(XTRAPEXT)
 #endif
-    XVFBSTATICEXTS = $(LBXEXT) $(SITEEXTS) $(XVFBRANDRLIB) $(XVFBRENDERLIB)
+#if BuildComposite
+    XVFBCOMPOSITE = $(XVFBDDXDIR)/composite/LibraryTargetName(composite)
+#endif
+#if BuildDamage
+    XVFBDAMAGEEXT = $(XVFBDDXDIR)/damageext/LibraryTargetName(damage)
+#endif
+#if BuildXfixes
+       XVFBFIXES = $(XVFBDDXDIR)/xfixes/LibraryTargetName(xfixes)
+#endif
+    XVFBSTATICEXTS = $(LBXEXT) $(SITEEXTS) $(XVFBCOMPOSITE) $(XVFBDAMAGEEXT) \
+		     $(MIDAMAGE) $(XVFBFIXES) $(MICW) $(XVFBRANDRLIB) $(XVFBRENDERLIB)
        XVFBMISCEXT = $(XVFBDDXDIR)/$(MISCEXT)
   XVFBLOADABLEEXTS = $(XVFBMISCEXT) $(XVFBDBEEXT) $(XVFBRECORDEXT) $(GLXEXT) \
 		     $(XVFBXTRAPEXT)
     XVFBEXTENSIONS = $(XVFBLOADABLEEXTS) $(XVFBSTATICEXTS)
        XVFBEXTDIRS = $(GLXDIR) $(LBXDIRS) $(SITEEXTDIRS)
           XVFBDIRS = $(STDDIRS) $(HWSUBDIR) $(XVFBEXTDIRS) \
-		     $(MFBSUBDIR) $(FBSUBDIR) $(DEPDIRS)
+		     $(MFBSUBDIR) $(FBSUBDIR) $(MIDAMAGEDIR) $(MICWDIR) $(DEPDIRS)
           XVFBOBJS = $(XVFBDDXDIR)/dix/main.o $(XVFBDDXDIR)/miinitext.o \
                      $(GLOBJS)
               XVFB = $(XVFBDDXDIR)/LibraryTargetName(vfb)
@@ -1666,7 +1691,7 @@ Xnon: $(XNONSUBDIRS)
 
 
         CFBSUBDIRS = $(CFB8SUBDIR) $(CFB16SUBDIR) $(CFB24SUBDIR) $(CFB32SUBDIR)
-         MIEXTDIRS = $(SHADOWDIR) $(LAYERDIR) $(ROOTLESSDIR)
+         MIEXTDIRS = $(SHADOWDIR) $(LAYERDIR) $(ROOTLESSDIR) $(MIDAMAGEDIR) $(MICWDIR)
          IPLANDIRS = $(IPLAN2P2DIR) $(IPLAN2P4DIR) $(IPLAN2P8DIR)
            SUBDIRS = $(STDDIRS) $(DIXSUBDIR) $(OSSUBDIR) $(HWSUBDIR) \
 		     $(EXTDIRS) $(LMFCFBSUBDIR) $(MFBSUBDIR) $(CFBSUBDIRS) \

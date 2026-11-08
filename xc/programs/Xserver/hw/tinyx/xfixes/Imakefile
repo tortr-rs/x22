@@ -1,0 +1,14 @@
+XCOMM xfixes for this server, from the shared sources
+
+#undef XF86Server
+#define XF86Server NO
+#undef DoLoadableServer
+#define DoLoadableServer NO
+#define LinkDefines TinyDIXDefines
+#define LinkDirectory ../../../xfixes
+
+IMAKE_DEFINES=-DXF86Server=NO
+
+#include "../../../xfixes/Imakefile"
+
+Makefiles:: Makefile

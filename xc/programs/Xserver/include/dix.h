@@ -386,7 +386,9 @@ extern void NoopDDA(void);
 extern int AlterSaveSetForClient(
     ClientPtr /*client*/,
     WindowPtr /*pWin*/,
-    unsigned /*mode*/);
+    unsigned /*mode*/,
+    Bool /*toRoot*/,
+    Bool /*remap*/);
 
 extern void DeleteWindowFromAnySaveSet(
     WindowPtr /*pWin*/);
@@ -751,5 +753,22 @@ typedef struct {
 
 extern void SetVendorRelease(int release);
 extern void SetVendorString(const char *string);
+
+/*
+ * SelectionCallback: XFIXES watches who owns which selection through this
+ */
+
+extern CallbackListPtr SelectionCallback;
+
+typedef enum {
+    SelectionSetOwner,
+    SelectionWindowDestroy,
+    SelectionClientClose
+} SelectionCallbackKind;
+
+typedef struct {
+    struct _Selection	    *selection;
+    SelectionCallbackKind   kind;
+} SelectionInfoRec;
 
 #endif /* DIX_H */

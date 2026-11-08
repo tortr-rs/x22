@@ -1079,6 +1079,136 @@ SetPictureClipRects (PicturePtr	pPicture,
     return result;
 }
 
+/* x8664: from X11R6.8.2, composite and xfixes clip pictures with a region */
+int
+SetPictureClipRegion (PicturePtr    pPicture,
+                      int           xOrigin,
+                      int           yOrigin,
+                      RegionPtr     pRegion)
+{
+    ScreenPtr           pScreen = pPicture->pDrawable->pScreen;
+    PictureScreenPtr    ps = GetPictureScreen(pScreen);
+    RegionPtr           clientClip;
+    int                 result;
+    int                 type;
+
+    if (pRegion)
+    {
+        type = CT_REGION;
+        clientClip = REGION_CREATE (pScreen,
+                                    REGION_EXTENTS(pScreen, pRegion),
+                                    REGION_NUM_RECTS(pRegion));
+        if (!clientClip)
+            return BadAlloc;
+        if (!REGION_COPY (pScreen, clientClip, pRegion))
+        {
+            REGION_DESTROY (pScreen, clientClip);
+            return BadAlloc;
+        }
+    }
+    else
+    {
+        type = CT_NONE;
+        clientClip = 0;
+    }
+
+    result =(*ps->ChangePictureClip) (pPicture, type,
+                                      (pointer) clientClip, 0);
+    if (result == Success)
+    {
+        pPicture->clipOrigin.x = xOrigin;
+        pPicture->clipOrigin.y = yOrigin;
+        pPicture->stateChanges |= CPClipXOrigin|CPClipYOrigin|CPClipMask;
+        pPicture->serialNumber |= GC_CHANGE_SERIAL_BIT;
+    }
+    return result;
+}
+
+/* x8664: from X11R6.8.2, with the region really copied (6.8.2 left it empty) */
+void
+CopyPicture (PicturePtr	pSrc,
+	     Mask	mask,
+	     PicturePtr	pDst)
+{
+    PictureScreenPtr ps = GetPictureScreen(pSrc->pDrawable->pScreen);
+    Mask origMask = mask;
+
+    pDst->serialNumber |= GC_CHANGE_SERIAL_BIT;
+    pDst->stateChanges |= mask;
+
+    while (mask) {
+	Mask bit = lowbit(mask);
+
+	switch (bit)
+	{
+	case CPRepeat:
+	    pDst->repeat = pSrc->repeat;
+	    break;
+	case CPAlphaMap:
+	    if (pSrc->alphaMap && pSrc->alphaMap->pDrawable->type == DRAWABLE_PIXMAP)
+		pSrc->alphaMap->refcnt++;
+	    if (pDst->alphaMap)
+		FreePicture ((pointer) pDst->alphaMap, (XID) 0);
+	    pDst->alphaMap = pSrc->alphaMap;
+	    break;
+	case CPAlphaXOrigin:
+	    pDst->alphaOrigin.x = pSrc->alphaOrigin.x;
+	    break;
+	case CPAlphaYOrigin:
+	    pDst->alphaOrigin.y = pSrc->alphaOrigin.y;
+	    break;
+	case CPClipXOrigin:
+	    pDst->clipOrigin.x = pSrc->clipOrigin.x;
+	    break;
+	case CPClipYOrigin:
+	    pDst->clipOrigin.y = pSrc->clipOrigin.y;
+	    break;
+	case CPClipMask:
+	    switch (pSrc->clientClipType) {
+	    case CT_NONE:
+		(*ps->ChangePictureClip)(pDst, CT_NONE, NULL, 0);
+		break;
+	    case CT_REGION:
+		if (!pSrc->clientClip) {
+		    (*ps->ChangePictureClip)(pDst, CT_NONE, NULL, 0);
+		} else {
+		    RegionPtr clientClip;
+		    RegionPtr srcClientClip = (RegionPtr)pSrc->clientClip;
+
+		    clientClip = REGION_CREATE(pSrc->pDrawable->pScreen,
+			REGION_EXTENTS(pSrc->pDrawable->pScreen, srcClientClip),
+			REGION_NUM_RECTS(srcClientClip));
+		    REGION_COPY(pSrc->pDrawable->pScreen, clientClip, srcClientClip);
+		    (*ps->ChangePictureClip)(pDst, CT_REGION, clientClip, 0);
+		}
+		break;
+	    default:
+		/* CT_PIXMAP isn't done, same as in x.org then */
+		break;
+	    }
+	    break;
+	case CPGraphicsExposure:
+	    pDst->graphicsExposures = pSrc->graphicsExposures;
+	    break;
+	case CPPolyEdge:
+	    pDst->polyEdge = pSrc->polyEdge;
+	    break;
+	case CPPolyMode:
+	    pDst->polyMode = pSrc->polyMode;
+	    break;
+	case CPDither:
+	    pDst->dither = pSrc->dither;
+	    break;
+	case CPComponentAlpha:
+	    pDst->componentAlpha = pSrc->componentAlpha;
+	    break;
+	}
+	mask &= ~bit;
+    }
+
+    (*ps->ChangePicture)(pDst, origMask);
+}
+
 int
 SetPictureTransform (PicturePtr	    pPicture,
 		     PictTransform  *transform)

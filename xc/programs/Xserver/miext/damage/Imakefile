@@ -1,0 +1,16 @@
+XCOMM damage: tracks what changed where, from X11R6.8.2
+
+#include <Server.tmpl>
+
+       SRCS = damage.c
+       OBJS = damage.o
+   INCLUDES = -I. -I../shadow -I../../mi -I../../fb -I../../include -I../../render \
+	      -I../cw -I$(XINCLUDESRC) -I$(FONTINCSRC) -I$(EXTINCSRC)
+   LINTLIBS = ../../dix/llib-ldix.ln ../../os/llib-los.ln ../../mi/llib-lmi.ln
+
+NormalLibraryObjectRule()
+NormalLibraryTarget(damage,$(OBJS))
+LintLibraryTarget(damage,$(SRCS))
+NormalLintTarget($(SRCS))
+
+DependTarget()

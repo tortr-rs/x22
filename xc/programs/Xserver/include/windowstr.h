@@ -140,6 +140,9 @@ typedef struct _Window {
     unsigned		srcBuffer:1;	/* source buffer for rendering */
 
 #endif /* NEED_DBE_BUF_BITS */
+#ifdef COMPOSITE
+    unsigned		redirectDraw:1;	/* rendering is redirected from here */
+#endif
 
     DevUnion		*devPrivates;
 } WindowRec;

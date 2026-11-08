@@ -136,6 +136,46 @@ int limitNoFile = -1;
 
 Bool OsDelayInitColors = FALSE;
 
+
+#if defined(__linux__) && defined(__GLIBC__)
+/*
+ * x8664: when the server crashes, say where. the backtrace goes to stderr, which is
+ * the log; the +0x... offsets turn into function and line with
+ *   addr2line -f -e Xfbdev 0x...
+ * then the signal goes through as usual, so there's still a core if you want one.
+ */
+#include <execinfo.h>
+#include <signal.h>
+
+static void
+x8664Crash(int sig)
+{
+    void *frames[64];
+    int n;
+    static const char head[] = "\nx8664: the server crashed. where it was:\n";
+
+    write(2, head, sizeof head - 1);
+    n = backtrace(frames, 64);
+    backtrace_symbols_fd(frames, n, 2);
+    signal(sig, SIG_DFL);
+    raise(sig);
+}
+
+static void
+x8664CatchCrashes(void)
+{
+    static const int sigs[] = { SIGSEGV, SIGBUS, SIGFPE, SIGILL, SIGABRT };
+    unsigned i;
+    void *warmup[1];
+
+    backtrace(warmup, 1);	/* loads libgcc now, not in the middle of a crash */
+    for (i = 0; i < sizeof sigs / sizeof sigs[0]; i++)
+	signal(sigs[i], x8664Crash);
+}
+#else
+static void x8664CatchCrashes(void) { }
+#endif
+
 void
 OsInit(void)
 {
@@ -143,6 +183,8 @@ OsInit(void)
     static char* admpath = ADMPATH;
     static char* devnull = "/dev/null";
     char fname[PATH_MAX];
+
+    x8664CatchCrashes();
 
 #ifdef macII
     set42sig();

@@ -78,6 +78,10 @@ typedef struct _Pixmap {
 #ifdef PIXPRIV
     DevUnion		*devPrivates; /* real devPrivates like gcs & windows */
 #endif
+#ifdef COMPOSITE
+    short		screen_x;
+    short		screen_y;
+#endif
 } PixmapRec;
 
 #endif /* PIXMAPSTRUCT_H */

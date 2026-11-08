@@ -1,0 +1,17 @@
+XCOMM cw: drawing into windows whose contents live in their own pixmap
+XCOMM (composite's redirected windows), from X11R6.8.2
+
+#include <Server.tmpl>
+
+       SRCS = cw.c cw_ops.c cw_render.c
+       OBJS = cw.o cw_ops.o cw_render.o
+   INCLUDES = -I. -I../../mi -I../../fb -I../../render -I../../composite \
+	      -I../../include -I$(XINCLUDESRC) -I$(FONTINCSRC) -I$(EXTINCSRC)
+   LINTLIBS = ../../dix/llib-ldix.ln ../../os/llib-los.ln ../../mi/llib-lmi.ln
+
+NormalLibraryObjectRule()
+NormalLibraryTarget(cw,$(OBJS))
+LintLibraryTarget(cw,$(SRCS))
+NormalLintTarget($(SRCS))
+
+DependTarget()

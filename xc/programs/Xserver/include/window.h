@@ -251,4 +251,20 @@ void ResizeChildrenWinSize(
     int /*dw*/,
     int /*dh*/);
 
+extern void SendShapeNotify(
+    WindowPtr /* pWin */,
+    int /* which */ );
+
+extern RegionPtr CreateBoundingShape(
+    WindowPtr /* pWin */ );
+
+extern RegionPtr CreateClipShape(
+    WindowPtr /* pWin */ );
+
+extern void DisableMapUnmapEvents(
+    WindowPtr /* pWin */ );
+
+extern void EnableMapUnmapEvents(
+    WindowPtr /* pWin */ );
+
 #endif /* WINDOW_H */

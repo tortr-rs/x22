@@ -52,6 +52,10 @@ SOFTWARE.
 #include "scrnintstr.h"
 #include "dixstruct.h"
 #include "cursorstr.h"
+
+#ifdef XFIXES
+static CARD32	cursorSerial;
+#endif
 #include "dixfontstr.h"
 #include "opaque.h"
 
@@ -180,6 +184,10 @@ AllocCursorARGB(unsigned char *psrcbits, unsigned char *pmaskbits,
 
     pCurs->bits = bits;
     pCurs->refcnt = 1;		
+#ifdef XFIXES
+    pCurs->serialNumber = ++cursorSerial;
+    pCurs->name = None;
+#endif
 
     pCurs->foreRed = foreRed;
     pCurs->foreGreen = foreGreen;
@@ -363,6 +371,10 @@ AllocGlyphCursor(Font source, unsigned int sourceChar,
     CheckForEmptyMask(bits);
     pCurs->bits = bits;
     pCurs->refcnt = 1;
+#ifdef XFIXES
+    pCurs->serialNumber = ++cursorSerial;
+    pCurs->name = None;
+#endif
 
     pCurs->foreRed = foreRed;
     pCurs->foreGreen = foreGreen;

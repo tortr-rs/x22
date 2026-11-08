@@ -1,0 +1,29 @@
+XCOMM xfixes, from X11R6.8.2, built once for each server like render is,
+XCOMM since each server builds dix with its own set of extensions
+
+#include <Server.tmpl>
+
+       SRCS =	cursor.c region.c saveset.c select.c xfixes.c
+       OBJS =	cursor.o region.o saveset.o select.o xfixes.o
+   INCLUDES =	-I$(SERVERSRC)/xfixes -I$(SERVERSRC)/include -I$(SERVERSRC)/Xext -I$(SERVERSRC)/render -I$(SERVERSRC)/mi \
+		-I$(EXTINCSRC) -I$(XINCLUDESRC)
+   LINTLIBS =	$(SERVERSRC)/dix/llib-ldix.ln $(SERVERSRC)/os/llib-los.ln
+#ifndef LinkDefines
+#define LinkDefines /**/
+#endif
+    DEFINES =	$(EXT_DEFINES) LinkDefines
+
+NormalLibraryTarget(xfixes,$(OBJS))
+NormalLibraryObjectRule()
+LintLibraryTarget(xfixes,$(SRCS))
+NormalLintTarget($(SRCS))
+
+#ifdef LinkDirectory
+LinkSourceFile(cursor.c,LinkDirectory)
+LinkSourceFile(region.c,LinkDirectory)
+LinkSourceFile(saveset.c,LinkDirectory)
+LinkSourceFile(select.c,LinkDirectory)
+LinkSourceFile(xfixes.c,LinkDirectory)
+#endif
+
+DependTarget()

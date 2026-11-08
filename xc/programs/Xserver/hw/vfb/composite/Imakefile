@@ -1,0 +1,14 @@
+XCOMM composite for this server, from the shared sources
+
+#undef XF86Server
+#define XF86Server NO
+#undef DoLoadableServer
+#define DoLoadableServer NO
+#define LinkDefines XvfbExcludedExtensions
+#define LinkDirectory ../../../composite
+
+IMAKE_DEFINES=-DXF86Server=NO
+
+#include "../../../composite/Imakefile"
+
+Makefiles:: Makefile

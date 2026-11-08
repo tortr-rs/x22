@@ -1,0 +1,28 @@
+XCOMM composite, from X11R6.8.2, built once for each server like render is,
+XCOMM since each server builds dix with its own set of extensions
+
+#include <Server.tmpl>
+
+       SRCS =	compalloc.c compext.c compinit.c compwindow.c
+       OBJS =	compalloc.o compext.o compinit.o compwindow.o
+   INCLUDES =	-I$(SERVERSRC)/composite -I$(SERVERSRC)/include -I$(SERVERSRC)/mi -I$(SERVERSRC)/Xext -I$(SERVERSRC)/render -I$(SERVERSRC)/xfixes -I$(SERVERSRC)/damageext -I$(SERVERSRC)/miext/damage -I$(SERVERSRC)/miext/cw -I$(FONTINCSRC) \
+		-I$(EXTINCSRC) -I$(XINCLUDESRC)
+   LINTLIBS =	$(SERVERSRC)/dix/llib-ldix.ln $(SERVERSRC)/os/llib-los.ln
+#ifndef LinkDefines
+#define LinkDefines /**/
+#endif
+    DEFINES =	$(EXT_DEFINES) LinkDefines
+
+NormalLibraryTarget(composite,$(OBJS))
+NormalLibraryObjectRule()
+LintLibraryTarget(composite,$(SRCS))
+NormalLintTarget($(SRCS))
+
+#ifdef LinkDirectory
+LinkSourceFile(compalloc.c,LinkDirectory)
+LinkSourceFile(compext.c,LinkDirectory)
+LinkSourceFile(compinit.c,LinkDirectory)
+LinkSourceFile(compwindow.c,LinkDirectory)
+#endif
+
+DependTarget()

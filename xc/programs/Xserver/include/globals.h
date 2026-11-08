@@ -49,4 +49,14 @@ extern Bool PanoramiXOneExposeRequest;
 #endif
 
 
+#ifdef COMPOSITE
+extern Bool noCompositeExtension;
+#endif
+#ifdef DAMAGE
+extern Bool noDamageExtension;
+#endif
+#ifdef XFIXES
+extern Bool noXFixesExtension;
+#endif
+
 #endif /* _XSERV_GLOBAL_H_ */

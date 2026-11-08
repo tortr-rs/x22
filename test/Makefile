@@ -1,5 +1,5 @@
 # little programs for poking at x8664
-all: win masks dpms present
+all: win masks dpms present composite
 win: win.c
 	cc -O2 -o $@ win.c -lX11
 masks: masks.c
@@ -10,3 +10,5 @@ dpms: dpms.c
 	cc -O2 -o $@ dpms.c -lX11 -lXext
 present: present.c
 	cc -O2 -o $@ present.c -lxcb -lxcb-present
+composite: composite.c
+	cc -O2 -o $@ composite.c -lxcb -lxcb-composite -lxcb-damage -lxcb-xfixes -lxcb-render

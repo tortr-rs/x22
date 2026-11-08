@@ -631,4 +631,15 @@ extern void miPolyFillArc(
     xArc * /*parcs*/
 );
 
+/* mivaltree.c: composite asks for redirected windows' border clips through these */
+typedef void
+(*SetRedirectBorderClipProcPtr) (WindowPtr pWindow, RegionPtr pRegion);
+
+typedef RegionPtr
+(*GetRedirectBorderClipProcPtr) (WindowPtr pWindow);
+
+void
+miRegisterRedirectBorderClipProc (SetRedirectBorderClipProcPtr setBorderClip,
+				  GetRedirectBorderClipProcPtr getBorderClip);
+
 #endif /* MI_H */

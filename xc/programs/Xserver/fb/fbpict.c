@@ -943,6 +943,15 @@ fbComposite (CARD8      op,
 				   height))
 	return;
 
+    /*
+     * x8664: a source without alpha, no mask: OVER is just SRC. the fast paths below
+     * took x8r8g8b8 sources for a8r8g8b8 and read alpha from the unused top byte,
+     * which is 0, so OVER drew nothing. that's every ordinary window a compositor paints.
+     */
+    if (op == PictOpOver && !pMask && !srcAlphaMap &&
+	PICT_FORMAT_A(pSrc->format) == 0)
+	op = PictOpSrc;
+
     func = fbCompositeGeneral;
     if (!pSrc->transform && !(pMask && pMask->transform))
     if (!maskAlphaMap && !srcAlphaMap && !dstAlphaMap)

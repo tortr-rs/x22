@@ -24,7 +24,17 @@ DBEDIR = dbe
 XTRAPDIR = XTrap
 #endif
 
-SUBDIRS = dix os Xext $(RENDERDIRS) $(RANDRDIRS) $(RECORDDIRS) $(DBEDIR) \
+#if BuildXfixes
+FIXESDIRS = xfixes
+#endif
+#if BuildDamage
+DAMAGEDIRS = damageext
+#endif
+#if BuildComposite
+COMPOSITEDIRS = composite
+#endif
+
+SUBDIRS = dix os Xext $(FIXESDIRS) $(DAMAGEDIRS) $(COMPOSITEDIRS) $(RENDERDIRS) $(RANDRDIRS) $(RECORDDIRS) $(DBEDIR) \
 	  $(XTRAPDIR)
 
 #if HasShm

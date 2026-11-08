@@ -177,6 +177,15 @@ OR PERFORMANCE OF THIS SOFTWARE.
 
 Bool CoreDump;
 Bool noTestExtensions;
+#ifdef COMPOSITE
+Bool noCompositeExtension = FALSE;	/* x8664: on, it's what step 4 is for */
+#endif
+#ifdef DAMAGE
+Bool noDamageExtension = FALSE;
+#endif
+#ifdef XFIXES
+Bool noXFixesExtension = FALSE;
+#endif
 
 #ifdef PANORAMIX
 Bool noPanoramiXExtension = TRUE;

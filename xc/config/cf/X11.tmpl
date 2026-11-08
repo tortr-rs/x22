@@ -1341,6 +1341,35 @@ XCOMM $XFree86: xc/config/cf/X11.tmpl,v 1.300 2008/12/06 17:00:39 tsi Exp $
 #undef   RenderUndefines
 #define  RenderUndefines		-URENDER
 
+/* x8664: XFIXES, DAMAGE and COMPOSITE, from X11R6.8.2 */
+#ifndef BuildXfixes
+#define BuildXfixes		YES
+#endif
+#ifndef BuildDamage
+#define BuildDamage		BuildXfixes
+#endif
+#ifndef BuildComposite
+#define BuildComposite		(BuildXfixes && BuildDamage && BuildRender)
+#endif
+#undef   XfixesDefines
+#if BuildXfixes
+# define XfixesDefines			-DXFIXES
+#else
+# define XfixesDefines			/**/
+#endif
+#undef   XDamageDefines
+#if BuildDamage
+# define XDamageDefines			-DDAMAGE
+#else
+# define XDamageDefines			/**/
+#endif
+#undef   CompositeDefines
+#if BuildComposite
+# define CompositeDefines		-DCOMPOSITE
+#else
+# define CompositeDefines		/**/
+#endif
+
 #undef   RandRDefines
 #if BuildRandR
 # define RandRDefines			-DRANDR
@@ -1395,6 +1424,7 @@ XCOMM $XFree86: xc/config/cf/X11.tmpl,v 1.300 2008/12/06 17:00:39 tsi Exp $
 	ShapeDefines XInputDefines XkbDefines LbxDefines AppgroupDefines \
 	XCSecurityDefines XSyncDefines XF86BigfontExtensionDefines \
 	DPMSDefines BigReqDefines XineramaDefines RenderDefines RandRDefines \
+	XfixesDefines XDamageDefines CompositeDefines \
 	XResExtensionDefines PervasiveDBEDefines XprintDefines \
 	SitePervasiveExtensionDefines LowMemDefines
 #endif

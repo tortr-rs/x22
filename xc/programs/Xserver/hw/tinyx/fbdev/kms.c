@@ -40,6 +40,7 @@
 #include <drm/drm.h>
 #include <drm/drm_mode.h>
 #include "x8664present.h"
+#include "damage.h"
 
 /* ioctl, again if a signal got in the way */
 static int
@@ -395,7 +396,31 @@ static void
 kmsCopy(FbdevPriv *priv, RegionPtr what)
 {
     shadowBufPtr pBuf = priv->kmsBuf;
-    RegionRec keep = pBuf->damage;
+    RegionRec keep;
+
+    if (priv->kmsDirect) {
+	/* row by row, box by box, from the screen pixmap into the hidden buffer */
+	ScreenPtr pScreen = priv->kmsScreen;
+	PixmapPtr pPix = (*pScreen->GetScreenPixmap) (pScreen);
+	CARD8 *src = pPix->devPrivate.ptr, *dst = (CARD8 *) priv->fb;
+	int sstride = pPix->devKind, dstride = priv->fix.line_length;
+	int bpp = pPix->drawable.bitsPerPixel / 8;
+	int w = pPix->drawable.width, h = pPix->drawable.height;
+	int n = REGION_NUM_RECTS(what);
+	BoxPtr b = REGION_RECTS(what);
+
+	for (; n--; b++) {
+	    int x1 = b->x1 < 0 ? 0 : b->x1, x2 = b->x2 > w ? w : b->x2;
+	    int y1 = b->y1 < 0 ? 0 : b->y1, y2 = b->y2 > h ? h : b->y2;
+	    int y;
+
+	    for (y = y1; x1 < x2 && y < y2; y++)
+		memcpy(dst + y * dstride + x1 * bpp, src + y * sstride + x1 * bpp,
+		       (x2 - x1) * bpp);
+	}
+	return;
+    }
+    keep = pBuf->damage;
 
     /* shadowUpdatePacked copies whatever pBuf->damage says, into whatever fbdevWindowLinear
      * points at, which is priv->fb */
@@ -418,7 +443,7 @@ kmsDirty(FbdevPriv *priv, RegionPtr damage)
 
     memset(&dirty, 0, sizeof dirty);
     dirty.fb_id = priv->kmsFb;
-    if (priv->kmsBuf->randr == SHADOW_ROTATE_0 && nbox <= 64) {
+    if ((priv->kmsDirect || priv->kmsBuf->randr == SHADOW_ROTATE_0) && nbox <= 64) {
 	for (i = 0; i < nbox; i++) {
 	    clips[i].x1 = pbox[i].x1;
 	    clips[i].y1 = pbox[i].y1;
@@ -439,7 +464,8 @@ kmsFlush(FbdevPriv *priv)
     struct drm_mode_crtc_page_flip flip;
     RegionRec todo;
 
-    if (priv->kmsFlipping || !priv->kmsBuf || !REGION_NOTEMPTY(pScreen, &priv->kmsPending))
+    if (priv->kmsFlipping || (!priv->kmsBuf && !priv->kmsDirect) ||
+	!REGION_NOTEMPTY(pScreen, &priv->kmsPending))
 	return;
 
     REGION_NULL(pScreen, &todo);
@@ -554,9 +580,44 @@ kmsQueueVblank(ScreenPtr pScreen, uint64_t id, uint64_t msc)
 
 static PresentHooksRec kmsPresentHooks = { kmsGetMsc, kmsQueueVblank };
 
+/*
+ * Without a layer, damage on the screen pixmap says what was drawn. Everything that
+ * ends up on the screen goes through that pixmap, a compositor's painting included,
+ * and windows a compositor took off the screen don't, which is just right.
+ */
 static void
 kmsBlock(pointer data, OSTimePtr timeout, pointer readmask)
 {
+    FbdevPriv *priv = data;
+    ScreenPtr pScreen = priv->kmsScreen;
+    RegionPtr changed;
+
+    if (!priv->kmsDirect || !priv->kmsDamage)
+	return;
+    if (!priv->kmsDamageOn) {
+	/* the screen pixmap only exists once the screen's resources are made */
+	PixmapPtr pPix = (*pScreen->GetScreenPixmap) (pScreen);
+	BoxRec all;
+
+	if (!pPix)
+	    return;
+	DamageRegister(&pPix->drawable, priv->kmsDamage);
+	priv->kmsDamageOn = TRUE;
+	all.x1 = all.y1 = 0;
+	all.x2 = pPix->drawable.width;
+	all.y2 = pPix->drawable.height;
+	REGION_RESET(pScreen, &priv->kmsPending, &all);
+    }
+    changed = DamageRegion(priv->kmsDamage);
+    if (REGION_NOTEMPTY(pScreen, changed)) {
+	if (priv->kmsNoFlip) {
+	    kmsCopy(priv, changed);
+	    kmsDirty(priv, changed);
+	} else
+	    REGION_UNION(pScreen, &priv->kmsPending, &priv->kmsPending, changed);
+	DamageEmpty(priv->kmsDamage);
+    }
+    kmsFlush(priv);
 }
 
 static void
@@ -616,4 +677,15 @@ kmsStart(ScreenPtr pScreen)
 	free(encs);
     }
     PresentSetHooks(pScreen, &kmsPresentHooks);
+
+    if (priv->kmsDirect) {
+	/* damage gets set up now, during screen setup, the way x.org's software cursor
+	 * did it: that puts composite's drawing wrapper under damage, not over it */
+	if (!DamageSetup(pScreen) ||
+	    !(priv->kmsDamage = DamageCreate(NULL, NULL, DamageReportNone, TRUE,
+					     pScreen, priv))) {
+	    kmsSay("no damage tracking, nothing would ever reach the screen");
+	    priv->kmsDirect = FALSE;
+	}
+    }
 }

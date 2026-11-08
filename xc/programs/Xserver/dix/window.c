@@ -274,6 +274,9 @@ SetWindowToDefaults(WindowPtr pWin)
     pWin->srcBuffer = DBE_FRONT_BUFFER;
     pWin->dstBuffer = DBE_FRONT_BUFFER;
 #endif
+#ifdef COMPOSITE
+    pWin->redirectDraw = 0;
+#endif
 }
 
 static void
@@ -1619,6 +1622,19 @@ CreateUnclippedWinSize(WindowPtr pWin)
 void
 SetWinSize(WindowPtr pWin)
 {
+#ifdef COMPOSITE
+    if (pWin->redirectDraw)
+    {
+	BoxRec	box;
+
+	box.x1 = pWin->drawable.x;
+	box.y1 = pWin->drawable.y;
+	box.x2 = pWin->drawable.x + pWin->drawable.width;
+	box.y2 = pWin->drawable.y + pWin->drawable.height;
+	REGION_RESET (pWin->drawable.pScreen, &pWin->winSize, &box);
+    }
+    else
+#endif
     ClippedRegionFromBox(pWin->parent, &pWin->winSize,
 			 pWin->drawable.x, pWin->drawable.y,
 			 (int)pWin->drawable.width,
@@ -1648,6 +1664,19 @@ SetBorderSize(WindowPtr pWin)
 
     if (HasBorder (pWin)) {
 	bw = wBorderWidth (pWin);
+#ifdef COMPOSITE
+	if (pWin->redirectDraw)
+	{
+	    BoxRec	box;
+
+	    box.x1 = pWin->drawable.x - bw;
+	    box.y1 = pWin->drawable.y - bw;
+	    box.x2 = pWin->drawable.x + pWin->drawable.width + bw;
+	    box.y2 = pWin->drawable.y + pWin->drawable.height + bw;
+	    REGION_RESET (pWin->drawable.pScreen, &pWin->borderSize, &box);
+	}
+	else
+#endif
 	ClippedRegionFromBox(pWin->parent, &pWin->borderSize,
 		pWin->drawable.x - bw, pWin->drawable.y - bw,
 		(int)(pWin->drawable.width + (bw<<1)),
@@ -2589,6 +2618,31 @@ RealizeTree(WindowPtr pWin)
     }
 }
 
+/*
+ * x8664, as x.org does it: composite unmaps and remaps a window to move it into its
+ * own pixmap and back. that's not the program's doing, so window managers shouldn't
+ * hear about it (dwm took the unmap as the window closing and stopped managing it).
+ */
+static WindowPtr windowDisableMapUnmapEvents;
+
+void
+DisableMapUnmapEvents(WindowPtr pWin)
+{
+    windowDisableMapUnmapEvents = pWin;
+}
+
+void
+EnableMapUnmapEvents(WindowPtr pWin)
+{
+    windowDisableMapUnmapEvents = NullWindow;
+}
+
+static Bool
+MapUnmapEventsEnabled(WindowPtr pWin)
+{
+    return pWin != windowDisableMapUnmapEvents;
+}
+
 /*****
  * MapWindow
  *    If some other client has selected SubStructureReDirect on the parent
@@ -2659,7 +2713,7 @@ MapWindow(WindowPtr pWin, ClientPtr client)
 	}
 
 	pWin->mapped = TRUE;
-	if (SubStrSend(pWin, pParent))
+	if (SubStrSend(pWin, pParent) && MapUnmapEventsEnabled(pWin))
 	{
 	    event.u.u.type = MapNotify;
 	    event.u.mapNotify.window = pWin->drawable.id;
@@ -2912,7 +2966,7 @@ UnmapWindow(WindowPtr pWin, Bool fromConfigure)
 
     if ((!pWin->mapped) || (!(pParent = pWin->parent)))
 	return(Success);
-    if (SubStrSend(pWin, pParent))
+    if (SubStrSend(pWin, pParent) && MapUnmapEventsEnabled(pWin))
     {
 	event.u.u.type = UnmapNotify;
 	event.u.unmapNotify.window = pWin->drawable.id;
@@ -3058,10 +3112,17 @@ HandleSaveSet(ClientPtr client)
 
     for (j=0; j<client->numSaved; j++)
     {
-	pWin = (WindowPtr)client->saveSet[j];
-	pParent = pWin->parent;
-	while (pParent && (wClient (pParent) == client))
-	    pParent = pParent->parent;
+	pWin = SaveSetWindow(client->saveSet[j]);
+#ifdef XFIXES
+	if (SaveSetToRoot(client->saveSet[j]))
+	    pParent = WindowTable[pWin->drawable.pScreen->myNum];
+	else
+#endif
+	{
+	    pParent = pWin->parent;
+	    while (pParent && (wClient (pParent) == client))
+		pParent = pParent->parent;
+	}
 	if (pParent)
 	{
 	    if (pParent != pWin->parent)
@@ -3073,12 +3134,15 @@ HandleSaveSet(ClientPtr client)
 		if(!pWin->realized && pWin->mapped)
 		    pWin->mapped = FALSE;
 	    }
-	    MapWindow(pWin, client);
+#ifdef XFIXES
+	    if (SaveSetRemap (client->saveSet[j]))
+#endif
+		MapWindow(pWin, client);
 	}
     }
     xfree(client->saveSet);
     client->numSaved = 0;
-    client->saveSet = (pointer *)NULL;
+    client->saveSet = (SaveSetElt *)NULL;
 }
 
 Bool

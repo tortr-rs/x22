@@ -225,6 +225,24 @@ extern void FontCacheExtensionInit(INITARGS);
 #ifdef RES
 extern void ResExtensionInit(INITARGS);
 #endif
+#ifdef XFIXES
+extern Bool noXFixesExtension;
+#endif
+#ifdef DAMAGE
+extern Bool noDamageExtension;
+#endif
+#ifdef COMPOSITE
+extern Bool noCompositeExtension;
+#endif
+#ifdef XFIXES
+extern void XFixesExtensionInit(INITARGS);
+#endif
+#ifdef DAMAGE
+extern void DamageExtensionInit(INITARGS);
+#endif
+#ifdef COMPOSITE
+extern void CompositeExtensionInit(INITARGS);
+#endif
 extern void PresentExtensionInit(INITARGS);
 #ifdef DMXEXT
 extern void DMXExtensionInit(INITARGS);
@@ -337,6 +355,10 @@ InitExtensions(int argc, const char *argv[])
 #ifdef DPSEXT
     DPSExtensionInit();
 #endif
+#ifdef XFIXES
+    /* before render, it layers DisplayCursor */
+    if (!noXFixesExtension) XFixesExtensionInit();
+#endif
 #ifdef RENDER
 #ifdef DMXSERVER
     if (!dmxNoRender)
@@ -348,6 +370,12 @@ InitExtensions(int argc, const char *argv[])
 #endif
 #ifdef RES
     ResExtensionInit();
+#endif
+#ifdef COMPOSITE
+    if (!noCompositeExtension) CompositeExtensionInit();
+#endif
+#ifdef DAMAGE
+    if (!noDamageExtension) DamageExtensionInit();
 #endif
     PresentExtensionInit();
 #ifdef DMXEXT

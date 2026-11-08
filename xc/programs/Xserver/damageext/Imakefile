@@ -1,0 +1,25 @@
+XCOMM damageext, from X11R6.8.2, built once for each server like render is,
+XCOMM since each server builds dix with its own set of extensions
+
+#include <Server.tmpl>
+
+       SRCS =	damageext.c
+       OBJS =	damageext.o
+   INCLUDES =	-I$(SERVERSRC)/damageext -I$(SERVERSRC)/include -I$(SERVERSRC)/Xext -I$(SERVERSRC)/render -I$(SERVERSRC)/xfixes -I$(SERVERSRC)/miext/damage -I$(SERVERSRC)/mi \
+		-I$(EXTINCSRC) -I$(XINCLUDESRC)
+   LINTLIBS =	$(SERVERSRC)/dix/llib-ldix.ln $(SERVERSRC)/os/llib-los.ln
+#ifndef LinkDefines
+#define LinkDefines /**/
+#endif
+    DEFINES =	$(EXT_DEFINES) LinkDefines
+
+NormalLibraryTarget(damage,$(OBJS))
+NormalLibraryObjectRule()
+LintLibraryTarget(damage,$(SRCS))
+NormalLintTarget($(SRCS))
+
+#ifdef LinkDirectory
+LinkSourceFile(damageext.c,LinkDirectory)
+#endif
+
+DependTarget()

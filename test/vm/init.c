@@ -104,11 +104,21 @@ int main(void)
 	run(w1); run(w2); run(w3);
 	say("dwm and three windows started");
 
-	/* extra tests, asked for on the kernel command line: x8664.test=dpms or present */
+	/* extra tests, asked for on the kernel command line: x8664.test=dpms, present or composite */
 	{
 		char cmd[512] = "";
 		int fd = open("/proc/cmdline", O_RDONLY);
 		if (fd >= 0) { if (read(fd, cmd, sizeof cmd - 1) < 0) cmd[0] = 0; close(fd); }
+		if (strstr(cmd, "x8664.test=composite")) {
+			char *ct[] = { "/bin/composite", NULL };
+			char *xc[] = { "/bin/xcompmgr", "-c", "-r", "14", "-o", "0.55", "-l", "-16", "-t", "-12", NULL };
+			sleep(10);
+			say("composite test");
+			run(ct);
+			sleep(3);
+			say("xcompmgr, with shadows");
+			run(xc);
+		}
 		if (strstr(cmd, "x8664.test=present")) {
 			char *pr[] = { "/bin/present", NULL };
 			sleep(10);

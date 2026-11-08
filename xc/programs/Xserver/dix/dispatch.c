@@ -130,6 +130,7 @@ static ClientPtr grabClient;
 static int grabState = GrabNone;
 static long grabWaiters[mskcnt];
 CallbackListPtr ServerGrabCallback = NULL;
+CallbackListPtr SelectionCallback = NULL;
 HWEventQueuePtr checkForInput[2];
 extern int connBlockScreenStart;
 
@@ -609,7 +610,7 @@ ProcChangeSaveSet(ClientPtr client)
         return BadMatch;
     if ((stuff->mode == SetModeInsert) || (stuff->mode == SetModeDelete))
     {
-        result = AlterSaveSetForClient(client, pWin, stuff->mode);
+        result = AlterSaveSetForClient(client, pWin, stuff->mode, FALSE, TRUE);
 	if (client->noClientException != Success)
 	    return(client->noClientException);
 	else
@@ -1008,6 +1009,14 @@ ProcSetSelectionOwner(ClientPtr client)
 	CurrentSelections[i].window = stuff->window;
 	CurrentSelections[i].pWin = pWin;
 	CurrentSelections[i].client = (pWin ? client : NullClient);
+	if (SelectionCallback)
+	{
+	    SelectionInfoRec	info;
+
+	    info.selection = &CurrentSelections[i];
+	    info.kind = SelectionSetOwner;
+	    CallCallbacks(&SelectionCallback, &info);
+	}
 	return (client->noClientException);
     }
     else 
@@ -3621,7 +3630,7 @@ InitClient(ClientPtr client, int i, pointer ospriv)
     client->lastGC = (GCPtr) NULL;
     client->lastGCID = INVALID;
     client->numSaved = 0;
-    client->saveSet = (pointer *)NULL;
+    client->saveSet = (SaveSetElt *)NULL;
     client->noClientException = Success;
 #ifdef DEBUG
     client->requestLogIndex = 0;
@@ -3943,6 +3952,14 @@ DeleteWindowFromAnySelections(WindowPtr pWin)
     for (i = 0; i< NumCurrentSelections; i++)
         if (CurrentSelections[i].pWin == pWin)
         {
+	    if (SelectionCallback)
+	    {
+	        SelectionInfoRec	info;
+
+	        info.selection = &CurrentSelections[i];
+	        info.kind = SelectionWindowDestroy;
+	        CallCallbacks(&SelectionCallback, &info);
+	    }
             CurrentSelections[i].pWin = (WindowPtr)NULL;
             CurrentSelections[i].window = None;
 	    CurrentSelections[i].client = NullClient;
@@ -3957,6 +3974,14 @@ DeleteClientFromAnySelections(ClientPtr client)
     for (i = 0; i< NumCurrentSelections; i++)
         if (CurrentSelections[i].client == client)
         {
+	    if (SelectionCallback)
+	    {
+	        SelectionInfoRec	info;
+
+	        info.selection = &CurrentSelections[i];
+	        info.kind = SelectionClientClose;
+	        CallCallbacks(&SelectionCallback, &info);
+	    }
             CurrentSelections[i].pWin = (WindowPtr)NULL;
             CurrentSelections[i].window = None;
 	    CurrentSelections[i].client = NullClient;

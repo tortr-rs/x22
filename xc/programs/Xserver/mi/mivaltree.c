@@ -160,6 +160,17 @@ miShapedWindowIn(ScreenPtr pScreen, RegionPtr universe, RegionPtr bounding,
 				    (w)->backgroundState == ParentRelative)
 
 
+static GetRedirectBorderClipProcPtr	miGetRedirectBorderClipProc;
+static SetRedirectBorderClipProcPtr	miSetRedirectBorderClipProc;
+
+void
+miRegisterRedirectBorderClipProc (SetRedirectBorderClipProcPtr setBorderClip,
+				  GetRedirectBorderClipProcPtr getBorderClip)
+{
+    miSetRedirectBorderClipProc = setBorderClip;
+    miGetRedirectBorderClipProc = getBorderClip;
+}
+
 /*
  *-----------------------------------------------------------------------
  * miComputeClips --
@@ -251,6 +262,18 @@ miComputeClips (
     if (oldVis != newVis &&
 	((pParent->eventMask | wOtherEventMasks(pParent)) & VisibilityChangeMask))
 	SendVisibilityNotify(pParent);
+
+#ifdef COMPOSITE
+    /*
+     * In redirected drawing case, reset universe to borderSize
+     */
+    if (pParent->redirectDraw)
+    {
+	if (miSetRedirectBorderClipProc)
+	    (*miSetRedirectBorderClipProc) (pParent, universe);
+	REGION_COPY(pScreen, universe, &pParent->borderSize);
+    }
+#endif
 
     dx = pParent->drawable.x - pParent->valdata->before.oldAbsCorner.x;
     dy = pParent->drawable.y - pParent->valdata->before.oldAbsCorner.y;
@@ -627,7 +650,12 @@ miValidateTree(
 	    {
 		if (pWin->valdata)
 		{
-		    REGION_APPEND( pScreen, &totalClip, &pWin->borderClip);
+		    RegionPtr	pBorderClip = &pWin->borderClip;
+#ifdef COMPOSITE
+		    if (pWin->redirectDraw && miGetRedirectBorderClipProc)
+			pBorderClip = (*miGetRedirectBorderClipProc)(pWin);
+#endif
+		    REGION_APPEND( pScreen, &totalClip, pBorderClip );
 		    if (pWin->viewable)
 			viewvals++;
 		}
@@ -641,7 +669,12 @@ miValidateTree(
 	    {
 		if (pWin->valdata)
 		{
-		    REGION_APPEND( pScreen, &totalClip, &pWin->borderClip);
+		    RegionPtr	pBorderClip = &pWin->borderClip;
+#ifdef COMPOSITE
+		    if (pWin->redirectDraw && miGetRedirectBorderClipProc)
+			pBorderClip = (*miGetRedirectBorderClipProc)(pWin);
+#endif
+		    REGION_APPEND( pScreen, &totalClip, pBorderClip );
 		    if (pWin->viewable)
 			viewvals++;
 		}

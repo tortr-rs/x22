@@ -17,7 +17,7 @@
 
 /* 2008 C on a 2026 compiler: the old dialect, shared globals allowed, and the checks that are errors
    now but were warnings then turned back into warnings */
-#define X8664CompatFlags -std=gnu89 -fcommon -fno-strict-aliasing -Wno-error=incompatible-pointer-types -Wno-error=int-conversion -Wno-error=implicit-function-declaration -Wno-error=return-mismatch -Wno-error=declaration-missing-parameter-type
+#define X8664CompatFlags -std=gnu89 -fcommon -fno-strict-aliasing -Wno-error=incompatible-pointer-types -Wno-error=int-conversion -Wimplicit-function-declaration -Wno-error=implicit-function-declaration -Wno-error=return-mismatch -Wno-error=declaration-missing-parameter-type
 #define DefaultCCOptions X8664CompatFlags
 #define OptimizedCDebugFlags -O2
 

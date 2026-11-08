@@ -120,9 +120,11 @@ fbCopyWindow(WindowPtr	    pWin,
 {
     RegionRec	rgnDst;
     int		dx, dy;
-    WindowPtr	pwinRoot;
 
-    pwinRoot = WindowTable[pWin->drawable.pScreen->myNum];
+    /* the copy happens on the window's own pixmap: the screen's, or with composite
+     * the one it was redirected into */
+    PixmapPtr	pPixmap = fbGetWindowPixmap (pWin);
+    DrawablePtr	pDrawable = &pPixmap->drawable;
 
     dx = ptOldOrg.x - pWin->drawable.x;
     dy = ptOldOrg.y - pWin->drawable.y;
@@ -132,7 +134,13 @@ fbCopyWindow(WindowPtr	    pWin,
     
     REGION_INTERSECT(pWin->drawable.pScreen, &rgnDst, &pWin->borderClip, prgnSrc);
 
-    fbCopyRegion ((DrawablePtr)pwinRoot, (DrawablePtr)pwinRoot,
+#ifdef COMPOSITE
+    if (pPixmap->screen_x || pPixmap->screen_y)
+	REGION_TRANSLATE (pWin->drawable.pScreen, &rgnDst,
+			  -pPixmap->screen_x, -pPixmap->screen_y);
+#endif
+
+    fbCopyRegion (pDrawable, pDrawable,
 		  0,
 		  &rgnDst, dx, dy, fbCopyWindowProc, 0, 0);
     

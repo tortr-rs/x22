@@ -405,6 +405,17 @@ SetPictureClipRects (PicturePtr	pPicture,
 		     xRectangle	*rects);
 
 int
+SetPictureClipRegion (PicturePtr    pPicture,
+		      int	    xOrigin,
+		      int	    yOrigin,
+		      RegionPtr	    pRegion);
+
+void
+CopyPicture (PicturePtr	pSrc,
+	     Mask	mask,
+	     PicturePtr	pDst);
+
+int
 SetPictureTransform (PicturePtr	    pPicture,
 		     PictTransform  *transform);
 		     
