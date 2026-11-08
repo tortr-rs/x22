@@ -9,3 +9,15 @@ Makefile.bak
 xc/config/imake/imake
 xc/config/imake/ximake
 xc/config/makedepend/makedepend
+run/
+xc/config/cf/date.def
+xc/config/cf/version.def
+xc/config/imake/bootstrap/
+xc/config/imake/ccimake
+xc/config/imake/imake._man
+xc/config/imake/imakemdep_cpp.h
+xc/config/makedepend/Makefile.proto
+xc/config/makedepend/mkdepend._man
+xc/config/util/ccmakedep
+shots/
+dwm/dwm
