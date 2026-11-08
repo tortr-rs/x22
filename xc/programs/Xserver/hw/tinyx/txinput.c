@@ -110,7 +110,7 @@ KeySymsRec	kdKeySyms;
 void
 KdResetInputMachine (void);
     
-#define KD_KEY_COUNT		248
+#define KD_KEY_COUNT		256
 
 CARD8		kdKeyState[KD_KEY_COUNT/8];
 
@@ -1346,6 +1346,10 @@ KdEnqueueKeyboardEvent(unsigned char	scan_code,
 	    return;
 	}
 	KdCheckSpecialKeys (&xE);
+	if (getenv ("X8664_EVDEV_DEBUG"))
+	    ErrorF ("x8664 input: queue keycode %d %s, modmap %02x\n", key_code,
+		    xE.u.u.type == KeyPress ? "press" : "release",
+		    pKdKeyboard->key->modifierMap[key_code]);
 	KdHandleKeyboardEvent (&xE);
     }
 }

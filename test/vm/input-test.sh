@@ -26,6 +26,8 @@ def cmd(c, wait=0.5):
     try: s.recv(65536)
     except socket.timeout: pass
 cmd("screendump %s/input-before.png -f png" % sys.argv[2], 2)
+for k in __import__("os").environ.get("FIRST", "").split():
+    cmd("sendkey " + k, 2)
 for _ in range(int(__import__("os").environ.get("PRESSES", "2"))): cmd("sendkey meta_l-j", 3)
 cmd("screendump %s/input-keys.png -f png" % sys.argv[2], 2)
 for _ in range(10): cmd("mouse_move 40 30", 0.3)

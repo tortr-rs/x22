@@ -124,7 +124,7 @@ static const struct { int code; KeySym plain, shifted; } evdevMap[] = {
     { KEY_PREVIOUSSONG, XF86AudioPrev, NoSymbol }, { KEY_STOPCD, XF86AudioStop, NoSymbol },
     { KEY_BRIGHTNESSDOWN, XF86MonBrightnessDown, NoSymbol },
     { KEY_BRIGHTNESSUP, XF86MonBrightnessUp, NoSymbol },
-    { KEY_MICMUTE, XF86AudioMicMute, NoSymbol },
+    /* KEY_MICMUTE is 248, one past what X keycodes can reach */
 };
 
 #define BIT(a, n)	((a)[(n) / 8] & (1 << ((n) % 8)))
@@ -183,6 +183,10 @@ EvdevKeyboardLoad(void)
     kdMaxScanCode = 247;
     memset(kdKeymap, 0, sizeof(KeySym) * KD_MAX_LENGTH * KD_MAX_WIDTH);
     for (i = 0; i < sizeof evdevMap / sizeof evdevMap[0]; i++) {
+	/* X keycodes stop at 255, so evdev keys stop at 247. writing past that
+	 * used to land in the key-is-down table and swallow the first super press */
+	if (evdevMap[i].code > kdMaxScanCode)
+	    continue;
 	k = kdKeymap + evdevMap[i].code * KD_MAX_WIDTH;
 	k[0] = evdevMap[i].plain;
 	k[1] = evdevMap[i].shifted;
