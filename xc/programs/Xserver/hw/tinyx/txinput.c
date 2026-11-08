@@ -534,11 +534,13 @@ const KdKeySymModsRec kdKeySymMods[] = {
   {  XK_Meta_L,	Mod1Mask },
   {  XK_Meta_R,	Mod1Mask },
   {  XK_Num_Lock,	Mod2Mask },
-  {  XK_Super_L,	Mod3Mask },
-  {  XK_Super_R,	Mod3Mask },
-  {  XK_Hyper_L,	Mod3Mask },
-  {  XK_Hyper_R,	Mod3Mask },
-  {  XK_Mode_switch, Mod4Mask },
+  /* x8664: super on mod4 and mode_switch on mod5, like every X since. dwm and friends
+   * use mod4 for super; on mod3 they never saw it */
+  {  XK_Super_L,	Mod4Mask },
+  {  XK_Super_R,	Mod4Mask },
+  {  XK_Hyper_L,	Mod4Mask },
+  {  XK_Hyper_R,	Mod4Mask },
+  {  XK_Mode_switch, Mod5Mask },
 #ifdef TOUCHSCREEN
   /* PDA specific hacks */
   {  XF86XK_Start, ControlMask },

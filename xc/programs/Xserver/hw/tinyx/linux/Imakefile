@@ -58,9 +58,9 @@ TSOBJS = ts.o
 #endif
 #endif
 
-SRCS = keyboard.c linux.c mouse.c ps2.c bus.c ms.c agp.c $(TSSRCS)
+SRCS = keyboard.c evdev.c linux.c mouse.c ps2.c bus.c ms.c agp.c $(TSSRCS)
 
-OBJS = keyboard.o linux.o mouse.o ps2.o bus.o ms.o agp.o $(TSOBJS)
+OBJS = keyboard.o evdev.o linux.o mouse.o ps2.o bus.o ms.o agp.o $(TSOBJS)
 
 INCLUDES = $(TINYXINCLUDES)
 

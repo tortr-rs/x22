@@ -86,7 +86,9 @@ InitOutput (ScreenInfo *pScreenInfo, const int argc, const char **argv)
 void
 InitInput (const int argc, const char **argv)
 {
-    KdInitInput (&LinuxMouseFuncs, &LinuxKeyboardFuncs);
+    /* x8664: keyboards from /dev/input when there are any, the console otherwise */
+    KdInitInput (&LinuxMouseFuncs,
+		 EvdevKeyboardAvailable () ? &EvdevKeyboardFuncs : &LinuxKeyboardFuncs);
 #ifdef TOUCHSCREEN
     KdInitTouchScreen (&TsFuncs);
 #endif
