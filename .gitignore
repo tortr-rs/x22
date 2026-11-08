@@ -1,0 +1,11 @@
+*.o
+*.a
+*.so*
+Makefile
+Makefile.bak
+/xc/exports/
+/xc/World.log
+/xc/xmakefile
+xc/config/imake/imake
+xc/config/imake/ximake
+xc/config/makedepend/makedepend

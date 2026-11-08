@@ -1,0 +1,5 @@
+dwm, from suckless.org, the window manager x8664 is first tried with.
+
+taken from git://git.suckless.org/dwm at 1563572 (dwm 6.8, "replace strncpy with snprintf()"),
+with torter's config.h. nothing here is changed for x8664 yet: the point is that it runs on our
+server exactly like it does on X.Org. changes go in as their own commits so they're easy to see.
