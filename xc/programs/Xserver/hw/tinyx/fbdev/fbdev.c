@@ -384,48 +384,6 @@ fbdevUpdateFake24 (ScreenPtr pScreen,
 }
 #endif /* FAKE24_ON_16 */
 
-/*
- * x8664: with kms we always draw into a copy in ordinary memory, then copy what
- * changed to the card's buffer and tell the kernel which boxes those were.
- * virtual cards (qemu's, virtio) and usb screens show nothing until they're told,
- * and on real cards it's still faster than drawing into video memory directly.
- */
-static void
-kmsUpdate (ScreenPtr pScreen, shadowBufPtr pBuf)
-{
-    KdScreenPriv(pScreen);
-    FbdevPriv		*priv = pScreenPriv->card->driver;
-    RegionPtr		damage = &pBuf->damage;
-    int			nbox = REGION_NUM_RECTS (damage);
-    BoxPtr		pbox = REGION_RECTS (damage);
-    struct drm_clip_rect clips[64];
-    struct drm_mode_fb_dirty_cmd dirty;
-    int			i;
-
-    if (pBuf->randr != SHADOW_ROTATE_0)
-	shadowUpdateRotatePacked (pScreen, pBuf);
-    else
-	shadowUpdatePacked (pScreen, pBuf);
-
-    memset (&dirty, 0, sizeof dirty);
-    dirty.fb_id = priv->kmsFb;
-    /* turned screens and lots of little boxes: just say the whole thing changed */
-    if (pBuf->randr == SHADOW_ROTATE_0 && nbox <= 64)
-    {
-	for (i = 0; i < nbox; i++)
-	{
-	    clips[i].x1 = pbox[i].x1;
-	    clips[i].y1 = pbox[i].y1;
-	    clips[i].x2 = pbox[i].x2;
-	    clips[i].y2 = pbox[i].y2;
-	}
-	dirty.num_clips = nbox;
-	dirty.clips_ptr = (unsigned long) clips;
-    }
-    /* cards that scan our buffer out directly say ENOSYS, which is fine */
-    ioctl (priv->fd, DRM_IOCTL_MODE_DIRTYFB, &dirty);
-}
-
 static LayerPtr
 fbdevLayerCreate (ScreenPtr pScreen)
 {
@@ -691,6 +649,8 @@ fbdevInitScreen (ScreenPtr pScreen)
     scrpriv->pLayer = fbdevLayerCreate (pScreen);
     if (!scrpriv->pLayer)
 	return FALSE;
+    if (((FbdevPriv *) pScreenPriv->card->driver)->kms)
+	kmsStart (pScreen);
 #ifdef RANDR
     if (!fbdevRandRInit (pScreen))
 	return FALSE;

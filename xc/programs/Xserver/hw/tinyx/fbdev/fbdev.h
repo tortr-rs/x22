@@ -47,8 +47,19 @@ typedef struct _fbdevPriv {
     char			*fb_base;
     /* x8664: set when the screen came from /dev/dri (kms.c), not /dev/fb0 */
     Bool			kms;
-    __u32			kmsCrtc, kmsConn, kmsFb, kmsHandle;
+    __u32			kmsCrtc, kmsConn;
     struct drm_mode_modeinfo	kmsMode;
+    /* two buffers: the screen shows one while we draw into the other, then they swap
+     * at the next vblank. kmsFb is the one being drawn into */
+    __u32			kmsFbs[2], kmsHandles[2], kmsFb;
+    char			*kmsMaps[2];
+    int				kmsBack;
+    Bool			kmsFlipping;	/* a swap is asked for and hasn't happened yet */
+    Bool			kmsNoFlip;	/* the card can't swap: draw on screen like before */
+    RegionRec			kmsPending;	/* changed since the last frame went out */
+    RegionRec			kmsLast;	/* what the last frame changed */
+    ScreenPtr			kmsScreen;
+    shadowBufPtr		kmsBuf;
 } FbdevPriv;
     
 typedef struct _fbdevScrPriv {
@@ -64,6 +75,8 @@ Bool kmsInitialize (FbdevPriv *priv);
 Bool kmsShow (FbdevPriv *priv);
 void kmsHide (FbdevPriv *priv);
 void kmsFini (FbdevPriv *priv);
+void kmsUpdate (ScreenPtr pScreen, shadowBufPtr pBuf);
+void kmsStart (ScreenPtr pScreen);
 
 Bool
 fbdevInitialize (KdCardInfo *card, FbdevPriv *priv);
