@@ -10,9 +10,12 @@ The name: XFree86 was free X for the 386. X8664 is X for x86-64.
 Where it's at
 -------------
 
-Early. Right now only Xvfb builds, the X server that draws into memory instead
-of onto a screen. dwm runs on it with gaps, its bar and a wallpaper. It doesn't
-drive real screens yet.
+Early, but it draws on real screens now. Two servers build:
+
+  Xvfb     draws into memory, for testing. dwm runs on it.
+  Xfbdev   draws on a real screen through the kernel (kms, /dev/dri/card0).
+           Tested in qemu so far, not on real hardware yet. Mouse and
+           keyboard come from the old Linux console drivers for now.
 
 The plan, and the news as it happens: https://chamesle.org/x8664.html
 
@@ -25,7 +28,8 @@ What's in here
   dwm/     dwm 6.8 from suckless with our config, the first window manager we
            run on it.
   test/    tiny X programs for poking at the server. win opens a window,
-           masks checks the colors come out right.
+           masks checks the colors come out right. test/vm/run.sh boots your
+           kernel in qemu with Xfbdev and dwm and saves a picture of the screen.
 
 Building
 --------
@@ -35,9 +39,9 @@ You need gcc, make, the X11 headers, freetype and zlib.
   cd xc
   make World BOOTSTRAPCFLAGS="-std=gnu89 -fcommon -w" CC=gcc
 
-xc/config/cf/host.def decides what gets built. It's Xvfb only for now, with the
-2008 C allowed through a 2026 compiler. That takes a few minutes. The server
-ends up at xc/programs/Xserver/Xvfb.
+xc/config/cf/host.def decides what gets built. It's Xvfb and Xfbdev for now,
+with the 2008 C allowed through a 2026 compiler. That takes a few minutes. The
+servers end up in xc/programs/Xserver/.
 
 Running it
 ----------
