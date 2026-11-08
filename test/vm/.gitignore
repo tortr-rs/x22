@@ -1,0 +1,4 @@
+init
+initramfs.cpio.gz
+shot*.png
+shot*.log
