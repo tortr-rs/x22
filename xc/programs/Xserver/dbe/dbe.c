@@ -1152,6 +1152,7 @@ static int
 SProcDbeGetVersion(ClientPtr client)
 {
     REQUEST(xDbeGetVersionReq);
+    REQUEST_AT_LEAST_SIZE(xDbeGetVersionReq);
     int	n;
 
 
@@ -1188,6 +1189,7 @@ static int
 SProcDbeAllocateBackBufferName(ClientPtr client)
 {
     REQUEST(xDbeAllocateBackBufferNameReq);
+    REQUEST_AT_LEAST_SIZE(xDbeAllocateBackBufferNameReq);
     int	n;
 
     swaps(&stuff->length, n);
@@ -1223,6 +1225,7 @@ static int
 SProcDbeDeallocateBackBufferName(ClientPtr client)
 {
     REQUEST (xDbeDeallocateBackBufferNameReq);
+    REQUEST_AT_LEAST_SIZE(xDbeDeallocateBackBufferNameReq);
     int	n;
 
 
@@ -1261,6 +1264,7 @@ static int
 SProcDbeSwapBuffers(ClientPtr client)
 {
     REQUEST(xDbeSwapBuffersReq);
+    REQUEST_AT_LEAST_SIZE(xDbeSwapBuffersReq);
     int			i, n;
     xDbeSwapInfo	*pSwapInfo;
 
@@ -1309,6 +1313,7 @@ static int
 SProcDbeBeginIdiom(ClientPtr client)
 {
     REQUEST(xDbeBeginIdiomReq);
+    REQUEST_AT_LEAST_SIZE(xDbeBeginIdiomReq);
     int	n;
 
     swaps(&stuff->length, n);
@@ -1338,6 +1343,7 @@ static int
 SProcDbeGetVisualInfo(ClientPtr client)
 {
     REQUEST(xDbeGetVisualInfoReq);
+    REQUEST_AT_LEAST_SIZE(xDbeGetVisualInfoReq);
     int	n;
 
 
@@ -1372,6 +1378,7 @@ static int
 SProcDbeGetBackBufferAttributes(ClientPtr client)
 {
     REQUEST (xDbeGetBackBufferAttributesReq);
+    REQUEST_AT_LEAST_SIZE(xDbeGetBackBufferAttributesReq);
     int	n;
 
     swaps(&stuff->length, n);
@@ -1398,6 +1405,7 @@ static int
 SProcDbeDispatch(ClientPtr client)
 {
     REQUEST(xReq);
+    REQUEST_AT_LEAST_SIZE(xReq);
 
 
     switch (stuff->data)

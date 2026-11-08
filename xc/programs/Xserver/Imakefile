@@ -853,7 +853,7 @@ XCOMM
 		     $(TINYXDIR)/ffcheck.o
         SAVAGELIBS = $(TINY_DIX) $(TINY_OS) $(SAVAGE) $(TINYX) $(TINYXOS) \
 		     $(SHADOW) $(FB) $(MI) $(TINY_EXTENSIONS)
-     SAVAGESYSLIBS = $(TINY_FONTLIBS) $(SYSLIBS)
+     SAVAGESYSLIBS = $(TINY_FONTLIBS) $(SYSLIBS) -linput -ludev
 
 #if HasParallelMake
 MakeMutex($(SAVAGEDIRS) $(SAVAGEOBJS) $(SAVAGELIBS) $(SAVAGESYSLIBS))
@@ -884,7 +884,7 @@ XCOMM
 		     $(TINYXDIR)/ffcheck.o
            IGSLIBS = $(TINY_DIX) $(TINY_OS) $(IGS) $(TINYX) $(TINYXOS) \
 		     $(SHADOW) $(FB) $(MI) $(TINY_EXTENSIONS)
-        IGSSYSLIBS = $(TINY_FONTLIBS) $(SYSLIBS)
+        IGSSYSLIBS = $(TINY_FONTLIBS) $(SYSLIBS) -linput -ludev
 
 #if HasParallelMake
 MakeMutex($(IGSDIRS) $(IGSOBJS) $(IGSLIBS) $(IGSSYSLIBS))
@@ -922,7 +922,7 @@ XCOMM
        TRIDENTLIBS = $(TINY_DIX) $(TINY_OS) $(TRIDENT) $(FBDEV) $(VESA) \
 		     $(LAYER) $(TINYX) $(TINYXOS) $(SHADOW) $(FB) $(MI) \
 		     $(TINY_EXTENSIONS)
-    TRIDENTSYSLIBS = $(TINY_FONTLIBS) $(SYSLIBS)
+    TRIDENTSYSLIBS = $(TINY_FONTLIBS) $(SYSLIBS) -linput -ludev
 
 #if HasParallelMake
 MakeMutex($(TRIDENTDIRS) $(TRIDENTLIBS) $(TRIDENTSYSLIBS))
@@ -957,7 +957,7 @@ XCOMM
          CHIPSLIBS = $(TINY_DIX) $(TINY_OS) $(CHIPS) $(VESA) $(LAYER) \
 		     $(TINYX) $(TINYXOS) $(SHADOW) $(FB) $(MI) \
 		     $(TINY_EXTENSIONS)
-      CHIPSSYSLIBS = $(TINY_FONTLIBS) $(SYSLIBS)
+      CHIPSSYSLIBS = $(TINY_FONTLIBS) $(SYSLIBS) -linput -ludev
 
 #if HasParallelMake
 MakeMutex($(CHIPSDIRS) $(CHIPSLIBS) $(CHIPSSYSLIBS))
@@ -992,7 +992,7 @@ XCOMM
         MACH64LIBS = $(TINY_DIX) $(TINY_OS) $(MACH64) $(VESA) $(LAYER) \
 		     $(TINYX) $(TINYXOS) $(SHADOW) $(FB) $(MI) \
 		     $(TINY_EXTENSIONS)
-     MACH64SYSLIBS = $(TINY_FONTLIBS) $(SYSLIBS)
+     MACH64SYSLIBS = $(TINY_FONTLIBS) $(SYSLIBS) -linput -ludev
 
 #if HasParallelMake
 MakeMutex($(MACH64DIRS) $(MACH64LIBS) $(MACH64SYSLIBS))
@@ -1023,7 +1023,7 @@ XCOMM
 		     $(TINYXDIR)/ffcheck.o
           I810LIBS = $(TINY_DIX) $(TINY_OS) $(I810) $(TINYX) $(TINYXOS) \
 		     $(SHADOW) $(FB) $(MI) $(TINY_EXTENSIONS)
-       I810SYSLIBS = $(TINY_FONTLIBS) $(SYSLIBS)
+       I810SYSLIBS = $(TINY_FONTLIBS) $(SYSLIBS) -linput -ludev
 
 #if HasParallelMake
 MakeMutex($(I810DIRS) $(I810LIBS) $(I810SYSLIBS))
@@ -1054,7 +1054,7 @@ XCOMM
 		     $(TINYXDIR)/ffcheck.o
         SIS530LIBS = $(TINY_DIX) $(TINY_OS) $(SIS530) $(TINYX) $(TINYXOS) \
 		     $(SHADOW) $(FB) $(MI) $(TINY_EXTENSIONS)
-     SIS530SYSLIBS = $(TINY_FONTLIBS) $(SYSLIBS)
+     SIS530SYSLIBS = $(TINY_FONTLIBS) $(SYSLIBS) -linput -ludev
 
 #if HasParallelMake
 MakeMutex($(SIS530DIRS) $(SIS530OBJS) $(SIS530LIBS) $(SIS530SYSLIBS))
@@ -1085,7 +1085,7 @@ XCOMM
 		     $(TINYXDIR)/ffcheck.o
           TRIOLIBS = $(TINY_DIX) $(TINY_OS) $(TRIO) $(TINYX) $(TINYXOS) \
 		     $(SHADOW) $(FB) $(MI) $(TINY_EXTENSIONS)
-       TRIOSYSLIBS = $(TINY_FONTLIBS) $(SYSLIBS)
+       TRIOSYSLIBS = $(TINY_FONTLIBS) $(SYSLIBS) -linput -ludev
 
 #if HasParallelMake
 MakeMutex($(TRIODIRS) $(TRIOOBJS) $(TRIOLIBS) $(TRIOSYSLIBS))
@@ -1123,7 +1123,7 @@ XCOMM
           IPAQLIBS = $(TINY_DIX) $(TINY_OS) $(IPAQ) $(FBDEV) $(LAYER) \
 		     $(PCMCIA) $(TINYX) $(TINYXOS) $(SHADOW) $(FB) $(MI) \
 		     $(TINY_EXTENSIONS)
-       IPAQSYSLIBS = $(TINY_FONTLIBS) $(SYSLIBS)
+       IPAQSYSLIBS = $(TINY_FONTLIBS) $(SYSLIBS) -linput -ludev
 
 #if HasParallelMake
 MakeMutex($(IPAQDIRS) $(IPAQOBJS) $(IPAQLIBS) $(IPAQSYSLIBS))
@@ -1161,7 +1161,7 @@ XCOMM
          TS300LIBS = $(TINY_DIX) $(TINY_OS) $(TS300) $(TRIO) $(SIS530) \
 		     $(TINYX) $(TINYXOS) $(SHADOW) $(FB) $(MI) \
 		     $(TINY_EXTENSIONS)
-      TS300SYSLIBS = $(TINY_FONTLIBS) $(SYSLIBS)
+      TS300SYSLIBS = $(TINY_FONTLIBS) $(SYSLIBS) -linput -ludev
 
 #if HasParallelMake
 MakeMutex($(TS300DIRS) $(TS300OBJS) $(TS300LIBS) $(TS300SYSLIBS))
@@ -1192,7 +1192,7 @@ XCOMM
 		     $(TINYXDIR)/ffcheck.o
           ITSYLIBS = $(TINY_DIX) $(TINY_OS) $(ITSY) $(TINYX) $(TINYXOS) \
 		     $(SHADOW) $(FB) $(MI) $(TINY_EXTENSIONS)
-       ITSYSYSLIBS = $(TINY_FONTLIBS) $(SYSLIBS)
+       ITSYSYSLIBS = $(TINY_FONTLIBS) $(SYSLIBS) -linput -ludev
 
 #if HasParallelMake
 MakeMutex($(ITSYDIRS) $(ITSYOBJS) $(ITSYLIBS) $(ITSYSYSLIBS))
@@ -1223,7 +1223,7 @@ XCOMM
 		     $(TINYXDIR)/ffcheck.o
           VESALIBS = $(TINY_DIX) $(TINY_OS) $(VESA) $(LAYER) $(TINYX) \
 		     $(TINYXOS) $(SHADOW) $(FB) $(MI) $(TINY_EXTENSIONS)
-       VESASYSLIBS = $(TINY_FONTLIBS) $(SYSLIBS)
+       VESASYSLIBS = $(TINY_FONTLIBS) $(SYSLIBS) -linput -ludev
 
 #if HasParallelMake
 MakeMutex($(VESADIRS) $(VESAOBJS) $(VESALIBS) $(VESASYSLIBS))

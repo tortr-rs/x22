@@ -265,8 +265,15 @@ CloseDevice(DeviceIntPtr dev)
 	xfree(l);
     }
 #ifdef XKB
+    /* free the client's resource too: it points at this device, and freeing it
+     * later went through freed memory (CVE-2025-62230). freeing it takes the
+     * interest off the list, through XkbClientGone */
     while (dev->xkb_interest) {
-	XkbRemoveResourceClient((DevicePtr)dev,dev->xkb_interest->resource);
+	XkbInterestPtr interest = dev->xkb_interest;
+
+	FreeResource(interest->resource,RT_NONE);
+	if (dev->xkb_interest == interest)
+	    XkbRemoveResourceClient((DevicePtr)dev,interest->resource);
     }
 #endif
     xfree(dev->sync.event);

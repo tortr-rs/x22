@@ -309,6 +309,7 @@ SProcDamageQueryVersion(ClientPtr client)
 {
     register int n;
     REQUEST(xDamageQueryVersionReq);
+    REQUEST_AT_LEAST_SIZE(xDamageQueryVersionReq);
 
     swaps(&stuff->length, n);
     REQUEST_SIZE_MATCH(xDamageQueryVersionReq);
@@ -322,6 +323,7 @@ SProcDamageCreate (ClientPtr client)
 {
     register int n;
     REQUEST(xDamageCreateReq);
+    REQUEST_AT_LEAST_SIZE(xDamageCreateReq);
     
     swaps (&stuff->length, n);
     REQUEST_SIZE_MATCH(xDamageCreateReq);
@@ -335,6 +337,7 @@ SProcDamageDestroy (ClientPtr client)
 {
     register int n;
     REQUEST(xDamageDestroyReq);
+    REQUEST_AT_LEAST_SIZE(xDamageDestroyReq);
     
     swaps (&stuff->length, n);
     REQUEST_SIZE_MATCH(xDamageDestroyReq);
@@ -347,6 +350,7 @@ SProcDamageSubtract (ClientPtr client)
 {
     register int n;
     REQUEST(xDamageSubtractReq);
+    REQUEST_AT_LEAST_SIZE(xDamageSubtractReq);
     
     swaps (&stuff->length, n);
     REQUEST_SIZE_MATCH(xDamageSubtractReq);

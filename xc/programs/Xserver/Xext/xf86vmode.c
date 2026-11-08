@@ -1754,6 +1754,7 @@ SProcXF86VidModeQueryVersion(ClientPtr client)
 {
     int n;
     REQUEST(xXF86VidModeQueryVersionReq);
+    REQUEST_AT_LEAST_SIZE(xXF86VidModeQueryVersionReq);
     swaps(&stuff->length, n);
     return ProcXF86VidModeQueryVersion(client);
 }
@@ -1763,6 +1764,7 @@ SProcXF86VidModeGetModeLine(ClientPtr client)
 {
     int n;
     REQUEST(xXF86VidModeGetModeLineReq);
+    REQUEST_AT_LEAST_SIZE(xXF86VidModeGetModeLineReq);
     swaps(&stuff->length, n);
     REQUEST_SIZE_MATCH(xXF86VidModeGetModeLineReq);
     swaps(&stuff->screen, n);
@@ -1774,6 +1776,7 @@ SProcXF86VidModeGetAllModeLines(ClientPtr client)
 {
     int n;
     REQUEST(xXF86VidModeGetAllModeLinesReq);
+    REQUEST_AT_LEAST_SIZE(xXF86VidModeGetAllModeLinesReq);
     swaps(&stuff->length, n);
     REQUEST_SIZE_MATCH(xXF86VidModeGetAllModeLinesReq);
     swaps(&stuff->screen, n);
@@ -1789,6 +1792,7 @@ SProcXF86VidModeAddModeLine(ClientPtr client)
     int n;
     
     REQUEST(xXF86VidModeAddModeLineReq);
+    REQUEST_AT_LEAST_SIZE(xXF86VidModeAddModeLineReq);
     ver = ClientMajorVersion(client);
     if (ver < 2) {
 	swaps(&oldstuff->length, n);
@@ -1834,6 +1838,7 @@ SProcXF86VidModeDeleteModeLine(ClientPtr client)
     int n;
 
     REQUEST(xXF86VidModeDeleteModeLineReq);
+    REQUEST_AT_LEAST_SIZE(xXF86VidModeDeleteModeLineReq);
     ver = ClientMajorVersion(client);
     if (ver < 2) {
 	swaps(&oldstuff->length, n);
@@ -1879,6 +1884,7 @@ SProcXF86VidModeModModeLine(ClientPtr client)
     int n;
 
     REQUEST(xXF86VidModeModModeLineReq);
+    REQUEST_AT_LEAST_SIZE(xXF86VidModeModModeLineReq);
     ver = ClientMajorVersion(client);
     if (ver < 2) {
 	swaps(&oldstuff->length, n);
@@ -1924,6 +1930,7 @@ SProcXF86VidModeValidateModeLine(ClientPtr client)
     int n;
 
     REQUEST(xXF86VidModeValidateModeLineReq);
+    REQUEST_AT_LEAST_SIZE(xXF86VidModeValidateModeLineReq);
     ver = ClientMajorVersion(client);
     if (ver < 2) {
 	swaps(&oldstuff->length, n);
@@ -1965,6 +1972,7 @@ SProcXF86VidModeSwitchMode(ClientPtr client)
 {
     int n;
     REQUEST(xXF86VidModeSwitchModeReq);
+    REQUEST_AT_LEAST_SIZE(xXF86VidModeSwitchModeReq);
     swaps(&stuff->length, n);
     REQUEST_SIZE_MATCH(xXF86VidModeSwitchModeReq);
     swaps(&stuff->screen, n);
@@ -1977,6 +1985,7 @@ SProcXF86VidModeSwitchToMode(ClientPtr client)
 {
     int n;
     REQUEST(xXF86VidModeSwitchToModeReq);
+    REQUEST_AT_LEAST_SIZE(xXF86VidModeSwitchToModeReq);
     swaps(&stuff->length, n);
     REQUEST_SIZE_MATCH(xXF86VidModeSwitchToModeReq);
     swaps(&stuff->screen, n);
@@ -1988,6 +1997,7 @@ SProcXF86VidModeLockModeSwitch(ClientPtr client)
 {
     int n;
     REQUEST(xXF86VidModeLockModeSwitchReq);
+    REQUEST_AT_LEAST_SIZE(xXF86VidModeLockModeSwitchReq);
     swaps(&stuff->length, n);
     REQUEST_SIZE_MATCH(xXF86VidModeLockModeSwitchReq);
     swaps(&stuff->screen, n);
@@ -2000,6 +2010,7 @@ SProcXF86VidModeGetMonitor(ClientPtr client)
 {
     int n;
     REQUEST(xXF86VidModeGetMonitorReq);
+    REQUEST_AT_LEAST_SIZE(xXF86VidModeGetMonitorReq);
     swaps(&stuff->length, n);
     REQUEST_SIZE_MATCH(xXF86VidModeGetMonitorReq);
     swaps(&stuff->screen, n);
@@ -2011,6 +2022,7 @@ SProcXF86VidModeGetViewPort(ClientPtr client)
 {
     int n;
     REQUEST(xXF86VidModeGetViewPortReq);
+    REQUEST_AT_LEAST_SIZE(xXF86VidModeGetViewPortReq);
     swaps(&stuff->length, n);
     REQUEST_SIZE_MATCH(xXF86VidModeGetViewPortReq);
     swaps(&stuff->screen, n);
@@ -2022,6 +2034,7 @@ SProcXF86VidModeSetViewPort(ClientPtr client)
 {
     int n;
     REQUEST(xXF86VidModeSetViewPortReq);
+    REQUEST_AT_LEAST_SIZE(xXF86VidModeSetViewPortReq);
     swaps(&stuff->length, n);
     REQUEST_SIZE_MATCH(xXF86VidModeSetViewPortReq);
     swaps(&stuff->screen, n);
@@ -2035,6 +2048,7 @@ SProcXF86VidModeGetDotClocks(ClientPtr client)
 {
     int n;
     REQUEST(xXF86VidModeGetDotClocksReq);
+    REQUEST_AT_LEAST_SIZE(xXF86VidModeGetDotClocksReq);
     swaps(&stuff->length, n);
     REQUEST_SIZE_MATCH(xXF86VidModeGetDotClocksReq);
     swaps(&stuff->screen, n);
@@ -2046,6 +2060,7 @@ SProcXF86VidModeSetClientVersion(ClientPtr client)
 {
     int n;
     REQUEST(xXF86VidModeSetClientVersionReq);
+    REQUEST_AT_LEAST_SIZE(xXF86VidModeSetClientVersionReq);
     swaps(&stuff->length, n);
     REQUEST_SIZE_MATCH(xXF86VidModeSetClientVersionReq);
     swaps(&stuff->major, n);
@@ -2058,6 +2073,7 @@ SProcXF86VidModeSetGamma(ClientPtr client)
 {
     int n;
     REQUEST(xXF86VidModeSetGammaReq);
+    REQUEST_AT_LEAST_SIZE(xXF86VidModeSetGammaReq);
     swaps(&stuff->length, n);
     REQUEST_SIZE_MATCH(xXF86VidModeSetGammaReq);
     swaps(&stuff->screen, n);
@@ -2072,6 +2088,7 @@ SProcXF86VidModeGetGamma(ClientPtr client)
 {
     int n;
     REQUEST(xXF86VidModeGetGammaReq);
+    REQUEST_AT_LEAST_SIZE(xXF86VidModeGetGammaReq);
     swaps(&stuff->length, n);
     REQUEST_SIZE_MATCH(xXF86VidModeGetGammaReq);
     swaps(&stuff->screen, n);
@@ -2084,6 +2101,7 @@ SProcXF86VidModeSetGammaRamp(ClientPtr client)
     CARD16 *ramp;
     int length, n;
     REQUEST(xXF86VidModeSetGammaRampReq);
+    REQUEST_AT_LEAST_SIZE(xXF86VidModeSetGammaRampReq);
     swaps(&stuff->length, n);
     REQUEST_AT_LEAST_SIZE(xXF86VidModeSetGammaRampReq);
     swaps(&stuff->size, n);
@@ -2103,6 +2121,7 @@ SProcXF86VidModeGetGammaRamp(ClientPtr client)
 {
     int n;
     REQUEST(xXF86VidModeGetGammaRampReq);
+    REQUEST_AT_LEAST_SIZE(xXF86VidModeGetGammaRampReq);
     swaps(&stuff->length, n);
     REQUEST_SIZE_MATCH(xXF86VidModeGetGammaRampReq);
     swaps(&stuff->size, n);
@@ -2115,6 +2134,7 @@ SProcXF86VidModeGetGammaRampSize(ClientPtr client)
 {   
     int n;
     REQUEST(xXF86VidModeGetGammaRampSizeReq);
+    REQUEST_AT_LEAST_SIZE(xXF86VidModeGetGammaRampSizeReq);
     swaps(&stuff->length, n);
     REQUEST_SIZE_MATCH(xXF86VidModeGetGammaRampSizeReq);
     swaps(&stuff->screen, n);
@@ -2126,6 +2146,7 @@ SProcXF86VidModeGetPermissions(ClientPtr client)
 {   
     int n;
     REQUEST(xXF86VidModeGetPermissionsReq);
+    REQUEST_AT_LEAST_SIZE(xXF86VidModeGetPermissionsReq);
     swaps(&stuff->length, n);
     REQUEST_SIZE_MATCH(xXF86VidModeGetPermissionsReq);
     swaps(&stuff->screen, n);

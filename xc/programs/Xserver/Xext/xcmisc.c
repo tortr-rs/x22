@@ -184,6 +184,7 @@ SProcXCMiscGetVersion(ClientPtr client)
 {
     int n;
     REQUEST(xXCMiscGetVersionReq);
+    REQUEST_AT_LEAST_SIZE(xXCMiscGetVersionReq);
 
     swaps(&stuff->length, n);
     REQUEST_SIZE_MATCH(xXCMiscGetVersionReq);
@@ -197,6 +198,7 @@ SProcXCMiscGetXIDRange(ClientPtr client)
 {
     int n;
     REQUEST(xReq);
+    REQUEST_AT_LEAST_SIZE(xReq);
 
     swaps(&stuff->length, n);
     return ProcXCMiscGetXIDRange(client);
@@ -207,6 +209,7 @@ SProcXCMiscGetXIDList(ClientPtr client)
 {
     int n;
     REQUEST(xXCMiscGetXIDListReq);
+    REQUEST_AT_LEAST_SIZE(xXCMiscGetXIDListReq);
 
     swaps(&stuff->length, n);
     swapl(&stuff->count, n);

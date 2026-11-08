@@ -297,6 +297,7 @@ static int
 SProcResDispatch (ClientPtr client)
 {
     REQUEST(xReq);
+    REQUEST_AT_LEAST_SIZE(xReq);
     int n;
 
     swaps(&stuff->length,n);

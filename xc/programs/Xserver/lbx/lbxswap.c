@@ -73,6 +73,7 @@ SProcLbxQueryVersion(ClientPtr client)
     register int n;
 
     REQUEST(xLbxQueryVersionReq);
+    REQUEST_AT_LEAST_SIZE(xLbxQueryVersionReq);
 
     swaps(&stuff->length, n);
     return ProcLbxQueryVersion(client);
@@ -84,6 +85,7 @@ SProcLbxStartProxy(ClientPtr client)
     register int n;
 
     REQUEST(xLbxStartProxyReq);
+    REQUEST_AT_LEAST_SIZE(xLbxStartProxyReq);
 
     swaps(&stuff->length, n);
     return ProcLbxStartProxy(client);
@@ -95,6 +97,7 @@ SProcLbxStopProxy(ClientPtr client)
     register int n;
 
     REQUEST(xLbxStopProxyReq);
+    REQUEST_AT_LEAST_SIZE(xLbxStopProxyReq);
 
     swaps(&stuff->length, n);
     return ProcLbxStopProxy(client);
@@ -106,6 +109,7 @@ SProcLbxSwitch(ClientPtr client)
     register int n;
 
     REQUEST(xLbxSwitchReq);
+    REQUEST_AT_LEAST_SIZE(xLbxSwitchReq);
 
     swaps(&stuff->length, n);
     swapl(&stuff->client, n);
@@ -118,6 +122,7 @@ SProcLbxBeginLargeRequest (ClientPtr client)
     register int n;
 
     REQUEST(xLbxBeginLargeRequestReq);
+    REQUEST_AT_LEAST_SIZE(xLbxBeginLargeRequestReq);
 
     swaps(&stuff->length, n);
     swapl(&stuff->largeReqLength, n);
@@ -130,6 +135,7 @@ SProcLbxLargeRequestData (ClientPtr client)
     register int n;
 
     REQUEST(xLbxLargeRequestDataReq);
+    REQUEST_AT_LEAST_SIZE(xLbxLargeRequestDataReq);
 
     swaps(&stuff->length, n);
     return ProcLbxLargeRequestData(client);
@@ -141,6 +147,7 @@ SProcLbxEndLargeRequest (ClientPtr client)
     register int n;
 
     REQUEST(xLbxEndLargeRequestReq);
+    REQUEST_AT_LEAST_SIZE(xLbxEndLargeRequestReq);
 
     swaps(&stuff->length, n);
     return ProcLbxEndLargeRequest(client);
@@ -152,6 +159,7 @@ SProcLbxNewClient(ClientPtr client)
     register int n;
 
     REQUEST(xLbxNewClientReq);
+    REQUEST_AT_LEAST_SIZE(xLbxNewClientReq);
 
     swaps(&stuff->length, n);
     swapl(&stuff->client, n);
@@ -164,6 +172,7 @@ SProcLbxCloseClient(ClientPtr client)
     register int n;
 
     REQUEST(xLbxCloseClientReq);
+    REQUEST_AT_LEAST_SIZE(xLbxCloseClientReq);
 
     swaps(&stuff->length, n);
     swapl(&stuff->client, n);
@@ -176,6 +185,7 @@ SProcLbxModifySequence(ClientPtr client)
     register int n;
 
     REQUEST(xLbxModifySequenceReq);
+    REQUEST_AT_LEAST_SIZE(xLbxModifySequenceReq);
 
     swaps(&stuff->length, n);
     swapl(&stuff->adjust, n);
@@ -188,6 +198,7 @@ SProcLbxAllowMotion(ClientPtr client)
     register int n;
 
     REQUEST(xLbxAllowMotionReq);
+    REQUEST_AT_LEAST_SIZE(xLbxAllowMotionReq);
 
     swaps(&stuff->length, n);
     swapl(&stuff->num, n);
@@ -200,6 +211,7 @@ SProcLbxIncrementPixel(ClientPtr client)
     register int n;
 
     REQUEST(xLbxIncrementPixelReq);
+    REQUEST_AT_LEAST_SIZE(xLbxIncrementPixelReq);
 
     swaps(&stuff->length, n);
     swapl(&stuff->cmap, n);
@@ -213,6 +225,7 @@ SProcLbxGrabCmap(ClientPtr client)
     register int n;
 
     REQUEST(xLbxGrabCmapReq);
+    REQUEST_AT_LEAST_SIZE(xLbxGrabCmapReq);
 
     swaps(&stuff->length, n);
     swapl(&stuff->cmap, n);
@@ -226,6 +239,7 @@ SProcLbxReleaseCmap(ClientPtr client)
     register int n;
 
     REQUEST(xLbxReleaseCmapReq);
+    REQUEST_AT_LEAST_SIZE(xLbxReleaseCmapReq);
 
     swaps(&stuff->length, n);
     swapl(&stuff->cmap, n);
@@ -239,6 +253,7 @@ SProcLbxAllocColor(ClientPtr client)
     register int n;
 
     REQUEST(xLbxAllocColorReq);
+    REQUEST_AT_LEAST_SIZE(xLbxAllocColorReq);
 
     swaps(&stuff->length, n);
     swapl(&stuff->cmap, n);
@@ -256,6 +271,7 @@ SProcLbxGetModifierMapping(ClientPtr client)
     register int n;
 
     REQUEST(xLbxGetModifierMappingReq);
+    REQUEST_AT_LEAST_SIZE(xLbxGetModifierMappingReq);
 
     swaps(&stuff->length, n);
     return ProcLbxGetModifierMapping(client);
@@ -267,6 +283,7 @@ SProcLbxGetKeyboardMapping(ClientPtr client)
     register int n;
 
     REQUEST(xLbxGetKeyboardMappingReq);
+    REQUEST_AT_LEAST_SIZE(xLbxGetKeyboardMappingReq);
 
     swaps(&stuff->length, n);
     return ProcLbxGetKeyboardMapping(client);
@@ -278,6 +295,7 @@ SProcLbxQueryFont(ClientPtr client)
     register int n;
 
     REQUEST(xLbxQueryFontReq);
+    REQUEST_AT_LEAST_SIZE(xLbxQueryFontReq);
 
     swaps(&stuff->length, n);
     swapl(&stuff->fid, n);
@@ -290,6 +308,7 @@ SProcLbxChangeProperty(ClientPtr client)
     register int n;
 
     REQUEST(xLbxChangePropertyReq);
+    REQUEST_AT_LEAST_SIZE(xLbxChangePropertyReq);
 
     swaps(&stuff->length, n);
     REQUEST_AT_LEAST_SIZE(xLbxChangePropertyReq);
@@ -316,6 +335,7 @@ SProcLbxGetProperty(ClientPtr client)
     register int n;
 
     REQUEST(xLbxGetPropertyReq);
+    REQUEST_AT_LEAST_SIZE(xLbxGetPropertyReq);
 
     swaps(&stuff->length, n);
     swapl(&stuff->window, n);
@@ -332,6 +352,7 @@ SProcLbxTagData(ClientPtr client)
     register int n;
 
     REQUEST(xLbxTagDataReq);
+    REQUEST_AT_LEAST_SIZE(xLbxTagDataReq);
 
     swaps(&stuff->length, n);
     swapl(&stuff->tag, n);
@@ -345,6 +366,7 @@ SProcLbxInvalidateTag(ClientPtr client)
     register int n;
 
     REQUEST(xLbxInvalidateTagReq);
+    REQUEST_AT_LEAST_SIZE(xLbxInvalidateTagReq);
 
     swaps(&stuff->length, n);
     swapl(&stuff->tag, n);
@@ -357,6 +379,7 @@ SProcLbxPoly(ClientPtr client)
     register int n;
 
     REQUEST(xLbxPolyPointReq);
+    REQUEST_AT_LEAST_SIZE(xLbxPolyPointReq);
     char *after;
 
     swaps(&stuff->length, n);
@@ -377,6 +400,7 @@ SProcLbxFillPoly(ClientPtr client)
     register int n;
 
     REQUEST(xLbxFillPolyReq);
+    REQUEST_AT_LEAST_SIZE(xLbxFillPolyReq);
     char *after;
 
     swaps(&stuff->length, n);
@@ -397,6 +421,7 @@ SProcLbxCopyArea(ClientPtr client)
     int    n;
 
     REQUEST(xLbxCopyAreaReq);
+    REQUEST_AT_LEAST_SIZE(xLbxCopyAreaReq);
     char *after;
 
     swaps(&stuff->length, n);
@@ -422,6 +447,7 @@ SProcLbxCopyPlane(ClientPtr client)
     int    n;
 
     REQUEST(xLbxCopyPlaneReq);
+    REQUEST_AT_LEAST_SIZE(xLbxCopyPlaneReq);
     char *after;
 
     swaps(&stuff->length, n);
@@ -448,6 +474,7 @@ SProcLbxPolyText(ClientPtr client)
     register int n;
 
     REQUEST(xLbxPolyTextReq);
+    REQUEST_AT_LEAST_SIZE(xLbxPolyTextReq);
     char *after;
 
     swaps(&stuff->length, n);
@@ -468,6 +495,7 @@ SProcLbxImageText(ClientPtr client)
     register int n;
 
     REQUEST(xLbxImageTextReq);
+    REQUEST_AT_LEAST_SIZE(xLbxImageTextReq);
     char *after;
 
     swaps(&stuff->length, n);
@@ -489,6 +517,7 @@ SProcLbxPutImage(ClientPtr client)
     register int n;
 
     REQUEST(xLbxPutImageReq);
+    REQUEST_AT_LEAST_SIZE(xLbxPutImageReq);
 
     swaps (&stuff->length, n);
     return ProcLbxPutImage(client);
@@ -500,6 +529,7 @@ SProcLbxGetImage(ClientPtr client)
     register int n;
 
     REQUEST(xLbxGetImageReq);
+    REQUEST_AT_LEAST_SIZE(xLbxGetImageReq);
 
     swaps (&stuff->length, n);
     swapl (&stuff->drawable, n);
@@ -521,6 +551,7 @@ SProcLbxInternAtoms(ClientPtr client)
     int i;
 
     REQUEST(xLbxInternAtomsReq);
+    REQUEST_AT_LEAST_SIZE(xLbxInternAtomsReq);
 
     swaps (&stuff->length, n);
     swaps (&stuff->num, n);
@@ -545,6 +576,7 @@ SProcLbxGetWinAttrAndGeom(ClientPtr client)
     int	n;
 
     REQUEST(xLbxGetWinAttrAndGeomReq);
+    REQUEST_AT_LEAST_SIZE(xLbxGetWinAttrAndGeomReq);
 
     swaps(&stuff->length, n);
     swapl(&stuff->id, n);
@@ -560,6 +592,7 @@ SProcLbxQueryExtension(ClientPtr client)
     int	n;
 
     REQUEST(xLbxQueryExtensionReq);
+    REQUEST_AT_LEAST_SIZE(xLbxQueryExtensionReq);
 
     swaps(&stuff->length, n);
     swapl(&stuff->nbytes, n);

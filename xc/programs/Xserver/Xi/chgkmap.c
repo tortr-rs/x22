@@ -80,6 +80,7 @@ SProcXChangeDeviceKeyMapping(client)
     unsigned int count;
 
     REQUEST(xChangeDeviceKeyMappingReq);
+    REQUEST_AT_LEAST_SIZE(xChangeDeviceKeyMappingReq);
     swaps(&stuff->length, n);
     REQUEST_AT_LEAST_SIZE(xChangeDeviceKeyMappingReq);
     count = stuff->keyCodes * stuff->keySymsPerKeyCode;

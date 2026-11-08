@@ -302,6 +302,7 @@ SProcQueryVersion(ClientPtr client)
     int n;
 
     REQUEST(xXcupQueryVersionReq);
+    REQUEST_AT_LEAST_SIZE(xXcupQueryVersionReq);
     swaps(&stuff->length, n);
     return ProcQueryVersion(client);
 }
@@ -312,6 +313,7 @@ SProcGetReservedColormapEntries(ClientPtr client)
     int n;
 
     REQUEST (xXcupGetReservedColormapEntriesReq);
+    REQUEST_AT_LEAST_SIZE(xXcupGetReservedColormapEntriesReq);
     swaps (&stuff->length, n);
     swapl (&stuff->screen, n);
     REQUEST_AT_LEAST_SIZE (xXcupGetReservedColormapEntriesReq);
@@ -326,6 +328,7 @@ SProcXcupStoreColors(ClientPtr client)
     xColorItem* pItem;
 
     REQUEST (xXcupStoreColorsReq);
+    REQUEST_AT_LEAST_SIZE(xXcupStoreColorsReq);
     swaps (&stuff->length, n);
     REQUEST_AT_LEAST_SIZE (xXcupStoreColorsReq);
     swapl(&stuff->cmap, n);

@@ -664,6 +664,7 @@ SProcXagQueryVersion(ClientPtr client)
 {
     int n;
     REQUEST(xXagQueryVersionReq);
+    REQUEST_AT_LEAST_SIZE(xXagQueryVersionReq);
     swaps(&stuff->length, n);
     return ProcXagQueryVersion(client);
 }
@@ -673,6 +674,7 @@ SProcXagCreate(ClientPtr client)
 {
     int n;
     REQUEST (xXagCreateReq);
+    REQUEST_AT_LEAST_SIZE(xXagCreateReq);
     swaps (&stuff->length, n);
     REQUEST_AT_LEAST_SIZE (xXagCreateReq);
     swapl (&stuff->app_group, n);
@@ -686,6 +688,7 @@ SProcXagDestroy(ClientPtr client)
 {
     int n;
     REQUEST (xXagDestroyReq);
+    REQUEST_AT_LEAST_SIZE(xXagDestroyReq);
     swaps (&stuff->length, n);
     REQUEST_SIZE_MATCH (xXagDestroyReq);
     swapl (&stuff->app_group, n);
@@ -697,6 +700,7 @@ SProcXagGetAttr(ClientPtr client)
 {
     int n;
     REQUEST (xXagGetAttrReq);
+    REQUEST_AT_LEAST_SIZE(xXagGetAttrReq);
     swaps (&stuff->length, n);
     REQUEST_SIZE_MATCH (xXagGetAttrReq);
     swapl (&stuff->app_group, n);
@@ -708,6 +712,7 @@ SProcXagQuery(ClientPtr client)
 {
     int n;
     REQUEST (xXagQueryReq);
+    REQUEST_AT_LEAST_SIZE(xXagQueryReq);
     swaps (&stuff->length, n);
     REQUEST_SIZE_MATCH (xXagQueryReq);
     swapl (&stuff->resource, n);
@@ -719,6 +724,7 @@ SProcXagCreateAssoc(ClientPtr client)
 {
     int n;
     REQUEST (xXagCreateAssocReq);
+    REQUEST_AT_LEAST_SIZE(xXagCreateAssocReq);
     swaps (&stuff->length, n);
     REQUEST_SIZE_MATCH (xXagCreateAssocReq);
     swapl (&stuff->window, n);
@@ -732,6 +738,7 @@ SProcXagDestroyAssoc(ClientPtr client)
 {
     int n;
     REQUEST (xXagDestroyAssocReq);
+    REQUEST_AT_LEAST_SIZE(xXagDestroyAssocReq);
     swaps (&stuff->length, n);
     REQUEST_SIZE_MATCH (xXagDestroyAssocReq);
     swapl (&stuff->window, n);

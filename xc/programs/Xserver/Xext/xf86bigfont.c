@@ -737,6 +737,7 @@ static int
 SProcXF86BigfontQueryVersion(ClientPtr client)
 {
     REQUEST(xXF86BigfontQueryVersionReq);
+    REQUEST_AT_LEAST_SIZE(xXF86BigfontQueryVersionReq);
     char tmp;
 
     swaps(&stuff->length, tmp);
@@ -747,6 +748,7 @@ static int
 SProcXF86BigfontQueryFont(ClientPtr client)
 {
     REQUEST(xXF86BigfontQueryFontReq);
+    REQUEST_AT_LEAST_SIZE(xXF86BigfontQueryFontReq);
     char tmp;
 
     swaps(&stuff->length, tmp);

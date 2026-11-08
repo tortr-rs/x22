@@ -2454,6 +2454,7 @@ SProcXpCreateContext(ClientPtr client)
     long n;
 
     REQUEST(xPrintCreateContextReq);
+    REQUEST_AT_LEAST_SIZE(xPrintCreateContextReq);
 
     swaps(&stuff->length, i);
     swapl(&stuff->contextID, n);
@@ -2469,6 +2470,7 @@ SProcXpGetPrinterList(ClientPtr client)
     long n;
 
     REQUEST(xPrintGetPrinterListReq);
+    REQUEST_AT_LEAST_SIZE(xPrintGetPrinterListReq);
 
     swaps(&stuff->length, i);
     swapl(&stuff->printerNameLen, n);
@@ -2482,6 +2484,7 @@ SProcXpRehashPrinterList(ClientPtr client)
     int i;
 
     REQUEST(xPrintRehashPrinterListReq);
+    REQUEST_AT_LEAST_SIZE(xPrintRehashPrinterListReq);
     swaps(&stuff->length, i);
     return ProcXpRehashPrinterList(client);
 }
@@ -2492,6 +2495,7 @@ SProcXpSetContext(ClientPtr client)
     int i;
 
     REQUEST(xPrintSetContextReq);
+    REQUEST_AT_LEAST_SIZE(xPrintSetContextReq);
     swaps(&stuff->length, i);
     swapl(&stuff->printContext, i);
     return ProcXpSetContext(client);
@@ -2503,6 +2507,7 @@ SProcXpGetContext(ClientPtr client)
     int i;
 
     REQUEST(xPrintGetContextReq);
+    REQUEST_AT_LEAST_SIZE(xPrintGetContextReq);
     swaps(&stuff->length, i);
     return ProcXpGetContext(client);
 }
@@ -2514,6 +2519,7 @@ SProcXpDestroyContext(ClientPtr client)
     long n;
 
     REQUEST(xPrintDestroyContextReq);
+    REQUEST_AT_LEAST_SIZE(xPrintDestroyContextReq);
     swaps(&stuff->length, i);
     swapl(&stuff->printContext, n);
     return ProcXpDestroyContext(client);
@@ -2526,6 +2532,7 @@ SProcXpGetContextScreen(ClientPtr client)
     long n;
 
     REQUEST(xPrintGetContextScreenReq);
+    REQUEST_AT_LEAST_SIZE(xPrintGetContextScreenReq);
     swaps(&stuff->length, i);
     swapl(&stuff->printContext, n);
     return ProcXpGetContextScreen(client);
@@ -2538,6 +2545,7 @@ SProcXpInputSelected(ClientPtr client)
     long n;
 
     REQUEST(xPrintInputSelectedReq);
+    REQUEST_AT_LEAST_SIZE(xPrintInputSelectedReq);
     swaps(&stuff->length, i);
     swapl(&stuff->printContext, n);
     return ProcXpInputSelected(client);
@@ -2549,6 +2557,7 @@ SProcXpStartJob(ClientPtr client)
     int i;
 
     REQUEST(xPrintStartJobReq);
+    REQUEST_AT_LEAST_SIZE(xPrintStartJobReq);
     swaps(&stuff->length, i);
     return ProcXpStartJob(client);
 }
@@ -2559,6 +2568,7 @@ SProcXpEndJob(ClientPtr client)
     int i;
 
     REQUEST(xPrintEndJobReq);
+    REQUEST_AT_LEAST_SIZE(xPrintEndJobReq);
     swaps(&stuff->length, i);
     return ProcXpEndJob(client);
 }
@@ -2569,6 +2579,7 @@ SProcXpStartDoc(ClientPtr client)
     int i;
 
     REQUEST(xPrintStartDocReq);
+    REQUEST_AT_LEAST_SIZE(xPrintStartDocReq);
     swaps(&stuff->length, i);
     return ProcXpStartDoc(client);
 }
@@ -2579,6 +2590,7 @@ SProcXpEndDoc(ClientPtr client)
     int i;
 
     REQUEST(xPrintEndDocReq);
+    REQUEST_AT_LEAST_SIZE(xPrintEndDocReq);
     swaps(&stuff->length, i);
     return ProcXpEndDoc(client);
 }
@@ -2590,6 +2602,7 @@ SProcXpStartPage(ClientPtr client)
     long n;
 
     REQUEST(xPrintStartPageReq);
+    REQUEST_AT_LEAST_SIZE(xPrintStartPageReq);
     swaps(&stuff->length, i);
     swapl(&stuff->window, n);
     return ProcXpStartPage(client);
@@ -2601,6 +2614,7 @@ SProcXpEndPage(ClientPtr client)
     int i;
 
     REQUEST(xPrintEndPageReq);
+    REQUEST_AT_LEAST_SIZE(xPrintEndPageReq);
     swaps(&stuff->length, i);
     return ProcXpEndPage(client);
 }
@@ -2612,6 +2626,7 @@ SProcXpPutDocumentData(ClientPtr client)
     int i;
 
     REQUEST(xPrintPutDocumentDataReq);
+    REQUEST_AT_LEAST_SIZE(xPrintPutDocumentDataReq);
     swaps(&stuff->length, i);
     swapl(&stuff->drawable, n);
     swapl(&stuff->len_data, n);
@@ -2627,6 +2642,7 @@ SProcXpGetDocumentData(ClientPtr client)
     int i;
 
     REQUEST(xPrintGetDocumentDataReq);
+    REQUEST_AT_LEAST_SIZE(xPrintGetDocumentDataReq);
     swaps(&stuff->length, i);
     swapl(&stuff->printContext, n);
     swapl(&stuff->maxBufferSize, n);
@@ -2640,6 +2656,7 @@ SProcXpGetAttributes(ClientPtr client)
     int i;
 
     REQUEST(xPrintGetAttributesReq);
+    REQUEST_AT_LEAST_SIZE(xPrintGetAttributesReq);
     swaps(&stuff->length, i);
     swapl(&stuff->printContext, n);
     return ProcXpGetAttributes(client);
@@ -2652,6 +2669,7 @@ SProcXpSetAttributes(ClientPtr client)
     int i;
 
     REQUEST(xPrintSetAttributesReq);
+    REQUEST_AT_LEAST_SIZE(xPrintSetAttributesReq);
     swaps(&stuff->length, i);
     swapl(&stuff->printContext, n);
     swapl(&stuff->stringLen, n);
@@ -2665,6 +2683,7 @@ SProcXpGetOneAttribute(ClientPtr client)
     int i;
 
     REQUEST(xPrintGetOneAttributeReq);
+    REQUEST_AT_LEAST_SIZE(xPrintGetOneAttributeReq);
     swaps(&stuff->length, i);
     swapl(&stuff->printContext, n);
     swapl(&stuff->nameLen, n);
@@ -2678,6 +2697,7 @@ SProcXpSelectInput(ClientPtr client)
     int i;
 
     REQUEST(xPrintSelectInputReq);
+    REQUEST_AT_LEAST_SIZE(xPrintSelectInputReq);
     swaps(&stuff->length, i);
     swapl(&stuff->eventMask, n);
     swapl(&stuff->printContext, n);
@@ -2691,6 +2711,7 @@ SProcXpGetPageDimensions(ClientPtr client)
     int i;
 
     REQUEST(xPrintGetPageDimensionsReq);
+    REQUEST_AT_LEAST_SIZE(xPrintGetPageDimensionsReq);
     swaps(&stuff->length, i);
     swapl(&stuff->printContext, n);
     return ProcXpGetPageDimensions(client);
@@ -2703,6 +2724,7 @@ SProcXpSetImageResolution(ClientPtr client)
     int i;
 
     REQUEST(xPrintSetImageResolutionReq);
+    REQUEST_AT_LEAST_SIZE(xPrintSetImageResolutionReq);
     swaps(&stuff->length, i);
     swapl(&stuff->printContext, n);
     swaps(&stuff->imageRes, i);
@@ -2716,6 +2738,7 @@ SProcXpGetImageResolution(ClientPtr client)
     int i;
 
     REQUEST(xPrintGetImageResolutionReq);
+    REQUEST_AT_LEAST_SIZE(xPrintGetImageResolutionReq);
     swaps(&stuff->length, i);
     swapl(&stuff->printContext, n);
     return ProcXpGetImageResolution(client);

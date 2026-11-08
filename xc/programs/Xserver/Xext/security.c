@@ -660,6 +660,7 @@ static int
 SProcSecurityQueryVersion(ClientPtr client)
 {
     REQUEST(xSecurityQueryVersionReq);
+    REQUEST_AT_LEAST_SIZE(xSecurityQueryVersionReq);
     char 	n;
 
     swaps(&stuff->length, n);
@@ -674,6 +675,7 @@ static int
 SProcSecurityGenerateAuthorization(ClientPtr client)
 {
     REQUEST(xSecurityGenerateAuthorizationReq);
+    REQUEST_AT_LEAST_SIZE(xSecurityGenerateAuthorizationReq);
     char 	n;
     CARD32 *values;
     unsigned long nvalues;
@@ -699,6 +701,7 @@ static int
 SProcSecurityRevokeAuthorization(ClientPtr client)
 {
     REQUEST(xSecurityRevokeAuthorizationReq);
+    REQUEST_AT_LEAST_SIZE(xSecurityRevokeAuthorizationReq);
     char 	n;
 
     swaps(&stuff->length, n);

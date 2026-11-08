@@ -1987,6 +1987,7 @@ static int
 SProcSyncInitialize(ClientPtr client)
 {
     REQUEST(xSyncInitializeReq);
+    REQUEST_AT_LEAST_SIZE(xSyncInitializeReq);
     char   n;
 
     swaps(&stuff->length, n);
@@ -1999,6 +2000,7 @@ static int
 SProcSyncListSystemCounters(ClientPtr client)
 {
     REQUEST(xSyncListSystemCountersReq);
+    REQUEST_AT_LEAST_SIZE(xSyncListSystemCountersReq);
     char   n;
 
     swaps(&stuff->length, n);
@@ -2011,6 +2013,7 @@ static int
 SProcSyncCreateCounter(ClientPtr client)
 {
     REQUEST(xSyncCreateCounterReq);
+    REQUEST_AT_LEAST_SIZE(xSyncCreateCounterReq);
     char   n;
 
     swaps(&stuff->length, n);
@@ -2026,6 +2029,7 @@ static int
 SProcSyncSetCounter(ClientPtr client)
 {
     REQUEST(xSyncSetCounterReq);
+    REQUEST_AT_LEAST_SIZE(xSyncSetCounterReq);
     char   n;
 
     swaps(&stuff->length, n);
@@ -2041,6 +2045,7 @@ static int
 SProcSyncChangeCounter(ClientPtr client)
 {
     REQUEST(xSyncChangeCounterReq);
+    REQUEST_AT_LEAST_SIZE(xSyncChangeCounterReq);
     char   n;
 
     swaps(&stuff->length, n);
@@ -2056,6 +2061,7 @@ static int
 SProcSyncQueryCounter(ClientPtr client)
 {
     REQUEST(xSyncQueryCounterReq);
+    REQUEST_AT_LEAST_SIZE(xSyncQueryCounterReq);
     char   n;
 
     swaps(&stuff->length, n);
@@ -2069,6 +2075,7 @@ static int
 SProcSyncDestroyCounter(ClientPtr client)
 {
     REQUEST(xSyncDestroyCounterReq);
+    REQUEST_AT_LEAST_SIZE(xSyncDestroyCounterReq);
     char   n;
 
     swaps(&stuff->length, n);
@@ -2082,6 +2089,7 @@ static int
 SProcSyncAwait(ClientPtr client)
 {
     REQUEST(xSyncAwaitReq);
+    REQUEST_AT_LEAST_SIZE(xSyncAwaitReq);
     char   n;
 
     swaps(&stuff->length, n);
@@ -2096,6 +2104,7 @@ static int
 SProcSyncCreateAlarm(ClientPtr client)
 {
     REQUEST(xSyncCreateAlarmReq);
+    REQUEST_AT_LEAST_SIZE(xSyncCreateAlarmReq);
     char   n;
 
     swaps(&stuff->length, n);
@@ -2111,6 +2120,7 @@ static int
 SProcSyncChangeAlarm(ClientPtr client)
 {
     REQUEST(xSyncChangeAlarmReq);
+    REQUEST_AT_LEAST_SIZE(xSyncChangeAlarmReq);
     char   n;
 
     swaps(&stuff->length, n);
@@ -2125,6 +2135,7 @@ static int
 SProcSyncQueryAlarm(ClientPtr client)
 {
     REQUEST(xSyncQueryAlarmReq);
+    REQUEST_AT_LEAST_SIZE(xSyncQueryAlarmReq);
     char   n;
 
     swaps(&stuff->length, n);
@@ -2138,6 +2149,7 @@ static int
 SProcSyncDestroyAlarm(ClientPtr client)
 {
     REQUEST(xSyncDestroyAlarmReq);
+    REQUEST_AT_LEAST_SIZE(xSyncDestroyAlarmReq);
     char   n;
 
     swaps(&stuff->length, n);
@@ -2151,6 +2163,7 @@ static int
 SProcSyncSetPriority(ClientPtr client)
 {
     REQUEST(xSyncSetPriorityReq);
+    REQUEST_AT_LEAST_SIZE(xSyncSetPriorityReq);
     char   n;
 
     swaps(&stuff->length, n);
@@ -2165,6 +2178,7 @@ static int
 SProcSyncGetPriority(ClientPtr client)
 {
     REQUEST(xSyncGetPriorityReq);
+    REQUEST_AT_LEAST_SIZE(xSyncGetPriorityReq);
     char   n;
 
     swaps(&stuff->length, n);

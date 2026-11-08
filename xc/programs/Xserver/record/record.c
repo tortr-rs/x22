@@ -2652,6 +2652,7 @@ static int
 SProcRecordQueryVersion(ClientPtr client)
 {
     REQUEST(xRecordQueryVersionReq);
+    REQUEST_AT_LEAST_SIZE(xRecordQueryVersionReq);
     register char 	n;
 
     swaps(&stuff->length, n);
@@ -2693,6 +2694,7 @@ static int
 SProcRecordCreateContext(ClientPtr client)
 {
     REQUEST(xRecordCreateContextReq);
+    REQUEST_AT_LEAST_SIZE(xRecordCreateContextReq);
     int			status;
     register char 	n;
 
@@ -2708,6 +2710,7 @@ static int
 SProcRecordRegisterClients(ClientPtr client)
 {
     REQUEST(xRecordRegisterClientsReq);
+    REQUEST_AT_LEAST_SIZE(xRecordRegisterClientsReq);
     int			status;
     register char 	n;
 
@@ -2723,6 +2726,7 @@ static int
 SProcRecordUnregisterClients(ClientPtr client)
 {
     REQUEST(xRecordUnregisterClientsReq);
+    REQUEST_AT_LEAST_SIZE(xRecordUnregisterClientsReq);
     register char 	n;
 
     swaps(&stuff->length, n);
@@ -2738,6 +2742,7 @@ static int
 SProcRecordGetContext(ClientPtr client)
 {
     REQUEST(xRecordGetContextReq);
+    REQUEST_AT_LEAST_SIZE(xRecordGetContextReq);
     register char 	n;
 
     swaps(&stuff->length, n);
@@ -2750,6 +2755,7 @@ static int
 SProcRecordEnableContext(ClientPtr client)
 {
     REQUEST(xRecordEnableContextReq);
+    REQUEST_AT_LEAST_SIZE(xRecordEnableContextReq);
     register char 	n;
 
     swaps(&stuff->length, n);
@@ -2763,6 +2769,7 @@ static int
 SProcRecordDisableContext(ClientPtr client)
 {
     REQUEST(xRecordDisableContextReq);
+    REQUEST_AT_LEAST_SIZE(xRecordDisableContextReq);
     register char 	n;
 
     swaps(&stuff->length, n);
@@ -2776,6 +2783,7 @@ static int
 SProcRecordFreeContext(ClientPtr client)
 {
     REQUEST(xRecordFreeContextReq);
+    REQUEST_AT_LEAST_SIZE(xRecordFreeContextReq);
     register char 	n;
 
     swaps(&stuff->length, n);

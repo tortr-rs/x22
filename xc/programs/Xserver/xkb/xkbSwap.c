@@ -46,6 +46,7 @@ SProcXkbUseExtension(ClientPtr client)
 int n;
 
     REQUEST(xkbUseExtensionReq);
+    REQUEST_AT_LEAST_SIZE(xkbUseExtensionReq);
 
     swaps(&stuff->length,n);
     REQUEST_SIZE_MATCH(xkbUseExtensionReq);
@@ -60,6 +61,7 @@ SProcXkbSelectEvents(ClientPtr client)
 int n;
 
     REQUEST(xkbSelectEventsReq);
+    REQUEST_AT_LEAST_SIZE(xkbSelectEventsReq);
 
     swaps(&stuff->length,n);
     REQUEST_AT_LEAST_SIZE(xkbSelectEventsReq);
@@ -79,7 +81,7 @@ int n;
 	unsigned bit,ndx,maskLeft,dataLeft,size;
 
 	from.c8= (CARD8 *)&stuff[1];
-	dataLeft= (stuff->length*4)-SIZEOF(xkbSelectEventsReq);
+	dataLeft= (client->req_len*4)-SIZEOF(xkbSelectEventsReq);	/* CVE-2020-14361 */
 	maskLeft= (stuff->affectWhich&(~XkbMapNotifyMask));
 	for (ndx=0,bit=1; (maskLeft!=0); ndx++, bit<<=1) {
 	    if (((bit&maskLeft)==0)||(ndx==XkbMapNotify))
@@ -139,6 +141,7 @@ SProcXkbBell(ClientPtr client)
 int	n;
 
     REQUEST(xkbBellReq);
+    REQUEST_AT_LEAST_SIZE(xkbBellReq);
 
     swaps(&stuff->length,n);
     REQUEST_SIZE_MATCH(xkbBellReq);
@@ -158,6 +161,7 @@ SProcXkbGetState(ClientPtr client)
 int	n;
 
     REQUEST(xkbGetStateReq);
+    REQUEST_AT_LEAST_SIZE(xkbGetStateReq);
 
     swaps(&stuff->length,n);
     REQUEST_SIZE_MATCH(xkbGetStateReq);
@@ -171,6 +175,7 @@ SProcXkbLatchLockState(ClientPtr client)
 int 	n;
 
     REQUEST(xkbLatchLockStateReq);
+    REQUEST_AT_LEAST_SIZE(xkbLatchLockStateReq);
 
     swaps(&stuff->length,n);
     REQUEST_SIZE_MATCH(xkbLatchLockStateReq);
@@ -185,6 +190,7 @@ SProcXkbGetControls(ClientPtr client)
 int	n;
 
     REQUEST(xkbGetControlsReq);
+    REQUEST_AT_LEAST_SIZE(xkbGetControlsReq);
 
     swaps(&stuff->length,n);
     REQUEST_SIZE_MATCH(xkbGetControlsReq);
@@ -198,6 +204,7 @@ SProcXkbSetControls(ClientPtr client)
 int	n;
 
     REQUEST(xkbSetControlsReq);
+    REQUEST_AT_LEAST_SIZE(xkbSetControlsReq);
 
     swaps(&stuff->length,n);
     REQUEST_SIZE_MATCH(xkbSetControlsReq);
@@ -233,6 +240,7 @@ SProcXkbGetMap(ClientPtr client)
 int	n;
 
     REQUEST(xkbGetMapReq);
+    REQUEST_AT_LEAST_SIZE(xkbGetMapReq);
 
     swaps(&stuff->length,n);
     REQUEST_SIZE_MATCH(xkbGetMapReq);
@@ -249,6 +257,7 @@ SProcXkbSetMap(ClientPtr client)
 int	n;
 
     REQUEST(xkbSetMapReq);
+    REQUEST_AT_LEAST_SIZE(xkbSetMapReq);
 
     swaps(&stuff->length,n);
     REQUEST_AT_LEAST_SIZE(xkbSetMapReq);
@@ -268,6 +277,7 @@ SProcXkbGetCompatMap(ClientPtr client)
 int	n;
 
     REQUEST(xkbGetCompatMapReq);
+    REQUEST_AT_LEAST_SIZE(xkbGetCompatMapReq);
 
     swaps(&stuff->length,n);
     REQUEST_SIZE_MATCH(xkbGetCompatMapReq);
@@ -283,6 +293,7 @@ SProcXkbSetCompatMap(ClientPtr client)
 int	n;
 
     REQUEST(xkbSetCompatMapReq);
+    REQUEST_AT_LEAST_SIZE(xkbSetCompatMapReq);
 
     swaps(&stuff->length,n);
     REQUEST_AT_LEAST_SIZE(xkbSetCompatMapReq);
@@ -298,6 +309,7 @@ SProcXkbGetIndicatorState(ClientPtr client)
 int	n;
 
     REQUEST(xkbGetIndicatorStateReq);
+    REQUEST_AT_LEAST_SIZE(xkbGetIndicatorStateReq);
 
     swaps(&stuff->length,n);
     REQUEST_SIZE_MATCH(xkbGetIndicatorStateReq);
@@ -311,6 +323,7 @@ SProcXkbGetIndicatorMap(ClientPtr client)
 int	n;
 
     REQUEST(xkbGetIndicatorMapReq);
+    REQUEST_AT_LEAST_SIZE(xkbGetIndicatorMapReq);
 
     swaps(&stuff->length,n);
     REQUEST_SIZE_MATCH(xkbGetIndicatorMapReq);
@@ -325,6 +338,7 @@ SProcXkbSetIndicatorMap(ClientPtr client)
 int	n;
 
     REQUEST(xkbSetIndicatorMapReq);
+    REQUEST_AT_LEAST_SIZE(xkbSetIndicatorMapReq);
 
     swaps(&stuff->length,n);
     REQUEST_AT_LEAST_SIZE(xkbSetIndicatorMapReq);
@@ -339,6 +353,7 @@ SProcXkbGetNamedIndicator(ClientPtr client)
 int	n;
 
     REQUEST(xkbGetNamedIndicatorReq);
+    REQUEST_AT_LEAST_SIZE(xkbGetNamedIndicatorReq);
 
     swaps(&stuff->length,n);
     REQUEST_SIZE_MATCH(xkbGetNamedIndicatorReq);
@@ -355,6 +370,7 @@ SProcXkbSetNamedIndicator(ClientPtr client)
 int	n;
 
     REQUEST(xkbSetNamedIndicatorReq);
+    REQUEST_AT_LEAST_SIZE(xkbSetNamedIndicatorReq);
 
     swaps(&stuff->length,n);
     REQUEST_SIZE_MATCH(xkbSetNamedIndicatorReq);
@@ -374,6 +390,7 @@ SProcXkbGetNames(ClientPtr client)
 int	n;
 
     REQUEST(xkbGetNamesReq);
+    REQUEST_AT_LEAST_SIZE(xkbGetNamesReq);
 
     swaps(&stuff->length,n);
     REQUEST_SIZE_MATCH(xkbGetNamesReq);
@@ -388,6 +405,7 @@ SProcXkbSetNames(ClientPtr client)
 int	n;
 
     REQUEST(xkbSetNamesReq);
+    REQUEST_AT_LEAST_SIZE(xkbSetNamesReq);
 
     swaps(&stuff->length,n);
     REQUEST_AT_LEAST_SIZE(xkbSetNamesReq);
@@ -405,6 +423,7 @@ SProcXkbGetGeometry(ClientPtr client)
 int	n;
 
     REQUEST(xkbGetGeometryReq);
+    REQUEST_AT_LEAST_SIZE(xkbGetGeometryReq);
 
     swaps(&stuff->length,n);
     REQUEST_SIZE_MATCH(xkbGetGeometryReq);
@@ -419,6 +438,7 @@ SProcXkbSetGeometry(ClientPtr client)
 int	n;
 
     REQUEST(xkbSetGeometryReq);
+    REQUEST_AT_LEAST_SIZE(xkbSetGeometryReq);
 
     swaps(&stuff->length,n);
     REQUEST_AT_LEAST_SIZE(xkbSetGeometryReq);
@@ -439,6 +459,7 @@ SProcXkbPerClientFlags(ClientPtr client)
 int	n;
 
     REQUEST(xkbPerClientFlagsReq);
+    REQUEST_AT_LEAST_SIZE(xkbPerClientFlagsReq);
 
     swaps(&stuff->length,n);
     REQUEST_SIZE_MATCH(xkbPerClientFlagsReq);
@@ -457,6 +478,7 @@ SProcXkbListComponents(ClientPtr client)
 int	n;
 
     REQUEST(xkbListComponentsReq);
+    REQUEST_AT_LEAST_SIZE(xkbListComponentsReq);
 
     swaps(&stuff->length,n);
     REQUEST_AT_LEAST_SIZE(xkbListComponentsReq);
@@ -471,6 +493,7 @@ SProcXkbGetKbdByName(ClientPtr client)
 int	n;
 
     REQUEST(xkbGetKbdByNameReq);
+    REQUEST_AT_LEAST_SIZE(xkbGetKbdByNameReq);
 
     swaps(&stuff->length,n);
     REQUEST_AT_LEAST_SIZE(xkbGetKbdByNameReq);
@@ -486,6 +509,7 @@ SProcXkbGetDeviceInfo(ClientPtr client)
 int	n;
 
     REQUEST(xkbGetDeviceInfoReq);
+    REQUEST_AT_LEAST_SIZE(xkbGetDeviceInfoReq);
 
     swaps(&stuff->length,n);
     REQUEST_SIZE_MATCH(xkbGetDeviceInfoReq);
@@ -502,6 +526,7 @@ SProcXkbSetDeviceInfo(ClientPtr client)
 int	n;
 
     REQUEST(xkbSetDeviceInfoReq);
+    REQUEST_AT_LEAST_SIZE(xkbSetDeviceInfoReq);
 
     swaps(&stuff->length,n);
     REQUEST_AT_LEAST_SIZE(xkbSetDeviceInfoReq);
@@ -517,6 +542,7 @@ SProcXkbSetDebuggingFlags(ClientPtr client)
 int	n;
 
     REQUEST(xkbSetDebuggingFlagsReq);
+    REQUEST_AT_LEAST_SIZE(xkbSetDebuggingFlagsReq);
 
     swaps(&stuff->length,n);
     REQUEST_AT_LEAST_SIZE(xkbSetDebuggingFlagsReq);

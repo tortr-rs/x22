@@ -225,6 +225,7 @@ SProcXFixesSelectCursorInput (ClientPtr client)
 {
     register int n;
     REQUEST(xXFixesSelectCursorInputReq);
+    REQUEST_AT_LEAST_SIZE(xXFixesSelectCursorInputReq);
 
     swaps(&stuff->length, n);
     swapl(&stuff->window, n);
@@ -353,6 +354,7 @@ SProcXFixesGetCursorImage (ClientPtr client)
 {
     int n;
     REQUEST(xXFixesGetCursorImageReq);
+    REQUEST_AT_LEAST_SIZE(xXFixesGetCursorImageReq);
     swaps (&stuff->length, n);
     return (*ProcXFixesVector[stuff->xfixesReqType]) (client);
 }
@@ -381,6 +383,7 @@ SProcXFixesSetCursorName (ClientPtr client)
 {
     int n;
     REQUEST(xXFixesSetCursorNameReq);
+    REQUEST_AT_LEAST_SIZE(xXFixesSetCursorNameReq);
 
     swaps (&stuff->length, n);
     REQUEST_AT_LEAST_SIZE(xXFixesSetCursorNameReq);
@@ -430,6 +433,7 @@ SProcXFixesGetCursorName (ClientPtr client)
 {
     int n;
     REQUEST(xXFixesSetCursorNameReq);
+    REQUEST_AT_LEAST_SIZE(xXFixesSetCursorNameReq);
 
     swaps (&stuff->length, n);
     REQUEST_SIZE_MATCH(xXFixesGetCursorNameReq);
@@ -509,6 +513,7 @@ SProcXFixesGetCursorImageAndName (ClientPtr client)
 {
     int n;
     REQUEST(xXFixesGetCursorImageAndNameReq);
+    REQUEST_AT_LEAST_SIZE(xXFixesGetCursorImageAndNameReq);
     swaps (&stuff->length, n);
     return (*ProcXFixesVector[stuff->xfixesReqType]) (client);
 }
@@ -642,6 +647,7 @@ SProcXFixesChangeCursor (ClientPtr client)
 {
     int n;
     REQUEST(xXFixesChangeCursorReq);
+    REQUEST_AT_LEAST_SIZE(xXFixesChangeCursorReq);
 
     swaps (&stuff->length, n);
     REQUEST_SIZE_MATCH(xXFixesChangeCursorReq);
@@ -678,6 +684,7 @@ SProcXFixesChangeCursorByName (ClientPtr client)
 {
     int n;
     REQUEST(xXFixesChangeCursorByNameReq);
+    REQUEST_AT_LEAST_SIZE(xXFixesChangeCursorByNameReq);
 
     swaps (&stuff->length, n);
     REQUEST_AT_LEAST_SIZE (xXFixesChangeCursorByNameReq);

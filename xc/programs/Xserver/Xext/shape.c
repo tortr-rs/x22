@@ -1155,6 +1155,7 @@ SProcShapeQueryVersion(ClientPtr client)
 {
     int    n;
     REQUEST (xShapeQueryVersionReq);
+    REQUEST_AT_LEAST_SIZE(xShapeQueryVersionReq);
 
     swaps (&stuff->length, n);
     return ProcShapeQueryVersion (client);
@@ -1165,6 +1166,7 @@ SProcShapeRectangles(ClientPtr client)
 {
     char   n;
     REQUEST (xShapeRectanglesReq);
+    REQUEST_AT_LEAST_SIZE(xShapeRectanglesReq);
 
     swaps (&stuff->length, n);
     REQUEST_AT_LEAST_SIZE (xShapeRectanglesReq);
@@ -1180,6 +1182,7 @@ SProcShapeMask(ClientPtr client)
 {
     char   n;
     REQUEST (xShapeMaskReq);
+    REQUEST_AT_LEAST_SIZE(xShapeMaskReq);
 
     swaps (&stuff->length, n);
     REQUEST_SIZE_MATCH (xShapeMaskReq);
@@ -1195,6 +1198,7 @@ SProcShapeCombine(ClientPtr client)
 {
     char   n;
     REQUEST (xShapeCombineReq);
+    REQUEST_AT_LEAST_SIZE(xShapeCombineReq);
 
     swaps (&stuff->length, n);
     REQUEST_SIZE_MATCH (xShapeCombineReq);
@@ -1210,6 +1214,7 @@ SProcShapeOffset(ClientPtr client)
 {
     char   n;
     REQUEST (xShapeOffsetReq);
+    REQUEST_AT_LEAST_SIZE(xShapeOffsetReq);
 
     swaps (&stuff->length, n);
     REQUEST_SIZE_MATCH (xShapeOffsetReq);
@@ -1224,6 +1229,7 @@ SProcShapeQueryExtents(ClientPtr client)
 {
     char   n;
     REQUEST (xShapeQueryExtentsReq);
+    REQUEST_AT_LEAST_SIZE(xShapeQueryExtentsReq);
 
     swaps (&stuff->length, n);
     REQUEST_SIZE_MATCH (xShapeQueryExtentsReq);
@@ -1236,6 +1242,7 @@ SProcShapeSelectInput(ClientPtr client)
 {
     char   n;
     REQUEST (xShapeSelectInputReq);
+    REQUEST_AT_LEAST_SIZE(xShapeSelectInputReq);
 
     swaps (&stuff->length, n);
     REQUEST_SIZE_MATCH (xShapeSelectInputReq);
@@ -1248,6 +1255,7 @@ SProcShapeInputSelected(ClientPtr client)
 {
     int    n;
     REQUEST (xShapeInputSelectedReq);
+    REQUEST_AT_LEAST_SIZE(xShapeInputSelectedReq);
 
     swaps (&stuff->length, n);
     REQUEST_SIZE_MATCH (xShapeInputSelectedReq);
@@ -1259,6 +1267,7 @@ static int
 SProcShapeGetRectangles(ClientPtr client)
 {
     REQUEST(xShapeGetRectanglesReq);
+    REQUEST_AT_LEAST_SIZE(xShapeGetRectanglesReq);
     char   n;
 
     swaps (&stuff->length, n);

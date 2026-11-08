@@ -501,6 +501,7 @@ SProcXTestGetVersion(ClientPtr client)
 {
     register int n;
     REQUEST(xXTestGetVersionReq);
+    REQUEST_AT_LEAST_SIZE(xXTestGetVersionReq);
 
     swaps(&stuff->length, n);
     REQUEST_SIZE_MATCH(xXTestGetVersionReq);
@@ -513,6 +514,7 @@ SProcXTestCompareCursor(ClientPtr client)
 {
     register int n;
     REQUEST(xXTestCompareCursorReq);
+    REQUEST_AT_LEAST_SIZE(xXTestCompareCursorReq);
 
     swaps(&stuff->length, n);
     REQUEST_SIZE_MATCH(xXTestCompareCursorReq);
@@ -550,6 +552,7 @@ SProcXTestFakeInput(ClientPtr client)
 {
     register int n;
     REQUEST(xReq);
+    REQUEST_AT_LEAST_SIZE(xReq);
 
     swaps(&stuff->length, n);
     n = XTestSwapFakeInput(client, stuff);
@@ -563,6 +566,7 @@ SProcXTestGrabControl(ClientPtr client)
 {
     register int n;
     REQUEST(xXTestGrabControlReq);
+    REQUEST_AT_LEAST_SIZE(xXTestGrabControlReq);
 
     swaps(&stuff->length, n);
     REQUEST_SIZE_MATCH(xXTestGrabControlReq);

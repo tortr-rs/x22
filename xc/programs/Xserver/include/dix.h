@@ -70,9 +70,12 @@ SOFTWARE.
     if ((sizeof(req) >> 2) > client->req_len )\
          return(BadLength)
 
+/* n comes from the client: it can be big enough to wrap round (CVE-2014-8092) */
 #define REQUEST_FIXED_SIZE(req, n)\
     if (((sizeof(req) >> 2) > client->req_len) || \
-        (((sizeof(req) + (n) + 3) >> 2) != client->req_len)) \
+        (((n) >> 2) >= client->req_len) || \
+        ((((unsigned long long) sizeof(req) + (n) + 3) >> 2) != \
+	 (unsigned long long) client->req_len)) \
          return(BadLength)
 
 #define LEGAL_NEW_RESOURCE(id,client)\

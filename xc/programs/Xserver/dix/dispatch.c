@@ -2030,7 +2030,10 @@ ProcPutImage(ClientPtr client)
 
     tmpImage = (char *)&stuff[1];
     lengthProto = length;
-	
+
+    /* height times the line length mustn't wrap round (CVE-2014-8092) */
+    if (stuff->height && lengthProto >= 0x7fffffffL / stuff->height)
+	return BadLength;
     if (((((lengthProto * stuff->height) + (unsigned)3) >> 2) + 
 	(sizeof(xPutImageReq) >> 2)) != client->req_len)
 	return BadLength;
@@ -3122,7 +3125,9 @@ ProcFreeCursor(ClientPtr client)
     REQUEST_SIZE_MATCH(xResourceReq);
     pCursor = (CursorPtr)SecurityLookupIDByType(client, stuff->id,
 					RT_CURSOR, SecurityDestroyAccess);
-    if (pCursor) 
+    /* the root cursor is the server's: freeing it left every window pointing at
+     * freed memory (CVE-2025-26594) */
+    if (pCursor && pCursor != rootCursor)
     {
 	FreeResource(stuff->id, RT_NONE);
 	return (client->noClientException);
@@ -3904,7 +3909,12 @@ ProcEstablishConnection(ClientPtr client)
     prefix = (xConnClientPrefix *)((char *)stuff + sz_xReq);
     auth_proto = (char *)prefix + sz_xConnClientPrefix;
     auth_string = auth_proto + ((prefix->nbytesAuthProto + 3) & ~3);
-    if ((prefix->majorVersion != X_PROTOCOL) ||
+    /* the two names have to be inside the request (CVE-2017-12176) */
+    if ((client->req_len << 2) != sz_xReq + sz_xConnClientPrefix +
+	((prefix->nbytesAuthProto + 3) & ~3) +
+	((prefix->nbytesAuthString + 3) & ~3))
+	reason = "Bad length";
+    else if ((prefix->majorVersion != X_PROTOCOL) ||
 	(prefix->minorVersion != X_PROTOCOL_REVISION))
 	reason = "Protocol version mismatch";
     else

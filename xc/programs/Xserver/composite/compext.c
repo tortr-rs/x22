@@ -268,6 +268,7 @@ SProcCompositeQueryVersion (ClientPtr client)
 {
     int n;
     REQUEST(xCompositeQueryVersionReq);
+    REQUEST_AT_LEAST_SIZE(xCompositeQueryVersionReq);
 
     swaps(&stuff->length, n);
     REQUEST_SIZE_MATCH(xCompositeQueryVersionReq);
@@ -281,6 +282,7 @@ SProcCompositeRedirectWindow (ClientPtr client)
 {
     int n;
     REQUEST(xCompositeRedirectWindowReq);
+    REQUEST_AT_LEAST_SIZE(xCompositeRedirectWindowReq);
 
     swaps(&stuff->length, n);
     REQUEST_SIZE_MATCH(xCompositeRedirectWindowReq);
@@ -293,6 +295,7 @@ SProcCompositeRedirectSubwindows (ClientPtr client)
 {
     int n;
     REQUEST(xCompositeRedirectSubwindowsReq);
+    REQUEST_AT_LEAST_SIZE(xCompositeRedirectSubwindowsReq);
 
     swaps(&stuff->length, n);
     REQUEST_SIZE_MATCH(xCompositeRedirectSubwindowsReq);
@@ -305,6 +308,7 @@ SProcCompositeUnredirectWindow (ClientPtr client)
 {
     int n;
     REQUEST(xCompositeUnredirectWindowReq);
+    REQUEST_AT_LEAST_SIZE(xCompositeUnredirectWindowReq);
 
     swaps(&stuff->length, n);
     REQUEST_SIZE_MATCH(xCompositeUnredirectWindowReq);
@@ -317,6 +321,7 @@ SProcCompositeUnredirectSubwindows (ClientPtr client)
 {
     int n;
     REQUEST(xCompositeUnredirectSubwindowsReq);
+    REQUEST_AT_LEAST_SIZE(xCompositeUnredirectSubwindowsReq);
 
     swaps(&stuff->length, n);
     REQUEST_SIZE_MATCH(xCompositeUnredirectSubwindowsReq);
@@ -329,6 +334,7 @@ SProcCompositeCreateRegionFromBorderClip (ClientPtr client)
 {
     int n;
     REQUEST(xCompositeCreateRegionFromBorderClipReq);
+    REQUEST_AT_LEAST_SIZE(xCompositeCreateRegionFromBorderClipReq);
 
     swaps(&stuff->length, n);
     REQUEST_SIZE_MATCH(xCompositeCreateRegionFromBorderClipReq);
@@ -342,6 +348,7 @@ SProcCompositeNameWindowPixmap (ClientPtr client)
 {
     int n;
     REQUEST(xCompositeNameWindowPixmapReq);
+    REQUEST_AT_LEAST_SIZE(xCompositeNameWindowPixmapReq);
 
     swaps(&stuff->length, n);
     REQUEST_SIZE_MATCH(xCompositeNameWindowPixmapReq);

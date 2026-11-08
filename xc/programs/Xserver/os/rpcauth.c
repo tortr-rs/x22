@@ -74,6 +74,11 @@ authdes_ezdecode(char *inmsg, int len)
     SVCXPRT         xprt;
 
     temp_inmsg = (char *) xalloc(len);
+    if (!temp_inmsg) {
+	/* before anyone has signed in, so failing here mustn't crash (CVE-2014-8091) */
+	why = AUTH_FAILED;
+	return NULL;
+    }
     memmove(temp_inmsg, inmsg, len);
 
     memset((char *)&msg, 0, sizeof(msg));

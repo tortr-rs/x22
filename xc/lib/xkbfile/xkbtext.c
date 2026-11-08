@@ -59,21 +59,31 @@
 
 #define	BUFFER_SIZE	512
 
-static char textBuffer[BUFFER_SIZE];
-static int  tbNext= 0;
+/* the strings these return are only good until eight more have been asked for.
+ * this used to be one 512 byte buffer that said NULL to anything bigger, and
+ * nobody checked (CVE-2017-13723): now each buffer grows to what's asked */
+#define	NUM_BUFFER	8
+
+static struct {
+    unsigned	size;
+    char *	buffer;
+} textBuffer[NUM_BUFFER];
+static int textBufferIndex;
 
 static char *
 tbGetBuffer(unsigned size)
 {
-char *rtrn;
+int n= textBufferIndex;
 
-    if (size>=BUFFER_SIZE)
-	return NULL;
-    if ((BUFFER_SIZE-tbNext)<=size)
-	tbNext= 0;
-    rtrn= &textBuffer[tbNext];
-    tbNext+= size;
-    return rtrn;
+    textBufferIndex= (textBufferIndex+1)%NUM_BUFFER;
+    if (size>textBuffer[n].size) {
+	char *b= (char *)realloc(textBuffer[n].buffer,size);
+	if (!b)
+	    abort();	/* a few hundred bytes: nothing else will work either */
+	textBuffer[n].buffer= b;
+	textBuffer[n].size= size;
+    }
+    return textBuffer[n].buffer;
 }
 
 /***====================================================================***/
@@ -87,11 +97,9 @@ char	*rtrn,*tmp;
     if (tmp!=NULL) {
 	int	len;
 	len= strlen(tmp)+1;
-	if (len>BUFFER_SIZE)
-	    len= BUFFER_SIZE-2;
 	rtrn= tbGetBuffer(len);
 	strncpy(rtrn,tmp,len);
-	rtrn[len]= '\0';
+	rtrn[len-1]= '\0';
     }
     else {
 	rtrn= tbGetBuffer(1);
@@ -132,13 +140,11 @@ char  numBuf[20];
 
     len= strlen(tmp)+1;
     if (format==XkbCFile)
-	len+= 4;
-    if (len>=BUFFER_SIZE)
-	len= BUFFER_SIZE-1;
+	len+= 5;	/* "vmod_" */
     rtrn= tbGetBuffer(len);
     if (format==XkbCFile) {
 	 strcpy(rtrn,"vmod_");
-	 strncpy(&rtrn[5],tmp,len-4);
+	 strncpy(&rtrn[5],tmp,len-5);
     }
     else strncpy(rtrn,tmp,len);
     return rtrn;
@@ -177,12 +183,14 @@ char *str,buf[BUFFER_SIZE];
 		len= strlen(tmp)+1+(str==buf?0:1);
 		if (format==XkbCFile)
 		    len+= 4;
-		if ((str-(buf+len))<=BUFFER_SIZE) {
-		    if (str!=buf) {
-			if (format==XkbCFile)	*str++= '|';
-			else			*str++= '+';
-			len--;
-		    }
+		/* the old test was always true, and long names ran off the end of buf
+		 * (CVE-2025-26595): what doesn't fit is left out */
+		if ((str-buf)+len>BUFFER_SIZE)
+		    continue;
+		if (str!=buf) {
+		    if (format==XkbCFile)	*str++= '|';
+		    else			*str++= '+';
+		    len--;
 		}
 		if (format==XkbCFile)
 		     sprintf(str,"%sMask",tmp);
@@ -198,8 +206,6 @@ char *str,buf[BUFFER_SIZE];
     else	len= 0;
     if (str)
 	len+= strlen(str)+(mm==NULL?0:1);
-    if (len>=BUFFER_SIZE)
-	len= BUFFER_SIZE-1;
     rtrn= tbGetBuffer(len+1);
     rtrn[0]= '\0';
 

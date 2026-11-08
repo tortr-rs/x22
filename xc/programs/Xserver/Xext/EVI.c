@@ -143,6 +143,7 @@ static int
 SProcEVIQueryVersion(ClientPtr client)
 {
    REQUEST(xEVIQueryVersionReq);
+    REQUEST_AT_LEAST_SIZE(xEVIQueryVersionReq);
    int n;
    swaps(&stuff->length, n);
    return ProcEVIQueryVersion(client);
@@ -153,6 +154,7 @@ SProcEVIGetVisualInfo(ClientPtr client)
 {
     register int n;
     REQUEST(xEVIGetVisualInfoReq);
+    REQUEST_AT_LEAST_SIZE(xEVIGetVisualInfoReq);
     swaps(&stuff->length, n);
     return ProcEVIGetVisualInfo(client);
 }

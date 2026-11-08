@@ -91,7 +91,10 @@ extern RegDataRec miBrokenData;
 #define REGION_BOX(reg,i) (&REGION_BOXPTR(reg)[i])
 #define REGION_TOP(reg) REGION_BOX(reg, (reg)->data->numRects)
 #define REGION_END(reg) REGION_BOX(reg, (reg)->data->numRects - 1)
-#define REGION_SZOF(n) (sizeof(RegDataRec) + ((n) * sizeof(BoxRec)))
+/* too many boxes asks for more memory than there is, so the allocation fails instead of
+ * wrapping round to a small one (CVE-2014-8092) */
+#define REGION_SZOF(n) ((unsigned long) (n) < (0x7fffffffUL - sizeof(RegDataRec)) / sizeof(BoxRec) ? \
+			sizeof(RegDataRec) + ((n) * sizeof(BoxRec)) : ~0UL)
 
 #ifdef NEED_SCREEN_REGIONS
 

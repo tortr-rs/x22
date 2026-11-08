@@ -1156,6 +1156,7 @@ SProcShmQueryVersion(ClientPtr client)
 {
     int n;
     REQUEST(xShmQueryVersionReq);
+    REQUEST_AT_LEAST_SIZE(xShmQueryVersionReq);
 
     swaps(&stuff->length, n);
     return ProcShmQueryVersion(client);
@@ -1166,6 +1167,7 @@ SProcShmAttach(ClientPtr client)
 {
     int n;
     REQUEST(xShmAttachReq);
+    REQUEST_AT_LEAST_SIZE(xShmAttachReq);
     swaps(&stuff->length, n);
     REQUEST_SIZE_MATCH(xShmAttachReq);
     swapl(&stuff->shmseg, n);
@@ -1178,6 +1180,7 @@ SProcShmDetach(ClientPtr client)
 {
     int n;
     REQUEST(xShmDetachReq);
+    REQUEST_AT_LEAST_SIZE(xShmDetachReq);
     swaps(&stuff->length, n);
     REQUEST_SIZE_MATCH(xShmDetachReq);
     swapl(&stuff->shmseg, n);
@@ -1189,6 +1192,7 @@ SProcShmPutImage(ClientPtr client)
 {
     int n;
     REQUEST(xShmPutImageReq);
+    REQUEST_AT_LEAST_SIZE(xShmPutImageReq);
     swaps(&stuff->length, n);
     REQUEST_SIZE_MATCH(xShmPutImageReq);
     swapl(&stuff->drawable, n);
@@ -1215,6 +1219,7 @@ SProcShmGetImage(ClientPtr client)
 {
     int n;
     REQUEST(xShmGetImageReq);
+    REQUEST_AT_LEAST_SIZE(xShmGetImageReq);
     swaps(&stuff->length, n);
     REQUEST_SIZE_MATCH(xShmGetImageReq);
     swapl(&stuff->drawable, n);
@@ -1237,6 +1242,7 @@ SProcShmCreatePixmap(ClientPtr client)
 {
     int n;
     REQUEST(xShmCreatePixmapReq);
+    REQUEST_AT_LEAST_SIZE(xShmCreatePixmapReq);
     swaps(&stuff->length, n);
     REQUEST_SIZE_MATCH(xShmCreatePixmapReq);
     swapl(&stuff->drawable, n);

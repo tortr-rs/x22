@@ -258,6 +258,7 @@ SProcFontCacheQueryVersion(ClientPtr client)
 {
     int n;
     REQUEST(xFontCacheQueryVersionReq);
+    REQUEST_AT_LEAST_SIZE(xFontCacheQueryVersionReq);
     swaps(&stuff->length, n);
     return ProcFontCacheQueryVersion(client);
 }
@@ -267,6 +268,7 @@ SProcFontCacheGetCacheSettings(ClientPtr client)
 {
     int n;
     REQUEST(xFontCacheGetCacheSettingsReq);
+    REQUEST_AT_LEAST_SIZE(xFontCacheGetCacheSettingsReq);
     swaps(&stuff->length, n);
     REQUEST_SIZE_MATCH(xFontCacheGetCacheSettingsReq);
     return ProcFontCacheGetCacheSettings(client);
@@ -277,6 +279,7 @@ SProcFontCacheGetCacheStatistics(ClientPtr client)
 {
     int n;
     REQUEST(xFontCacheGetCacheStatisticsReq);
+    REQUEST_AT_LEAST_SIZE(xFontCacheGetCacheStatisticsReq);
     swaps(&stuff->length, n);
     REQUEST_SIZE_MATCH(xFontCacheGetCacheStatisticsReq);
     return ProcFontCacheGetCacheStatistics(client);
@@ -287,6 +290,7 @@ SProcFontCacheChangeCacheSettings(ClientPtr client)
 {
     int n;
     REQUEST(xFontCacheChangeCacheSettingsReq);
+    REQUEST_AT_LEAST_SIZE(xFontCacheChangeCacheSettingsReq);
     swaps(&stuff->length, n);
     REQUEST_SIZE_MATCH(xFontCacheChangeCacheSettingsReq);
     /* XXX */

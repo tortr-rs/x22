@@ -289,8 +289,14 @@ typedef	struct _XkbControls {
 #define	XkbAX_NeedFeedback(c,w)	(XkbAX_AnyFeedback(c)&&XkbAX_NeedOption(c,w))
 
 typedef struct _XkbServerMapRec {
+#if defined(XKB_IN_SERVER) || defined(XFree86Server)
+	/* wider in the server: these got sizes that didn't fit (CVE-2026-93518) */
+	unsigned int		 num_acts;
+	unsigned int		 size_acts;
+#else
 	unsigned short		 num_acts;
 	unsigned short		 size_acts;
+#endif
 	XkbAction		*acts;
 
 	XkbBehavior		*behaviors;
@@ -323,8 +329,13 @@ typedef struct _XkbClientMapRec {
 	unsigned char		 num_types;
 	XkbKeyTypePtr		 types;
 
+#if defined(XKB_IN_SERVER) || defined(XFree86Server)
+	unsigned int		 size_syms;
+	unsigned int		 num_syms;
+#else
 	unsigned short		 size_syms;
 	unsigned short		 num_syms;
+#endif
 	KeySym			*syms;
 	XkbSymMapPtr		 key_sym_map;
 

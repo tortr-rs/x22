@@ -97,6 +97,7 @@ SProcXFixesCreateRegion (ClientPtr client)
 {
     register int n;
     REQUEST(xXFixesCreateRegionReq);
+    REQUEST_AT_LEAST_SIZE(xXFixesCreateRegionReq);
     
     swaps(&stuff->length, n);
     REQUEST_AT_LEAST_SIZE(xXFixesCreateRegionReq);
@@ -142,6 +143,7 @@ SProcXFixesCreateRegionFromBitmap (ClientPtr client)
 {
     int n;
     REQUEST (xXFixesCreateRegionFromBitmapReq);
+    REQUEST_AT_LEAST_SIZE(xXFixesCreateRegionFromBitmapReq);
 
     swaps(&stuff->length, n);
     REQUEST_SIZE_MATCH (xXFixesCreateRegionFromBitmapReq);
@@ -206,6 +208,7 @@ SProcXFixesCreateRegionFromWindow (ClientPtr client)
 {
     int n;
     REQUEST (xXFixesCreateRegionFromWindowReq);
+    REQUEST_AT_LEAST_SIZE(xXFixesCreateRegionFromWindowReq);
 
     swaps(&stuff->length, n);
     REQUEST_SIZE_MATCH (xXFixesCreateRegionFromWindowReq);
@@ -253,6 +256,7 @@ SProcXFixesCreateRegionFromGC (ClientPtr client)
 {
     int n;
     REQUEST (xXFixesCreateRegionFromGCReq);
+    REQUEST_AT_LEAST_SIZE(xXFixesCreateRegionFromGCReq);
 
     swaps(&stuff->length, n);
     REQUEST_SIZE_MATCH (xXFixesCreateRegionFromGCReq);
@@ -305,6 +309,7 @@ SProcXFixesCreateRegionFromPicture (ClientPtr client)
 {
     int n;
     REQUEST (xXFixesCreateRegionFromPictureReq);
+    REQUEST_AT_LEAST_SIZE(xXFixesCreateRegionFromPictureReq);
 
     swaps(&stuff->length, n);
     REQUEST_SIZE_MATCH (xXFixesCreateRegionFromPictureReq);
@@ -330,6 +335,7 @@ SProcXFixesDestroyRegion (ClientPtr client)
 {
     int n;
     REQUEST (xXFixesDestroyRegionReq);
+    REQUEST_AT_LEAST_SIZE(xXFixesDestroyRegionReq);
 
     swaps (&stuff->length, n);
     REQUEST_SIZE_MATCH(xXFixesDestroyRegionReq);
@@ -369,6 +375,7 @@ SProcXFixesSetRegion (ClientPtr client)
 {
     int n;
     REQUEST (xXFixesSetRegionReq);
+    REQUEST_AT_LEAST_SIZE(xXFixesSetRegionReq);
 
     swaps (&stuff->length, n);
     REQUEST_AT_LEAST_SIZE(xXFixesSetRegionReq);
@@ -397,6 +404,7 @@ SProcXFixesCopyRegion (ClientPtr client)
 {
     int n;
     REQUEST (xXFixesCopyRegionReq);
+    REQUEST_AT_LEAST_SIZE(xXFixesCopyRegionReq);
 
     swaps (&stuff->length, n);
     REQUEST_AT_LEAST_SIZE(xXFixesCopyRegionReq);
@@ -442,6 +450,7 @@ SProcXFixesCombineRegion (ClientPtr client)
 {
     int n;
     REQUEST (xXFixesCombineRegionReq);
+    REQUEST_AT_LEAST_SIZE(xXFixesCombineRegionReq);
 
     swaps (&stuff->length, n);
     REQUEST_SIZE_MATCH (xXFixesCombineRegionReq);
@@ -489,6 +498,7 @@ SProcXFixesInvertRegion (ClientPtr client)
 {
     int n;
     REQUEST(xXFixesInvertRegionReq);
+    REQUEST_AT_LEAST_SIZE(xXFixesInvertRegionReq);
 
     swaps (&stuff->length, n);
     REQUEST_SIZE_MATCH(xXFixesInvertRegionReq);
@@ -519,6 +529,7 @@ SProcXFixesTranslateRegion (ClientPtr client)
 {
     int n;
     REQUEST(xXFixesTranslateRegionReq);
+    REQUEST_AT_LEAST_SIZE(xXFixesTranslateRegionReq);
 
     swaps (&stuff->length, n);
     REQUEST_SIZE_MATCH(xXFixesTranslateRegionReq);
@@ -548,6 +559,7 @@ SProcXFixesRegionExtents (ClientPtr client)
 {
     int n;
     REQUEST(xXFixesRegionExtentsReq);
+    REQUEST_AT_LEAST_SIZE(xXFixesRegionExtentsReq);
     
     swaps (&stuff->length, n);
     REQUEST_SIZE_MATCH(xXFixesRegionExtentsReq);
@@ -616,6 +628,7 @@ SProcXFixesFetchRegion (ClientPtr client)
 {
     int n;
     REQUEST(xXFixesFetchRegionReq);
+    REQUEST_AT_LEAST_SIZE(xXFixesFetchRegionReq);
 
     swaps (&stuff->length, n);
     REQUEST_SIZE_MATCH(xXFixesFetchRegionReq);
@@ -655,6 +668,7 @@ SProcXFixesSetGCClipRegion (ClientPtr client)
 {
     int n;
     REQUEST(xXFixesSetGCClipRegionReq);
+    REQUEST_AT_LEAST_SIZE(xXFixesSetGCClipRegionReq);
 
     swaps (&stuff->length, n);
     REQUEST_SIZE_MATCH(xXFixesSetGCClipRegionReq);
@@ -740,6 +754,7 @@ SProcXFixesSetWindowShapeRegion (ClientPtr client)
 {
     int n;
     REQUEST(xXFixesSetWindowShapeRegionReq);
+    REQUEST_AT_LEAST_SIZE(xXFixesSetWindowShapeRegionReq);
 
     swaps (&stuff->length, n);
     REQUEST_SIZE_MATCH(xXFixesSetWindowShapeRegionReq);
@@ -779,6 +794,7 @@ SProcXFixesSetPictureClipRegion (ClientPtr client)
 {
     int n;
     REQUEST(xXFixesSetPictureClipRegionReq);
+    REQUEST_AT_LEAST_SIZE(xXFixesSetPictureClipRegionReq);
     
     swaps (&stuff->length, n);
     REQUEST_SIZE_MATCH (xXFixesSetPictureClipRegionReq);
@@ -836,6 +852,7 @@ SProcXFixesExpandRegion (ClientPtr client)
 {
     int n;
     REQUEST (xXFixesExpandRegionReq);
+    REQUEST_AT_LEAST_SIZE(xXFixesExpandRegionReq);
 
     swaps (&stuff->length, n);
     REQUEST_SIZE_MATCH (xXFixesExpandRegionReq);

@@ -158,7 +158,8 @@ XkbNamesPtr	names;
 	    (!XkbIsLegalKeycode(xkb->max_key_code))||
 	    (xkb->max_key_code<xkb->min_key_code)) 
 	    return BadValue;
-	names->keys= _XkbTypedCalloc((xkb->max_key_code+1),XkbKeyNameRec);
+	/* room for every keycode there can be: max_key_code can go up later (CVE-2026-93520) */
+	names->keys= _XkbTypedCalloc(XkbMaxLegalKeyCode+1,XkbKeyNameRec);
 	if (names->keys==NULL)
 	    return BadAlloc;
     }

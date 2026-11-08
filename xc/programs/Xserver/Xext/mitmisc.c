@@ -133,6 +133,7 @@ SProcMITSetBugMode(ClientPtr client)
 {
     int n;
     REQUEST(xMITSetBugModeReq);
+    REQUEST_AT_LEAST_SIZE(xMITSetBugModeReq);
 
     swaps(&stuff->length, n);
     return ProcMITSetBugMode(client);
@@ -143,6 +144,7 @@ SProcMITGetBugMode(ClientPtr client)
 {
     int n;
     REQUEST(xMITGetBugModeReq);
+    REQUEST_AT_LEAST_SIZE(xMITGetBugModeReq);
 
     swaps(&stuff->length, n);
     return ProcMITGetBugMode(client);

@@ -704,6 +704,7 @@ SProcXF86MiscQueryVersion(ClientPtr client)
 {
     int n;
     REQUEST(xXF86MiscQueryVersionReq);
+    REQUEST_AT_LEAST_SIZE(xXF86MiscQueryVersionReq);
     swaps(&stuff->length, n);
     return ProcXF86MiscQueryVersion(client);
 }
@@ -714,6 +715,7 @@ SProcXF86MiscGetSaver(ClientPtr client)
 {
     int n;
     REQUEST(xXF86MiscGetSaverReq);
+    REQUEST_AT_LEAST_SIZE(xXF86MiscGetSaverReq);
     swaps(&stuff->length, n);
     REQUEST_SIZE_MATCH(xXF86MiscGetSaverReq);
     swaps(&stuff->screen, n);
@@ -725,6 +727,7 @@ SProcXF86MiscSetSaver(ClientPtr client)
 {
     int n;
     REQUEST(xXF86MiscSetSaverReq);
+    REQUEST_AT_LEAST_SIZE(xXF86MiscSetSaverReq);
     swaps(&stuff->length, n);
     REQUEST_SIZE_MATCH(xXF86MiscSetSaverReq);
     swaps(&stuff->screen, n);
@@ -739,6 +742,7 @@ SProcXF86MiscGetMouseSettings(ClientPtr client)
 {
     int n;
     REQUEST(xXF86MiscGetMouseSettingsReq);
+    REQUEST_AT_LEAST_SIZE(xXF86MiscGetMouseSettingsReq);
     swaps(&stuff->length, n);
     REQUEST_SIZE_MATCH(xXF86MiscGetMouseSettingsReq);
     return ProcXF86MiscGetMouseSettings(client);
@@ -749,6 +753,7 @@ SProcXF86MiscGetKbdSettings(ClientPtr client)
 {
     int n;
     REQUEST(xXF86MiscGetKbdSettingsReq);
+    REQUEST_AT_LEAST_SIZE(xXF86MiscGetKbdSettingsReq);
     swaps(&stuff->length, n);
     REQUEST_SIZE_MATCH(xXF86MiscGetKbdSettingsReq);
     return ProcXF86MiscGetKbdSettings(client);
@@ -759,6 +764,7 @@ SProcXF86MiscSetMouseSettings(ClientPtr client)
 {
     int n;
     REQUEST(xXF86MiscSetMouseSettingsReq);
+    REQUEST_AT_LEAST_SIZE(xXF86MiscSetMouseSettingsReq);
     swaps(&stuff->length, n);
     REQUEST_SIZE_MATCH(xXF86MiscSetMouseSettingsReq);
     swapl(&stuff->mousetype, n);
@@ -776,6 +782,7 @@ SProcXF86MiscSetKbdSettings(ClientPtr client)
 {
     int n;
     REQUEST(xXF86MiscSetKbdSettingsReq);
+    REQUEST_AT_LEAST_SIZE(xXF86MiscSetKbdSettingsReq);
     swaps(&stuff->length, n);
     REQUEST_SIZE_MATCH(xXF86MiscSetKbdSettingsReq);
     swapl(&stuff->kbdtype, n);
@@ -789,6 +796,7 @@ SProcXF86MiscSetGrabKeysState(ClientPtr client)
 {
     int n;
     REQUEST(xXF86MiscSetGrabKeysStateReq);
+    REQUEST_AT_LEAST_SIZE(xXF86MiscSetGrabKeysStateReq);
     swaps(&stuff->length, n);
     REQUEST_SIZE_MATCH(xXF86MiscSetGrabKeysStateReq);
     swaps(&stuff->enable, n);
@@ -800,6 +808,7 @@ SProcXF86MiscSetClientVersion(ClientPtr client)
 {
     int n;
     REQUEST(xXF86MiscSetClientVersionReq);
+    REQUEST_AT_LEAST_SIZE(xXF86MiscSetClientVersionReq);
     swaps(&stuff->length, n);
     REQUEST_SIZE_MATCH(xXF86MiscSetClientVersionReq);
     swaps(&stuff->major, n);
@@ -812,6 +821,7 @@ SProcXF86MiscGetFilePaths(ClientPtr client)
 {
     int n;
     REQUEST(xXF86MiscGetFilePathsReq);
+    REQUEST_AT_LEAST_SIZE(xXF86MiscGetFilePathsReq);
     swaps(&stuff->length, n);
     REQUEST_SIZE_MATCH(xXF86MiscGetFilePathsReq);
     return ProcXF86MiscGetFilePaths(client);
@@ -822,6 +832,7 @@ SProcXF86MiscPassMessage(ClientPtr client)
 {
     int n;
     REQUEST(xXF86MiscPassMessageReq);
+    REQUEST_AT_LEAST_SIZE(xXF86MiscPassMessageReq);
     swaps(&stuff->length, n);
     REQUEST_SIZE_MATCH(xXF86MiscPassMessageReq);
     return ProcXF86MiscPassMessage(client);

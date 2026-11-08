@@ -1550,11 +1550,15 @@ GetHosts (
     int 	n = 0;
     unsigned char *ptr;
     HOST	*host;
-    int			nHosts = 0;
+    int			nHosts = 0, i;
 
     *pEnabled = AccessEnabled ? EnableAccess : DisableAccess;
     for (host = validhosts; host; host = host->next)
     {
+	/* more than a megabyte of host names is silly, and the reply's length has to fit
+	 * (CVE-2014-8092): the hosts after that aren't listed */
+	if (n + (((host->len + 3) >> 2) << 2) + sizeof(xHostEntry) >= 1048576)
+	    break;
 	nHosts++;
 	n += (((host->len + 3) >> 2) << 2) + sizeof(xHostEntry);
     }
@@ -1565,7 +1569,7 @@ GetHosts (
 	{
 	    return(BadAlloc);
 	}
-        for (host = validhosts; host; host = host->next)
+        for (host = validhosts, i = 0; i < nHosts; host = host->next, i++)
 	{
 	    len = host->len;
 	    ((xHostEntry *)ptr)->family = host->family;

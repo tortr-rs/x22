@@ -305,6 +305,12 @@ ReadRequestFromClient(ClientPtr client)
 	}
 #endif
 	client->req_len = needed;
+	/* a big request this big doesn't fit an int in bytes (CVE-2025-49176): the client goes */
+	if (needed > 0x7fffffff >> 2)
+	{
+	    YieldControlDeath();
+	    return -1;
+	}
 	needed <<= 2; /* needed is in bytes now */
     }
     if (gotnow < needed)
@@ -426,6 +432,11 @@ ReadRequestFromClient(ClientPtr client)
 	    }
 #endif
 	    client->req_len = needed;
+	    if (needed > 0x7fffffff >> 2)
+	    {
+		YieldControlDeath();
+		return -1;
+	    }
 	    needed <<= 2;
 	}
 	if (gotnow < needed)

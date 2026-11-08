@@ -1339,6 +1339,7 @@ static int
 SProcScreenSaverQueryVersion(ClientPtr client)
 {
     REQUEST(xScreenSaverQueryVersionReq);
+    REQUEST_AT_LEAST_SIZE(xScreenSaverQueryVersionReq);
     int	    n;
 
     swaps (&stuff->length, n);
@@ -1350,6 +1351,7 @@ static int
 SProcScreenSaverQueryInfo(ClientPtr client)
 {
     REQUEST(xScreenSaverQueryInfoReq);
+    REQUEST_AT_LEAST_SIZE(xScreenSaverQueryInfoReq);
     int	    n;
 
     swaps (&stuff->length, n);
@@ -1362,6 +1364,7 @@ static int
 SProcScreenSaverSelectInput(ClientPtr client)
 {
     REQUEST(xScreenSaverSelectInputReq);
+    REQUEST_AT_LEAST_SIZE(xScreenSaverSelectInputReq);
     int	    n;
 
     swaps (&stuff->length, n);
@@ -1375,6 +1378,7 @@ static int
 SProcScreenSaverSetAttributes(ClientPtr client)
 {
     REQUEST(xScreenSaverSetAttributesReq);
+    REQUEST_AT_LEAST_SIZE(xScreenSaverSetAttributesReq);
     int	    n;
 
     swaps (&stuff->length, n);
@@ -1395,6 +1399,7 @@ static int
 SProcScreenSaverUnsetAttributes(ClientPtr client)
 {
     REQUEST(xScreenSaverUnsetAttributesReq);
+    REQUEST_AT_LEAST_SIZE(xScreenSaverUnsetAttributesReq);
     int	    n;
 
     swaps (&stuff->length, n);
@@ -1415,6 +1420,7 @@ static int
 SProcScreenSaverDispatch(ClientPtr client)
 {
     REQUEST(xReq);
+    REQUEST_AT_LEAST_SIZE(xReq);
 
     if (stuff->data < NUM_REQUESTS)
 	return (*SwappedVector[stuff->data])(client);

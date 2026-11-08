@@ -345,6 +345,7 @@ SProcDPMSGetVersion(ClientPtr client)
 {
     int n;
     REQUEST(xDPMSGetVersionReq);
+    REQUEST_AT_LEAST_SIZE(xDPMSGetVersionReq);
 
     swaps(&stuff->length, n);
     REQUEST_SIZE_MATCH(xDPMSGetVersionReq);
@@ -357,6 +358,7 @@ static int
 SProcDPMSCapable(ClientPtr client)
 {
     REQUEST(xDPMSCapableReq);
+    REQUEST_AT_LEAST_SIZE(xDPMSCapableReq);
     int n;
 
     swaps(&stuff->length, n);
@@ -369,6 +371,7 @@ static int
 SProcDPMSGetTimeouts(ClientPtr client)
 {
     REQUEST(xDPMSGetTimeoutsReq);
+    REQUEST_AT_LEAST_SIZE(xDPMSGetTimeoutsReq);
     int n;
 
     swaps(&stuff->length, n);
@@ -381,6 +384,7 @@ static int
 SProcDPMSSetTimeouts(ClientPtr client)
 {
     REQUEST(xDPMSSetTimeoutsReq);
+    REQUEST_AT_LEAST_SIZE(xDPMSSetTimeoutsReq);
     int n;
 
     swaps(&stuff->length, n);
@@ -396,6 +400,7 @@ static int
 SProcDPMSEnable(ClientPtr client)
 {
     REQUEST(xDPMSEnableReq);
+    REQUEST_AT_LEAST_SIZE(xDPMSEnableReq);
     int n;
 
     swaps(&stuff->length, n);
@@ -408,6 +413,7 @@ static int
 SProcDPMSDisable(ClientPtr client)
 {
     REQUEST(xDPMSDisableReq);
+    REQUEST_AT_LEAST_SIZE(xDPMSDisableReq);
     int n;
 
     swaps(&stuff->length, n);
@@ -420,6 +426,7 @@ static int
 SProcDPMSForceLevel(ClientPtr client)
 {
     REQUEST(xDPMSForceLevelReq);
+    REQUEST_AT_LEAST_SIZE(xDPMSForceLevelReq);
     int n;
 
     swaps(&stuff->length, n);
@@ -434,6 +441,7 @@ static int
 SProcDPMSInfo(ClientPtr client)
 {
     REQUEST(xDPMSInfoReq);
+    REQUEST_AT_LEAST_SIZE(xDPMSInfoReq);
     int n;
 
     swaps(&stuff->length, n);

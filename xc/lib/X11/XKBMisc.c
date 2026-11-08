@@ -671,6 +671,9 @@ int		width,nOldGroups,oldWidth,newTypes[XkbNumKbdGroups];
 	i= XkbSetNumGroups(i,0);
 	xkb->map->key_sym_map[key].group_info= i;
 	XkbResizeKeySyms(xkb,key,0);
+	/* the actions go with the symbols, or they're left bigger than the map says
+	 * and read past later (CVE-2025-26597) */
+	XkbResizeKeyActions(xkb,key,0);
 	return Success;
     }
 

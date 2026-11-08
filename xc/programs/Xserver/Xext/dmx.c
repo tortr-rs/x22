@@ -945,6 +945,7 @@ SProcDMXQueryVersion(ClientPtr client)
 {
     int n;
     REQUEST(xDMXQueryVersionReq);
+    REQUEST_AT_LEAST_SIZE(xDMXQueryVersionReq);
 
     swaps(&stuff->length, n);
     REQUEST_SIZE_MATCH(xDMXQueryVersionReq);
@@ -956,6 +957,7 @@ SProcDMXSync(ClientPtr client)
 {
     int n;
     REQUEST(xDMXSyncReq);
+    REQUEST_AT_LEAST_SIZE(xDMXSyncReq);
 
     swaps(&stuff->length, n);
     REQUEST_SIZE_MATCH(xDMXSyncReq);
@@ -967,6 +969,7 @@ SProcDMXForceWindowCreation(ClientPtr client)
 {
     int n;
     REQUEST(xDMXForceWindowCreationReq);
+    REQUEST_AT_LEAST_SIZE(xDMXForceWindowCreationReq);
 
     swaps(&stuff->length, n);
     REQUEST_SIZE_MATCH(xDMXForceWindowCreationReq);
@@ -979,6 +982,7 @@ SProcDMXGetScreenCount(ClientPtr client)
 {
     int n;
     REQUEST(xDMXGetScreenCountReq);
+    REQUEST_AT_LEAST_SIZE(xDMXGetScreenCountReq);
 
     swaps(&stuff->length, n);
     REQUEST_SIZE_MATCH(xDMXGetScreenCountReq);
@@ -990,6 +994,7 @@ SProcDMXGetScreenAttributes(ClientPtr client)
 {
     int n;
     REQUEST(xDMXGetScreenAttributesReq);
+    REQUEST_AT_LEAST_SIZE(xDMXGetScreenAttributesReq);
 
     swaps(&stuff->length, n);
     REQUEST_SIZE_MATCH(xDMXGetScreenAttributesReq);
@@ -1002,6 +1007,7 @@ SProcDMXChangeScreensAttributes(ClientPtr client)
 {
     int n;
     REQUEST(xDMXChangeScreensAttributesReq);
+    REQUEST_AT_LEAST_SIZE(xDMXChangeScreensAttributesReq);
 
     swaps(&stuff->length, n);
     REQUEST_AT_LEAST_SIZE(xDMXGetScreenAttributesReq);
@@ -1017,6 +1023,7 @@ SProcDMXAddScreen(ClientPtr client)
     int n;
     int paddedLength;
     REQUEST(xDMXAddScreenReq);
+    REQUEST_AT_LEAST_SIZE(xDMXAddScreenReq);
 
     swaps(&stuff->length, n);
     REQUEST_AT_LEAST_SIZE(xDMXAddScreenReq);
@@ -1032,6 +1039,7 @@ SProcDMXRemoveScreen(ClientPtr client)
 {
     int n;
     REQUEST(xDMXRemoveScreenReq);
+    REQUEST_AT_LEAST_SIZE(xDMXRemoveScreenReq);
 
     swaps(&stuff->length, n);
     REQUEST_SIZE_MATCH(xDMXRemoveScreenReq);
@@ -1044,6 +1052,7 @@ SProcDMXGetWindowAttributes(ClientPtr client)
 {
     int n;
     REQUEST(xDMXGetWindowAttributesReq);
+    REQUEST_AT_LEAST_SIZE(xDMXGetWindowAttributesReq);
 
     swaps(&stuff->length, n);
     REQUEST_SIZE_MATCH(xDMXGetWindowAttributesReq);
@@ -1056,6 +1065,7 @@ SProcDMXGetDesktopAttributes(ClientPtr client)
 {
     int n;
     REQUEST(xDMXGetDesktopAttributesReq);
+    REQUEST_AT_LEAST_SIZE(xDMXGetDesktopAttributesReq);
 
     swaps(&stuff->length, n);
     REQUEST_SIZE_MATCH(xDMXGetDesktopAttributesReq);
@@ -1067,6 +1077,7 @@ SProcDMXChangeDesktopAttributes(ClientPtr client)
 {
     int n;
     REQUEST(xDMXChangeDesktopAttributesReq);
+    REQUEST_AT_LEAST_SIZE(xDMXChangeDesktopAttributesReq);
 
     swaps(&stuff->length, n);
     REQUEST_AT_LEAST_SIZE(xDMXChangeDesktopAttributesReq);
@@ -1080,6 +1091,7 @@ SProcDMXGetInputCount(ClientPtr client)
 {
     int n;
     REQUEST(xDMXGetInputCountReq);
+    REQUEST_AT_LEAST_SIZE(xDMXGetInputCountReq);
 
     swaps(&stuff->length, n);
     REQUEST_SIZE_MATCH(xDMXGetInputCountReq);
@@ -1091,6 +1103,7 @@ SProcDMXGetInputAttributes(ClientPtr client)
 {
     int n;
     REQUEST(xDMXGetInputAttributesReq);
+    REQUEST_AT_LEAST_SIZE(xDMXGetInputAttributesReq);
 
     swaps(&stuff->length, n);
     REQUEST_SIZE_MATCH(xDMXGetInputAttributesReq);
@@ -1104,6 +1117,7 @@ SProcDMXAddInput(ClientPtr client)
     int n;
     int paddedLength;
     REQUEST(xDMXAddInputReq);
+    REQUEST_AT_LEAST_SIZE(xDMXAddInputReq);
 
     swaps(&stuff->length, n);
     REQUEST_AT_LEAST_SIZE(xDMXAddInputReq);
@@ -1119,6 +1133,7 @@ SProcDMXRemoveInput(ClientPtr client)
 {
     int n;
     REQUEST(xDMXRemoveInputReq);
+    REQUEST_AT_LEAST_SIZE(xDMXRemoveInputReq);
 
     swaps(&stuff->length, n);
     REQUEST_SIZE_MATCH(xDMXRemoveInputReq);

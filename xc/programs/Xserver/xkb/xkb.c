@@ -201,6 +201,20 @@ RESTYPE	RT_XKBCLIENT;
 #define	CHK_REQ_KEY_RANGE(err,first,num,r)  \
 	CHK_REQ_KEY_RANGE2(err,first,num,r,client->errorValue,BadValue)
 
+/* from and to both inside the request, from before to: the requests below are walked
+ * by pointer, and every step has to stay inside what the client sent (CVE-2020-14345
+ * and the XKB ones after it) */
+static Bool
+_XkbCheckRequestBounds(ClientPtr client, void *stuff, void *from, void *to)
+{
+    char *cstuff = (char *) stuff;
+    char *cfrom = (char *) from;
+    char *cto = (char *) to;
+    char *end = cstuff + ((unsigned long) client->req_len << 2);
+
+    return cfrom < cto && cfrom >= cstuff && cfrom < end && cto >= cstuff && cto <= end;
+}
+
 /***====================================================================***/
 
 int
@@ -290,7 +304,7 @@ ProcXkbSelectEvents(ClientPtr client)
 	unsigned bit,ndx,maskLeft,dataLeft,size;
 
 	from.c8= (CARD8 *)&stuff[1];
-	dataLeft= (stuff->length*4)-SIZEOF(xkbSelectEventsReq);
+	dataLeft= (client->req_len*4)-SIZEOF(xkbSelectEventsReq);	/* CVE-2020-14361 */
 	maskLeft= (stuff->affectWhich&(~XkbMapNotifyMask));
 	for (ndx=0,bit=1; (maskLeft!=0); ndx++, bit<<=1) {
 	    if ((bit&maskLeft)==0)
@@ -1042,10 +1056,10 @@ XkbSizeKeySyms(XkbDescPtr xkb,xkbGetMapReply *rep)
     len= rep->nKeySyms*SIZEOF(xkbSymMapWireDesc);
     symMap = &xkb->map->key_sym_map[rep->firstKeySym];
     for (i=nSyms=0;i<rep->nKeySyms;i++,symMap++) {
-	if (symMap->offset!=0) {
-	    nSymsThisKey= XkbNumGroups(symMap->group_info)*symMap->width;
-	    nSyms+= nSymsThisKey;
-	}
+	/* offset 0 is a real place in the syms array, not "none": counting by it left
+	 * the first key out and the reply came up short (CVE-2025-26596) */
+	nSymsThisKey= XkbNumGroups(symMap->group_info)*symMap->width;
+	nSyms+= nSymsThisKey;
     }
     len+= nSyms*4;
     rep->totalSyms= nSyms;
@@ -1550,6 +1564,12 @@ xkbKeyTypeWireDesc	*wire = *wireRtrn;
 	    *nMapsRtrn= _XkbErrCode4(0x02,req->firstType,req->nTypes,4);
 	    return 0;
 	}
+	/* mapWidths has room for this many and no more (ZDI-CAN-30161) */
+	if (nMaps>XkbMaxLegalKeyCode+1) {
+	    *nMapsRtrn= _XkbErrCode4(0x02,req->firstType,req->nTypes,
+						XkbMaxLegalKeyCode+1);
+	    return 0;
+	}
     }
     else if (req->present&XkbKeyTypesMask) {
 	nMaps = xkb->map->num_types;
@@ -1576,13 +1596,19 @@ xkbKeyTypeWireDesc	*wire = *wireRtrn;
     }
     for (i=0;i<req->nTypes;i++) {
 	unsigned	width;
+	/* every type, and the entries after it, inside the request (CVE-2026-34003) */
+	if (!_XkbCheckRequestBounds(client,req,wire,wire+1)) {
+	    *nMapsRtrn= _XkbErrCode3(0x0b,req->nTypes,i);
+	    return 0;
+	}
 	if (client->swapped) {
 	    int s;
 	    swaps(&wire->virtualMods,s);
 	}
 	n= i+req->firstType;
 	width= wire->numLevels;
-	if (width<1) {
+	/* more levels than XKB has overflows a buffer later on (ZDI-CAN-30160) */
+	if (width<1 || width>XkbMaxShiftLevel) {
 	    *nMapsRtrn= _XkbErrCode3(0x04,n,width);
 	    return 0;
 	}
@@ -1601,7 +1627,18 @@ xkbKeyTypeWireDesc	*wire = *wireRtrn;
 	    xkbKTSetMapEntryWireDesc *	mapWire;
 	    xkbModsWireDesc *		preWire;
 	    mapWire= (xkbKTSetMapEntryWireDesc *)&wire[1];
+	    if (!_XkbCheckRequestBounds(client,req,mapWire,
+					&mapWire[wire->nMapEntries])) {
+		*nMapsRtrn= _XkbErrCode3(0x0c,i,wire->nMapEntries);
+		return 0;
+	    }
 	    preWire= (xkbModsWireDesc *)&mapWire[wire->nMapEntries];
+	    if (wire->preserve &&
+		!_XkbCheckRequestBounds(client,req,preWire,
+					&preWire[wire->nMapEntries])) {
+		*nMapsRtrn= _XkbErrCode3(0x0d,i,wire->nMapEntries);
+		return 0;
+	    }
 	    for (n=0;n<wire->nMapEntries;n++) {
 		if (client->swapped) {
 		    int s;
@@ -1711,6 +1748,10 @@ xkbSymMapWireDesc*	wire = *wireRtrn;
     for (i=0;i<req->nKeySyms;i++) {
 	KeySym *pSyms;
 	unsigned nG;
+	if (!_XkbCheckRequestBounds(client,req,wire,wire+1)) {
+	    *errorRtrn= _XkbErrCode3(0x18,i+req->firstKeySym,i);
+	    return 0;
+	}
 	if (client->swapped) {
 	    swaps(&wire->nSyms,nG);
 	}
@@ -1748,12 +1789,20 @@ xkbSymMapWireDesc*	wire = *wireRtrn;
 	}
         /* Go to next? Skip the record & following syms! */
 	pSyms = (KeySym *)&wire[1];
+	if (wire->nSyms &&
+	    !_XkbCheckRequestBounds(client,req,pSyms,&pSyms[wire->nSyms])) {
+	    *errorRtrn= _XkbErrCode3(0x19,i+req->firstKeySym,wire->nSyms);
+	    return 0;
+	}
 	wire = (xkbSymMapWireDesc *)&pSyms[wire->nSyms];
     }
 
     /* mmc: Keycodes after affected ones: */
+    /* from the key after the request's: this started at nKeySyms and wrote
+     * the old widths over the new ones (CVE-2026-93524) */
+    i= req->nKeySyms + req->firstKeySym;
     map = &xkb->map->key_sym_map[i];
-    for (i= req->nKeySyms + req->firstKeySym ;
+    for (;
 	 i<=(unsigned)xkb->max_key_code;i++,map++) { /* mmc: Bug was here. */
 	int g,nG,w;
 	nG= XkbKeyNumGroups(xkb,i);
@@ -1772,7 +1821,8 @@ xkbSymMapWireDesc*	wire = *wireRtrn;
 }
 
 static int
-CheckKeyActions(	XkbDescPtr	xkb,
+CheckKeyActions(	ClientPtr	client,
+			XkbDescPtr	xkb,
 			xkbSetMapReq *	req,
 			int		nTypes,
 			CARD8 *		mapWidths,
@@ -1787,6 +1837,10 @@ unsigned	 i;
     if (!(XkbKeyActionsMask&req->present))
 	return 1;
     CHK_REQ_KEY_RANGE2(0x21,req->firstKeyAct,req->nKeyActs,req,(*nActsRtrn),0);
+    if (!_XkbCheckRequestBounds(client,req,wire,wire+XkbPaddedSize(req->nKeyActs))) {
+	*nActsRtrn= _XkbErrCode2(0x24,req->nKeyActs);
+	return 0;
+    }
     for (nActs=i=0;i<req->nKeyActs;i++) {
 	if (wire[0]!=0) {
 	    if (wire[0]==symsPerKey[i+req->firstKeyAct])
@@ -1800,13 +1854,19 @@ unsigned	 i;
     }
     if (req->nKeyActs%4)
 	wire+= 4-(req->nKeyActs%4);
+    if (nActs &&
+	!_XkbCheckRequestBounds(client,req,wire,(CARD8 *)(((XkbAnyAction *)wire)+nActs))) {
+	*nActsRtrn= _XkbErrCode2(0x25,nActs);
+	return 0;
+    }
     *wireRtrn = (CARD8 *)(((XkbAnyAction *)wire)+nActs);
     *nActsRtrn = nActs;
     return 1;
 }
 
 static int
-CheckKeyBehaviors(	XkbDescPtr 		xkb,
+CheckKeyBehaviors(	ClientPtr	client,
+			XkbDescPtr 		xkb,
 			xkbSetMapReq *		req,
 			xkbBehaviorWireDesc **	wireRtrn,
 			int *			errorRtrn)
@@ -1833,6 +1893,10 @@ unsigned			first,last;
     }
 	
     for (i=0;i<req->totalKeyBehaviors;i++,wire++) {
+	if (!_XkbCheckRequestBounds(client,req,wire,wire+1)) {
+	    *errorRtrn= _XkbErrCode3(0x36,req->totalKeyBehaviors,i);
+	    return 0;
+	}
 	if ((wire->key<first)||(wire->key>last)) {
 	    *errorRtrn = _XkbErrCode4(0x33,first,last,wire->key);
 	    return 0;
@@ -1858,7 +1922,8 @@ unsigned			first,last;
 }
 
 static int
-CheckVirtualMods(	XkbDescRec *	xkb,
+CheckVirtualMods(	ClientPtr	client,
+			XkbDescRec *	xkb,
 			xkbSetMapReq *	req,
 			CARD8 **	wireRtrn,
 			int *		errorRtrn)
@@ -1872,12 +1937,17 @@ unsigned 	 i,nMods,bit;
 	if (req->virtualMods&bit)
 	    nMods++;
     }
+    if (!_XkbCheckRequestBounds(client,req,wire,wire+XkbPaddedSize(nMods))) {
+	*errorRtrn= _XkbErrCode2(0x41,nMods);
+	return 0;
+    }
     *wireRtrn= (wire+XkbPaddedSize(nMods));
     return 1;
 }
 
 static int
-CheckKeyExplicit(	XkbDescPtr	xkb,
+CheckKeyExplicit(	ClientPtr	client,
+			XkbDescPtr	xkb,
 			xkbSetMapReq *	req,
 			CARD8 **	wireRtrn,
 			int	*	errorRtrn)
@@ -1904,6 +1974,10 @@ int			first,last;
     }
     start= wire; 
     for (i=0;i<req->totalKeyExplicit;i++,wire+=2) {
+	if (!_XkbCheckRequestBounds(client,req,wire,wire+2)) {
+	    *errorRtrn= _XkbErrCode3(0x54,req->totalKeyExplicit,i);
+	    return 0;
+	}
 	if ((wire[0]<first)||(wire[0]>last)) {
 	    *errorRtrn = _XkbErrCode4(0x53,first,last,wire[0]);
 	    return 0;
@@ -1919,7 +1993,7 @@ int			first,last;
 }
 
 static int
-CheckModifierMap(XkbDescPtr xkb,xkbSetMapReq *req,CARD8 **wireRtrn,int *errRtrn)
+CheckModifierMap(ClientPtr client,XkbDescPtr xkb,xkbSetMapReq *req,CARD8 **wireRtrn,int *errRtrn)
 {
 CARD8 *	wire = *wireRtrn;
 CARD8	*		start;
@@ -1943,6 +2017,11 @@ int			first,last;
     }
     start= wire; 
     for (i=0;i<req->totalModMapKeys;i++,wire+=2) {
+	/* CVE-2026-34002 */
+	if (!_XkbCheckRequestBounds(client,req,wire,wire+2)) {
+	    *errRtrn= _XkbErrCode3(0x64,req->totalModMapKeys,i);
+	    return 0;
+	}
 	if ((wire[0]<first)||(wire[0]>last)) {
 	    *errRtrn = _XkbErrCode4(0x63,first,last,wire[0]);
 	    return 0;
@@ -1954,7 +2033,8 @@ int			first,last;
 }
 
 static int
-CheckVirtualModMap(	XkbDescPtr xkb,
+CheckVirtualModMap(	ClientPtr	client,
+			XkbDescPtr xkb,
 			xkbSetMapReq *req,
 			xkbVModMapWireDesc **wireRtrn,
 			int *errRtrn)
@@ -1979,6 +2059,10 @@ int				first,last;
 	return 0;
     }
     for (i=0;i<req->totalVModMapKeys;i++,wire++) {
+	if (!_XkbCheckRequestBounds(client,req,wire,wire+1)) {
+	    *errRtrn= _XkbErrCode3(0x74,req->totalVModMapKeys,i);
+	    return 0;
+	}
 	if ((wire->key<first)||(wire->key>last)) {
 	    *errRtrn = _XkbErrCode4(0x73,first,last,wire->key);
 	    return 0;
@@ -2420,35 +2504,35 @@ ProcXkbSetMap(ClientPtr client)
     }
 
     if ((stuff->present&XkbKeyActionsMask)&&
-	(!CheckKeyActions(xkb,stuff,nTypes,mapWidths,symsPerKey,
+	(!CheckKeyActions(client,xkb,stuff,nTypes,mapWidths,symsPerKey,
 						(CARD8 **)&tmp,&nActions))) {
 	client->errorValue = nActions;
 	return BadValue;
     }
 
     if ((stuff->present&XkbKeyBehaviorsMask)&&
-	(!CheckKeyBehaviors(xkb,stuff,(xkbBehaviorWireDesc**)&tmp,&error))) {
+	(!CheckKeyBehaviors(client,xkb,stuff,(xkbBehaviorWireDesc**)&tmp,&error))) {
 	client->errorValue = error;
 	return BadValue;
     }
 
     if ((stuff->present&XkbVirtualModsMask)&&
-	(!CheckVirtualMods(xkb,stuff,(CARD8 **)&tmp,&error))) {
+	(!CheckVirtualMods(client,xkb,stuff,(CARD8 **)&tmp,&error))) {
 	client->errorValue= error;
 	return BadValue;
     }
     if ((stuff->present&XkbExplicitComponentsMask)&&
-	(!CheckKeyExplicit(xkb,stuff,(CARD8 **)&tmp,&error))) {
+	(!CheckKeyExplicit(client,xkb,stuff,(CARD8 **)&tmp,&error))) {
 	client->errorValue= error;
 	return BadValue;
     }
     if ((stuff->present&XkbModifierMapMask)&&
-	(!CheckModifierMap(xkb,stuff,(CARD8 **)&tmp,&error))) {
+	(!CheckModifierMap(client,xkb,stuff,(CARD8 **)&tmp,&error))) {
 	client->errorValue= error;
 	return BadValue;
     }
     if ((stuff->present&XkbVirtualModMapMask)&&
-	(!CheckVirtualModMap(xkb,stuff,(xkbVModMapWireDesc **)&tmp,&error))) {
+	(!CheckVirtualModMap(client,xkb,stuff,(xkbVModMapWireDesc **)&tmp,&error))) {
 	client->errorValue= error;
 	return BadValue;
     }
@@ -2701,6 +2785,11 @@ ProcXkbSetCompatMap(ClientPtr client)
 	xkbSymInterpretWireDesc *wire;
 	if (stuff->firstSI>compat->num_si) {
 	    client->errorValue = _XkbErrCode2(0x02,compat->num_si);
+	    return BadValue;
+	}
+	/* num_si is 16 bits: more than that wrapped round to a small array (CVE-2025-62231) */
+	if ((unsigned)(stuff->firstSI+stuff->nSI)>0xffff) {
+	    client->errorValue = _XkbErrCode2(0x03,stuff->nSI);
 	    return BadValue;
 	}
 	wire= (xkbSymInterpretWireDesc *)data;
@@ -3680,6 +3769,8 @@ ProcXkbSetNames(ClientPtr client)
     tmp = (CARD32 *)&stuff[1];
 
     if (stuff->which&XkbKeycodesNameMask) {
+	if (!_XkbCheckRequestBounds(client,stuff,tmp,tmp+(1)))
+	    return BadLength;
 	tmp= _XkbCheckAtoms(tmp,1,client->swapped,&bad);
 	if (!tmp) {
 	    client->errorValue = bad;
@@ -3687,6 +3778,8 @@ ProcXkbSetNames(ClientPtr client)
 	}
     }
     if (stuff->which&XkbGeometryNameMask) {
+	if (!_XkbCheckRequestBounds(client,stuff,tmp,tmp+(1)))
+	    return BadLength;
 	tmp= _XkbCheckAtoms(tmp,1,client->swapped,&bad);
 	if (!tmp) {
 	    client->errorValue = bad;
@@ -3694,6 +3787,8 @@ ProcXkbSetNames(ClientPtr client)
 	}
     }
     if (stuff->which&XkbSymbolsNameMask) {
+	if (!_XkbCheckRequestBounds(client,stuff,tmp,tmp+(1)))
+	    return BadLength;
 	tmp= _XkbCheckAtoms(tmp,1,client->swapped,&bad);
 	if (!tmp) {
 	    client->errorValue = bad;
@@ -3701,6 +3796,8 @@ ProcXkbSetNames(ClientPtr client)
 	}
     }
     if (stuff->which&XkbPhysSymbolsNameMask) {
+	if (!_XkbCheckRequestBounds(client,stuff,tmp,tmp+(1)))
+	    return BadLength;
 	tmp= _XkbCheckAtoms(tmp,1,client->swapped,&bad);
 	if (!tmp) {
 	    client->errorValue= bad;
@@ -3708,6 +3805,8 @@ ProcXkbSetNames(ClientPtr client)
 	}
     }
     if (stuff->which&XkbTypesNameMask) {
+	if (!_XkbCheckRequestBounds(client,stuff,tmp,tmp+(1)))
+	    return BadLength;
 	tmp= _XkbCheckAtoms(tmp,1,client->swapped,&bad);
 	if (!tmp) {
 	    client->errorValue = bad;
@@ -3715,6 +3814,8 @@ ProcXkbSetNames(ClientPtr client)
 	}
     }
     if (stuff->which&XkbCompatNameMask) {
+	if (!_XkbCheckRequestBounds(client,stuff,tmp,tmp+(1)))
+	    return BadLength;
 	tmp= _XkbCheckAtoms(tmp,1,client->swapped,&bad);
 	if (!tmp) {
 	    client->errorValue = bad;
@@ -3739,6 +3840,8 @@ ProcXkbSetNames(ClientPtr client)
 	    return BadAccess;
 	}
 	old= tmp;
+	if (!_XkbCheckRequestBounds(client,stuff,tmp,tmp+(stuff->nTypes)))
+	    return BadLength;
 	tmp= _XkbCheckAtoms(tmp,stuff->nTypes,client->swapped,&bad);
 	if (!tmp) {
 	    client->errorValue= bad;
@@ -3765,6 +3868,8 @@ ProcXkbSetNames(ClientPtr client)
 	}
 	width = (CARD8 *)tmp;
 	tmp= (CARD32 *)(((char *)tmp)+XkbPaddedSize(stuff->nKTLevels));
+	if (!_XkbCheckRequestBounds(client,stuff,width,tmp))
+	    return BadLength;
 	type = &xkb->map->types[stuff->firstKTLevel];
 	for (i=0;i<stuff->nKTLevels;i++,type++) {
 	    if (width[i]==0)
@@ -3774,6 +3879,8 @@ ProcXkbSetNames(ClientPtr client)
 						type->num_levels,width[i]);
 		return BadMatch;
 	    }
+	    if (!_XkbCheckRequestBounds(client,stuff,tmp,tmp+(width[i])))
+		return BadLength;
 	    tmp= _XkbCheckAtoms(tmp,width[i],client->swapped,&bad);
 	    if (!tmp) {
 		client->errorValue= bad;
@@ -3786,6 +3893,8 @@ ProcXkbSetNames(ClientPtr client)
 	    client->errorValue= 0x08;
 	    return BadMatch;
 	}
+	if (!_XkbCheckRequestBounds(client,stuff,tmp,tmp+Ones(stuff->indicators)))
+	    return BadLength;
 	tmp= _XkbCheckMaskedAtoms(tmp,XkbNumIndicators,stuff->indicators,
 							client->swapped,&bad);
 	if (!tmp) {
@@ -3798,6 +3907,8 @@ ProcXkbSetNames(ClientPtr client)
 	    client->errorValue= 0x09;
 	    return BadMatch;
 	}
+	if (!_XkbCheckRequestBounds(client,stuff,tmp,tmp+Ones((CARD32)stuff->virtualMods)))
+	    return BadLength;
 	tmp= _XkbCheckMaskedAtoms(tmp,XkbNumVirtualMods,
 						(CARD32)stuff->virtualMods,
 						client->swapped,&bad);
@@ -3811,6 +3922,8 @@ ProcXkbSetNames(ClientPtr client)
 	    client->errorValue= 0x0a;
 	    return BadMatch;
 	}
+	if (!_XkbCheckRequestBounds(client,stuff,tmp,tmp+Ones((CARD32)stuff->groupNames)))
+	    return BadLength;
 	tmp= _XkbCheckMaskedAtoms(tmp,XkbNumKbdGroups,
 						(CARD32)stuff->groupNames,
 						client->swapped,&bad);
@@ -3831,9 +3944,13 @@ ProcXkbSetNames(ClientPtr client)
 						stuff->firstKey,stuff->nKeys);
 	    return BadValue;
 	}
+	if (!_XkbCheckRequestBounds(client,stuff,tmp,tmp+stuff->nKeys))
+	    return BadLength;
 	tmp+= stuff->nKeys;
     }
     if ((stuff->which&XkbKeyAliasesMask)&&(stuff->nKeyAliases>0)) {
+	if (!_XkbCheckRequestBounds(client,stuff,tmp,tmp+stuff->nKeyAliases*2))
+	    return BadLength;
 	tmp+= stuff->nKeyAliases*2;
     }
     if (stuff->which&XkbRGNamesMask) {
@@ -3841,6 +3958,8 @@ ProcXkbSetNames(ClientPtr client)
 	    client->errorValue= _XkbErrCode2(0x0d,stuff->nRadioGroups);
 	    return BadValue;
 	}
+	if (!_XkbCheckRequestBounds(client,stuff,tmp,tmp+(stuff->nRadioGroups)))
+	    return BadLength;
 	tmp= _XkbCheckAtoms(tmp,stuff->nRadioGroups,client->swapped,&bad);
 	if (!tmp) {
 	    client->errorValue= bad;
@@ -4524,19 +4643,29 @@ ProcXkbGetGeometry(ClientPtr client)
 
 /***====================================================================***/
 
+/* in the geometry code: this piece of the request has to be inside it */
+#define	GEOM_IN(from,to) \
+    if (!_XkbCheckRequestBounds(client,client->requestBuffer,(from),(to))) \
+	return BadLength
+
 static char *
-_GetCountedString(char **wire_inout,Bool swap)
+_GetCountedString(char **wire_inout,Bool swap,ClientPtr client)
 {
 char *	wire,*str;
 CARD16	len,*plen;
 
     wire= *wire_inout;
     plen= (CARD16 *)wire;
+    /* the length, then the string, both inside the request (CVE-2022-2319) */
+    if (!_XkbCheckRequestBounds(client,client->requestBuffer,wire,wire+2))
+	return NULL;
     if (swap) {
 	int n;
 	swaps(plen,n);
     }
     len= *plen;
+    if (!_XkbCheckRequestBounds(client,client->requestBuffer,wire,wire+2+len))
+	return NULL;
     str= (char *)_XkbAlloc(len+1);
     if (str) {
 	memcpy(str,&wire[2],len);
@@ -4558,6 +4687,7 @@ xkbDoodadWireDesc *	dWire;
 XkbDoodadPtr		doodad;
 
     dWire= (xkbDoodadWireDesc *)(*wire_inout);
+    GEOM_IN(dWire,dWire+1);
     wire= (char *)&dWire[1];
     if (client->swapped) {
 	int n;
@@ -4605,8 +4735,12 @@ XkbDoodadPtr		doodad;
 	    doodad->text.width= dWire->text.width;
 	    doodad->text.height= dWire->text.height;
 	    doodad->text.color_ndx= dWire->text.colorNdx;
-	    doodad->text.text= _GetCountedString(&wire,client->swapped);
-	    doodad->text.font= _GetCountedString(&wire,client->swapped);
+	    doodad->text.text= _GetCountedString(&wire,client->swapped,client);
+	    if (!doodad->text.text)
+		return BadLength;
+	    doodad->text.font= _GetCountedString(&wire,client->swapped,client);
+	    if (!doodad->text.font)
+		return BadLength;
 	    break;
 	case XkbIndicatorDoodad:
 	    if (dWire->indicator.onColorNdx>=geom->num_colors) {
@@ -4641,7 +4775,9 @@ XkbDoodadPtr		doodad;
 	    }
 	    doodad->logo.color_ndx= dWire->logo.colorNdx;
 	    doodad->logo.shape_ndx= dWire->logo.shapeNdx;
-	    doodad->logo.logo_name= _GetCountedString(&wire,client->swapped);
+	    doodad->logo.logo_name= _GetCountedString(&wire,client->swapped,client);
+	    if (!doodad->logo.logo_name)
+		return BadLength;
 	    break;
 	default:
 	    client->errorValue= _XkbErrCode2(0x4F,dWire->any.type);
@@ -4665,26 +4801,33 @@ xkbOverlayRowWireDesc *	rWire;
 
     wire= *wire_inout;
     olWire= (xkbOverlayWireDesc *)wire;
+    GEOM_IN(olWire,olWire+1);
     if (client->swapped) {
 	int n;
 	swapl(&olWire->name,n);
     }
     CHK_ATOM_ONLY(olWire->name);
     ol= XkbAddGeomOverlay(section,olWire->name,olWire->nRows);
+    if (!ol)
+	return BadAlloc;
     rWire= (xkbOverlayRowWireDesc *)&olWire[1];
     for (r=0;r<olWire->nRows;r++) {
 	int		k;
 	xkbOverlayKeyWireDesc *	kWire;
 	XkbOverlayRowPtr	row;
 
-	if (rWire->rowUnder>section->num_rows) {
+	GEOM_IN(rWire,rWire+1);
+	if (rWire->rowUnder>=section->num_rows) {
 	    client->errorValue= _XkbErrCode4(0x20,r,section->num_rows,
 							rWire->rowUnder);
 	    return BadMatch;
 	}
 	row= XkbAddGeomOverlayRow(ol,rWire->rowUnder,rWire->nKeys);
+	if (!row)
+	    return BadAlloc;
 	kWire= (xkbOverlayKeyWireDesc *)&rWire[1];
 	for (k=0;k<rWire->nKeys;k++,kWire++) {
+	    GEOM_IN(kWire,kWire+1);
 	    if (XkbAddGeomOverlayKey(ol,row,
 	    		(char *)kWire->over,(char *)kWire->under)==NULL) {
 		client->errorValue= _XkbErrCode3(0x21,r,k);
@@ -4718,6 +4861,7 @@ XkbSectionPtr		section;
     for (s=0;s<req->nSections;s++) {
 	int		r;
 	xkbRowWireDesc *	rWire;
+	GEOM_IN(sWire,sWire+1);
 	if (client->swapped) {
 	    int n;
 	    swapl(&sWire->name,n);
@@ -4743,6 +4887,7 @@ XkbSectionPtr		section;
 	    int	k;
 	    XkbRowPtr		row;
 	    xkbKeyWireDesc *	kWire;
+	    GEOM_IN(rWire,rWire+1);
 	    if (client->swapped) {
 		int n;
 		swaps(&rWire->top,n);
@@ -4755,6 +4900,8 @@ XkbSectionPtr		section;
 	    row->left= rWire->left;
 	    row->vertical= rWire->vertical;
 	    kWire= (xkbKeyWireDesc *)&rWire[1];
+	    if (rWire->nKeys)
+		GEOM_IN(kWire,kWire+rWire->nKeys);
 	    for (k=0;k<rWire->nKeys;k++) {
 		XkbKeyPtr	key;
 		key= XkbAddGeomKey(row);
@@ -4823,6 +4970,7 @@ char *		wire;
 	for (i=0;i<req->nShapes;i++) {
 	    xkbOutlineWireDesc *	olWire;
 	    XkbOutlinePtr		ol;
+	    GEOM_IN(shapeWire,shapeWire+1);
 	    shape= XkbAddGeomShape(geom,shapeWire->name,shapeWire->nOutlines);
 	    if (!shape)
 		return BadAlloc;
@@ -4832,11 +4980,14 @@ char *		wire;
 		XkbPointPtr		pt;
 		xkbPointWireDesc *	ptWire;
 
+		GEOM_IN(olWire,olWire+1);
 		ol= XkbAddGeomOutline(shape,olWire->nPoints);
 		if (!ol)
 		    return BadAlloc;
 		ol->corner_radius=	olWire->cornerRadius;
 		ptWire= (xkbPointWireDesc *)&olWire[1];
+		if (olWire->nPoints)
+		    GEOM_IN(ptWire,ptWire+olWire->nPoints);
 		for (p=0,pt=ol->points;p<olWire->nPoints;p++,pt++) {
 		    pt->x= ptWire[p].x;
 		    pt->y= ptWire[p].y;
@@ -4848,6 +4999,14 @@ char *		wire;
 		}
 		ol->num_points= olWire->nPoints;
 		olWire= (xkbOutlineWireDesc *)(&ptWire[olWire->nPoints]);
+	    }
+	    /* the outlines picked have to be ones this shape has */
+	    if ((shapeWire->primaryNdx!=XkbNoShape &&
+		 shapeWire->primaryNdx>=shape->num_outlines) ||
+		(shapeWire->approxNdx!=XkbNoShape &&
+		 shapeWire->approxNdx>=shape->num_outlines)) {
+		client->errorValue= _XkbErrCode2(0x08,shape->num_outlines);
+		return BadMatch;
 	    }
 	    if (shapeWire->primaryNdx!=XkbNoShape)
 		shape->primary= &shape->outlines[shapeWire->primaryNdx];
@@ -4876,13 +5035,21 @@ Status		status;
 char *		wire;
 
     wire= (char *)&req[1];
-    geom->label_font= _GetCountedString(&wire,client->swapped);
+    geom->label_font= _GetCountedString(&wire,client->swapped,client);
+    if (!geom->label_font)
+	return BadLength;
 
     for (i=0;i<req->nProperties;i++) {
 	char *name,*val;
-	name= _GetCountedString(&wire,client->swapped);
-	val= _GetCountedString(&wire,client->swapped);
-	if ((!name)||(!val)||(XkbAddGeomProperty(geom,name,val)==NULL))
+	name= _GetCountedString(&wire,client->swapped,client);
+	if (!name)
+	    return BadLength;
+	val= _GetCountedString(&wire,client->swapped,client);
+	if (!val) {
+	    _XkbFree(name);
+	    return BadLength;
+	}
+	if (XkbAddGeomProperty(geom,name,val)==NULL)
 	    return BadAlloc;
     }
 
@@ -4890,11 +5057,12 @@ char *		wire;
 	client->errorValue= _XkbErrCode3(0x01,2,req->nColors);
 	return BadValue;
     }
-    if (req->baseColorNdx>req->nColors) {
+    /* colours count from 0: nColors itself is one too many (CVE-2026-34000) */
+    if (req->baseColorNdx>=req->nColors) {
 	client->errorValue=_XkbErrCode3(0x03,req->nColors,req->baseColorNdx);
 	return BadMatch;
     }
-    if (req->labelColorNdx>req->nColors) {
+    if (req->labelColorNdx>=req->nColors) {
 	client->errorValue= _XkbErrCode3(0x03,req->nColors,req->labelColorNdx);
 	return BadMatch;
     }
@@ -4906,8 +5074,10 @@ char *		wire;
 
     for (i=0;i<req->nColors;i++) {
 	char *name;
-	name= _GetCountedString(&wire,client->swapped);
-	if ((!name)||(!XkbAddGeomColor(geom,name,geom->num_colors)))
+	name= _GetCountedString(&wire,client->swapped,client);
+	if (!name)
+	    return BadLength;
+	if (!XkbAddGeomColor(geom,name,geom->num_colors))
 	    return BadAlloc;
     }
     if (req->nColors!=geom->num_colors) {
@@ -4930,6 +5100,7 @@ char *		wire;
     }
 
     for (i=0;i<req->nKeyAliases;i++) {
+	GEOM_IN(wire,wire+2*XkbKeyNameLength);
 	if (XkbAddGeomKeyAlias(geom,&wire[XkbKeyNameLength],wire)==NULL)
 	    return BadAlloc;
 	wire+= 2*XkbKeyNameLength;
@@ -5912,6 +6083,11 @@ XkbSrvLedInfoPtr 	sli;
 
     ledWire= (xkbDeviceLedsWireDesc *)wire;
     for (i=0;i<num;i++) {
+	/* each piece inside the request before it's read (CVE-2020-25712) */
+	if (!_XkbCheckRequestBounds(client,client->requestBuffer,ledWire,ledWire+1)) {
+	    *status_rtrn= BadLength;
+	    return NULL;
+	}
 	if (client->swapped) {
 	   int n;
 	   swaps(&ledWire->ledClass,n);
@@ -5939,6 +6115,11 @@ XkbSrvLedInfoPtr 	sli;
 	    }
 	    atomWire= (CARD32 *)&ledWire[1];
 	    if (nNames>0) {
+		if (!_XkbCheckRequestBounds(client,client->requestBuffer,
+						atomWire,atomWire+nNames)) {
+		    *status_rtrn= BadLength;
+		    return NULL;
+		}
 		for (n=0;n<nNames;n++) {
 		    if (client->swapped) {
 			int t;
@@ -5951,6 +6132,11 @@ XkbSrvLedInfoPtr 	sli;
 	    }
 	    mapWire= (xkbIndicatorMapWireDesc *)atomWire;
 	    if (nMaps>0) {
+		if (!_XkbCheckRequestBounds(client,client->requestBuffer,
+						mapWire,mapWire+nMaps)) {
+		    *status_rtrn= BadLength;
+		    return NULL;
+		}
 		for (n=0;n<nMaps;n++) {
 		    if (client->swapped) {
 			int t;
@@ -6005,6 +6191,10 @@ DeviceIntPtr			kbd;
 	xkbIndicatorMapWireDesc *	mapWire;
 	XkbSrvLedInfoPtr		sli;
 
+	if (!_XkbCheckRequestBounds(client,client->requestBuffer,ledWire,ledWire+1)) {
+	    *status_rtrn= BadLength;
+	    return (char *)ledWire;
+	}
 	namec= mapc= statec= 0;
     	sli= XkbFindSrvLedInfo(dev,ledWire->ledClass,ledWire->ledID,
 						XkbXI_IndicatorMapsMask);
@@ -6023,6 +6213,11 @@ DeviceIntPtr			kbd;
 	    bzero((char *)sli->names,XkbNumIndicators*sizeof(Atom));
 	    for (n=0,bit=1;n<XkbNumIndicators;n++,bit<<=1) {
 		if (ledWire->namesPresent&bit) {
+		     if (!_XkbCheckRequestBounds(client,client->requestBuffer,
+						atomWire,atomWire+1)) {
+			*status_rtrn= BadLength;
+			return (char *)atomWire;
+		     }
 		     sli->names[n]= (Atom)*atomWire;
 		     if (sli->names[n]==None)
 			ledWire->namesPresent&= ~bit;
@@ -6039,6 +6234,11 @@ DeviceIntPtr			kbd;
 	if (ledWire->mapsPresent) {
 	    for (n=0,bit=1;n<XkbNumIndicators;n++,bit<<=1) {
 		if (ledWire->mapsPresent&bit) {
+		    if (!_XkbCheckRequestBounds(client,client->requestBuffer,
+						mapWire,mapWire+1)) {
+			*status_rtrn= BadLength;
+			return (char *)mapWire;
+		    }
 		    sli->maps[n].flags=		mapWire->flags;
 		    sli->maps[n].which_groups=	mapWire->whichGroups;
 		    sli->maps[n].groups=	mapWire->groups;

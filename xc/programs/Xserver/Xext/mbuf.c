@@ -925,6 +925,7 @@ SProcGetBufferVersion(ClientPtr client)
 {
     int    n;
     REQUEST (xMbufGetBufferVersionReq);
+    REQUEST_AT_LEAST_SIZE(xMbufGetBufferVersionReq);
 
     swaps (&stuff->length, n);
     return ProcGetBufferVersion (client);
@@ -935,6 +936,7 @@ SProcCreateImageBuffers(ClientPtr client)
 {
     int    n;
     REQUEST (xMbufCreateImageBuffersReq);
+    REQUEST_AT_LEAST_SIZE(xMbufCreateImageBuffersReq);
 
     swaps (&stuff->length, n);
     REQUEST_AT_LEAST_SIZE (xMbufCreateImageBuffersReq);
@@ -948,6 +950,7 @@ SProcDisplayImageBuffers(ClientPtr client)
 {
     int    n;
     REQUEST (xMbufDisplayImageBuffersReq);
+    REQUEST_AT_LEAST_SIZE(xMbufDisplayImageBuffersReq);
     
     swaps (&stuff->length, n);
     REQUEST_AT_LEAST_SIZE (xMbufDisplayImageBuffersReq);
@@ -962,6 +965,7 @@ SProcDestroyImageBuffers(ClientPtr client)
 {
     int    n;
     REQUEST (xMbufDestroyImageBuffersReq);
+    REQUEST_AT_LEAST_SIZE(xMbufDestroyImageBuffersReq);
     
     swaps (&stuff->length, n);
     REQUEST_SIZE_MATCH (xMbufDestroyImageBuffersReq);
@@ -974,6 +978,7 @@ SProcSetMBufferAttributes(ClientPtr client)
 {
     int    n;
     REQUEST (xMbufSetMBufferAttributesReq);
+    REQUEST_AT_LEAST_SIZE(xMbufSetMBufferAttributesReq);
 
     swaps (&stuff->length, n);
     REQUEST_AT_LEAST_SIZE(xMbufSetMBufferAttributesReq);
@@ -988,6 +993,7 @@ SProcGetMBufferAttributes(ClientPtr client)
 {
     int    n;
     REQUEST (xMbufGetMBufferAttributesReq);
+    REQUEST_AT_LEAST_SIZE(xMbufGetMBufferAttributesReq);
 
     swaps (&stuff->length, n);
     REQUEST_AT_LEAST_SIZE(xMbufGetMBufferAttributesReq);
@@ -1000,6 +1006,7 @@ SProcSetBufferAttributes(ClientPtr client)
 {
     int    n;
     REQUEST (xMbufSetBufferAttributesReq);
+    REQUEST_AT_LEAST_SIZE(xMbufSetBufferAttributesReq);
 
     swaps (&stuff->length, n);
     REQUEST_AT_LEAST_SIZE(xMbufSetBufferAttributesReq);
@@ -1014,6 +1021,7 @@ SProcGetBufferAttributes(ClientPtr client)
 {
     int    n;
     REQUEST (xMbufGetBufferAttributesReq);
+    REQUEST_AT_LEAST_SIZE(xMbufGetBufferAttributesReq);
 
     swaps (&stuff->length, n);
     REQUEST_AT_LEAST_SIZE(xMbufGetBufferAttributesReq);
@@ -1026,6 +1034,7 @@ SProcGetBufferInfo(ClientPtr client)
 {
     int    n;
     REQUEST (xMbufGetBufferInfoReq);
+    REQUEST_AT_LEAST_SIZE(xMbufGetBufferInfoReq);
 
     swaps (&stuff->length, n);
     REQUEST_SIZE_MATCH (xMbufGetBufferInfoReq);
@@ -1038,6 +1047,7 @@ SProcClearImageBufferArea(ClientPtr client)
 {
     char n;
     REQUEST(xMbufClearImageBufferAreaReq);
+    REQUEST_AT_LEAST_SIZE(xMbufClearImageBufferAreaReq);
 
     swaps(&stuff->length, n);
     REQUEST_SIZE_MATCH (xMbufClearImageBufferAreaReq);

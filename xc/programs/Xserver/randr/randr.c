@@ -1034,6 +1034,7 @@ SProcRRQueryVersion (ClientPtr client)
 {
     register int n;
     REQUEST(xRRQueryVersionReq);
+    REQUEST_AT_LEAST_SIZE(xRRQueryVersionReq);
 
     swaps(&stuff->length, n);
     swapl(&stuff->majorVersion, n);
@@ -1046,6 +1047,7 @@ SProcRRGetScreenInfo (ClientPtr client)
 {
     register int n;
     REQUEST(xRRGetScreenInfoReq);
+    REQUEST_AT_LEAST_SIZE(xRRGetScreenInfoReq);
 
     swaps(&stuff->length, n);
     swapl(&stuff->window, n);
@@ -1081,6 +1083,7 @@ SProcRRSelectInput (ClientPtr client)
 {
     register int n;
     REQUEST(xRRSelectInputReq);
+    REQUEST_AT_LEAST_SIZE(xRRSelectInputReq);
 
     swaps(&stuff->length, n);
     swapl(&stuff->window, n);

@@ -68,6 +68,18 @@ MitAddCookie (
     return 1;
 }
 
+/* compares every byte whatever the first difference is, so how long a wrong guess takes
+ * says nothing about how much of it was right (CVE-2017-2624) */
+static int
+MitSameCookie (const char *a, const char *b, int n)
+{
+    unsigned char d = 0;
+
+    while (n-- > 0)
+	d |= *a++ ^ *b++;
+    return d == 0;
+}
+
 XID
 MitCheckCookie (
     unsigned short	data_length,
@@ -79,7 +91,7 @@ MitCheckCookie (
 
     for (auth = mit_auth; auth; auth=auth->next) {
         if (data_length == auth->len &&
-	   memcmp (data, auth->data, (int) data_length) == 0)
+	   MitSameCookie (data, auth->data, (int) data_length))
 	    return auth->id;
     }
     *reason = "Invalid MIT-MAGIC-COOKIE-1 key";

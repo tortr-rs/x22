@@ -327,6 +327,7 @@ SProcTestFakeInput(ClientPtr client)
 	int		input_action_type;
 
 	REQUEST(xTestFakeInputReq);
+    REQUEST_AT_LEAST_SIZE(xTestFakeInputReq);
 	/*
 	 * byte-swap the fields in the request
 	 */
@@ -436,6 +437,7 @@ SProcTestGetInput(ClientPtr client)
 	char	n;
 
 	REQUEST(xTestGetInputReq);
+    REQUEST_AT_LEAST_SIZE(xTestGetInputReq);
 	/*
 	 * byte-swap the fields in the request
 	 */
@@ -459,6 +461,7 @@ SProcTestStopInput(ClientPtr client)
 	char	n;
 
 	REQUEST(xTestStopInputReq);
+    REQUEST_AT_LEAST_SIZE(xTestStopInputReq);
 	/*
 	 * byte-swap the length field in the request
 	 */
@@ -481,6 +484,7 @@ SProcTestReset(ClientPtr client)
 	char	n;
 
 	REQUEST(xTestResetReq);
+    REQUEST_AT_LEAST_SIZE(xTestResetReq);
 	/*
 	 * byte-swap the length field in the request
 	 */
@@ -503,6 +507,7 @@ SProcTestQueryInputSize(ClientPtr client)
 	char	n;
 
 	REQUEST(xTestQueryInputSizeReq);
+    REQUEST_AT_LEAST_SIZE(xTestQueryInputSizeReq);
 	/*
 	 * byte-swap the length field in the request
 	 */
