@@ -82,6 +82,7 @@ int main(void)
 	setenv("FONTCONFIG_FILE", "/etc/fonts/fonts.conf", 1);
 	setenv("XDG_CONFIG_HOME", "/tmp", 1);
 	setenv("X8664_EVDEV_DEBUG", "1", 1);
+	setenv("X8664_KEYMAP", "gb", 1);
 
 	char *x[] = { "/bin/Xfbdev", ":0", "-ac", "-fp", "/fonts/", "vt1", NULL };
 	run(x);

@@ -9,7 +9,8 @@
  * evdev key number + 8 is the X keycode, which is what every X server since
  * about 2008 does, so xmodmap files and keycodes from other X servers work here.
  *
- * The map is US English for now. Other layouts are on the list.
+ * The map is US English, with UK on top when X8664_KEYMAP=gb (or uk). More layouts
+ * are a few lines each: the keys that differ from US.
  *
  * Copyright (c) 2026 torter and the Chamesle Linux people
  *
@@ -127,6 +128,25 @@ static const struct { int code; KeySym plain, shifted; } evdevMap[] = {
     /* KEY_MICMUTE is 248, one past what X keycodes can reach */
 };
 
+/* other layouts: just the keys that differ from US, set with X8664_KEYMAP */
+static const struct { int code; KeySym plain, shifted; } evdevGb[] = {
+    { KEY_2, XK_2, XK_quotedbl },
+    { KEY_3, XK_3, XK_sterling },
+    { KEY_APOSTROPHE, XK_apostrophe, XK_at },
+    { KEY_GRAVE, XK_grave, XK_notsign },
+    { KEY_BACKSLASH, XK_numbersign, XK_asciitilde },	/* the key next to enter */
+    { KEY_102ND, XK_backslash, XK_bar },		/* the one next to left shift */
+};
+
+static const struct {
+    const char *name;
+    const void *keys;
+    int count;
+} evdevLayouts[] = {
+    { "gb", evdevGb, sizeof evdevGb / sizeof evdevGb[0] },
+    { "uk", evdevGb, sizeof evdevGb / sizeof evdevGb[0] },
+};
+
 #define BIT(a, n)	((a)[(n) / 8] & (1 << ((n) % 8)))
 
 /* a keyboard has letters and a space bar. that leaves out power buttons, lid switches and mice */
@@ -177,6 +197,7 @@ EvdevKeyboardLoad(void)
 {
     unsigned int i;
     KeySym *k;
+    const char *layout;
 
     /* scan code n is evdev key n, and X keycode n + 8 */
     kdMinScanCode = 0;
@@ -191,6 +212,25 @@ EvdevKeyboardLoad(void)
 	k[0] = evdevMap[i].plain;
 	k[1] = evdevMap[i].shifted;
     }
+
+    /* a layout on top, if one was asked for */
+    layout = getenv("X8664_KEYMAP");
+    for (i = 0; layout && i < sizeof evdevLayouts / sizeof evdevLayouts[0]; i++) {
+	const struct { int code; KeySym plain, shifted; } *keys = evdevLayouts[i].keys;
+	int j;
+
+	if (strcmp(layout, evdevLayouts[i].name) != 0)
+	    continue;
+	for (j = 0; j < evdevLayouts[i].count; j++) {
+	    k = kdKeymap + keys[j].code * KD_MAX_WIDTH;
+	    k[0] = keys[j].plain;
+	    k[1] = keys[j].shifted;
+	}
+	ErrorF("x8664 evdev: %s keyboard layout\n", layout);
+	return;
+    }
+    if (layout && strcmp(layout, "us") != 0)
+	ErrorF("x8664 evdev: no layout called %s, using us\n", layout);
 }
 
 static void
@@ -274,7 +314,8 @@ EvdevKeyboardLeds(int leds)
     ev[2].code = LED_CAPSL;
     ev[2].value = (leds & 4) != 0;
     for (i = 0; i < evdevCount; i++)
-	write(evdevFds[i], ev, sizeof ev);
+	if (write(evdevFds[i], ev, sizeof ev) < 0)
+	    ;	/* a keyboard without lights, nothing to do */
 }
 
 static void
