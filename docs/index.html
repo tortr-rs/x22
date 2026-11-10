@@ -27,7 +27,7 @@
   <li><a href="#what">What is it?</a></li>
   <li><a href="#plan">The plan</a></li>
   <li><a href="#questions">Questions</a></li>
-  <li><a href="https://github.com/tortr-rs/x22/blob/main/SECURITY">Security list</a></li>
+  <li><a href="https://github.com/tortr-rs/x22/blob/main/SECURITY.md">Security list</a></li>
   <li><a href="https://github.com/tortr-rs/x22">The code</a></li>
 </ul>
 <p class="head">Elsewhere</p>
@@ -86,7 +86,7 @@ one of June's, where a long font alias was copied onto the stack. Some things we
 X.Org did: talking to font servers, the Speedo and Type1 renderers, and two bitmap formats nobody has used in
 twenty years. <code>test/fonts</code> feeds the server some broken fonts and checks it's still there after.</dd>
 <dd>One entry from June is still open: a bug in the screen saver's window that X.Org hasn't said much about yet.
-The rest of the list is in <a href="https://github.com/tortr-rs/x22/blob/main/SECURITY">SECURITY</a>.</dd>
+The rest of the list is in <a href="https://github.com/tortr-rs/x22/blob/main/SECURITY.md">SECURITY</a>.</dd>
 <dt>November 10, 2026</dt>
 <dd>X22 is what we work on now, full time. Chamesle is on hold for a while (more on the
 <a href="https://chamesle.org/#hold">home page</a>), and all of that time goes here instead.</dd>
@@ -95,7 +95,7 @@ code we have too, so we went through every advisory about the X server since Jan
 117 entries: 52 we fixed here by hand (the code has moved too far for X.Org's patches to just apply), 9 that
 XFree86 4.8 had already fixed its own way, and 49 for code we don't have, like XInput 2, GLX and Xwayland. Six
 are left, nearly all in the font library, which is next. The whole list, with what we did about each one, is in
-<a href="https://github.com/tortr-rs/x22/blob/main/SECURITY">SECURITY</a>.</dd>
+<a href="https://github.com/tortr-rs/x22/blob/main/SECURITY.md">SECURITY</a>.</dd>
 <dd>One fix covers a lot of them at once: the code that reads requests from clients with the other byte order
 now checks a request is long enough before it touches it. That was 382 places in 38 files.</dd>
 <dd>Testing the SYNC fixes turned up a bug XFree86 had all along: one bad request about an alarm and the
