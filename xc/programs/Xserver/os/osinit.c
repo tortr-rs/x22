@@ -139,7 +139,7 @@ Bool OsDelayInitColors = FALSE;
 
 #if defined(__linux__) && defined(__GLIBC__)
 /*
- * x8664: when the server crashes, say where. the backtrace goes to stderr, which is
+ * x22: when the server crashes, say where. the backtrace goes to stderr, which is
  * the log; the +0x... offsets turn into function and line with
  *   addr2line -f -e Xfbdev 0x...
  * then the signal goes through as usual, so there's still a core if you want one.
@@ -148,11 +148,11 @@ Bool OsDelayInitColors = FALSE;
 #include <signal.h>
 
 static void
-x8664Crash(int sig)
+x22Crash(int sig)
 {
     void *frames[64];
     int n;
-    static const char head[] = "\nx8664: the server crashed. where it was:\n";
+    static const char head[] = "\nx22: the server crashed. where it was:\n";
 
     write(2, head, sizeof head - 1);
     n = backtrace(frames, 64);
@@ -162,7 +162,7 @@ x8664Crash(int sig)
 }
 
 static void
-x8664CatchCrashes(void)
+x22CatchCrashes(void)
 {
     static const int sigs[] = { SIGSEGV, SIGBUS, SIGFPE, SIGILL, SIGABRT };
     unsigned i;
@@ -170,10 +170,10 @@ x8664CatchCrashes(void)
 
     backtrace(warmup, 1);	/* loads libgcc now, not in the middle of a crash */
     for (i = 0; i < sizeof sigs / sizeof sigs[0]; i++)
-	signal(sigs[i], x8664Crash);
+	signal(sigs[i], x22Crash);
 }
 #else
-static void x8664CatchCrashes(void) { }
+static void x22CatchCrashes(void) { }
 #endif
 
 void
@@ -184,7 +184,7 @@ OsInit(void)
     static char* devnull = "/dev/null";
     char fname[PATH_MAX];
 
-    x8664CatchCrashes();
+    x22CatchCrashes();
 
 #ifdef macII
     set42sig();

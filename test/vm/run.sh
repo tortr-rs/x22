@@ -1,6 +1,6 @@
 #!/bin/sh
-# boots the x8664 test vm, waits, takes a picture of the screen and stops it.
-# usage: run.sh [SECONDS] [SHOT.png]     APPEND="x8664.test=dpms" adds to the kernel command line
+# boots the x22 test vm, waits, takes a picture of the screen and stops it.
+# usage: run.sh [SECONDS] [SHOT.png]     APPEND="x22.test=dpms" adds to the kernel command line
 # the console log ends up next to the picture, as SHOT.log
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
@@ -8,7 +8,7 @@ wait=${1:-90}
 shot=${2:-$here/shot.png}
 kernel=${KERNEL:-/boot/vmlinuz-$(uname -r)}
 img=$here/initramfs.cpio.gz
-sock=$(mktemp -u /tmp/x8664-vm.XXXXXX)
+sock=$(mktemp -u /tmp/x22-vm.XXXXXX)
 
 [ -f "$img" ] || "$here/mkinitramfs.sh" "$img"
 accel=tcg

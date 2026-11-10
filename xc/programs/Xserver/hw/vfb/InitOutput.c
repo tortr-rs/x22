@@ -999,7 +999,7 @@ vfbScreenInit(int index, ScreenPtr pScreen, const int argc, const char **argv)
     if (!pbits) return FALSE;
 
     miClearVisualTypes();
-    /* x8664: red in the high bits, like every other X server since the 2000s.
+    /* x22: red in the high bits, like every other X server since the 2000s.
      * mi's default puts red low (0x0000ff at depth 24), so Xft and anything else that
      * builds pixels from the masks drew blue where it meant orange. */
     switch (pvfb->depth) {
@@ -1019,7 +1019,7 @@ vfbScreenInit(int index, ScreenPtr pScreen, const int argc, const char **argv)
     default:
 	miSetVisualTypes(pvfb->depth, miGetDefaultVisualMask(pvfb->depth), 8, -1);
     }
-    /* x8664: and every other pixmap depth, with no visuals. render masks are depth 8 and
+    /* x22: and every other pixmap depth, with no visuals. render masks are depth 8 and
      * see-through windows depth 32, and a depth the screen doesn't list can't be made */
     miSetPixmapDepths ();
 

@@ -1,5 +1,5 @@
 /*
- * evdev.c: keyboards through /dev/input, for x8664.
+ * evdev.c: keyboards through /dev/input, for x22.
  *
  * The old keyboard driver (keyboard.c) reads the console in raw mode and builds
  * its key map from the console's own map. The console has no idea what the
@@ -9,7 +9,7 @@
  * evdev key number + 8 is the X keycode, which is what every X server since
  * about 2008 does, so xmodmap files and keycodes from other X servers work here.
  *
- * The map is US English, with UK on top when X8664_KEYMAP=gb (or uk). More layouts
+ * The map is US English, with UK on top when X22_KEYMAP=gb (or uk). More layouts
  * are a few lines each: the keys that differ from US.
  *
  * Copyright (c) 2026 torter and the Chamesle Linux people
@@ -49,7 +49,7 @@
 static int evdevFds[MAXKBD];
 static int evdevCount;
 static int evdevType;
-static int evdevDebug;	/* X8664_EVDEV_DEBUG=1 prints every key */
+static int evdevDebug;	/* X22_EVDEV_DEBUG=1 prints every key */
 
 /* the XF86 keysyms for the media keys, as numbers so we don't need XF86keysym.h */
 #define XF86AudioLowerVolume	0x1008FF11
@@ -128,7 +128,7 @@ static const struct { int code; KeySym plain, shifted; } evdevMap[] = {
     /* KEY_MICMUTE is 248, one past what X keycodes can reach */
 };
 
-/* other layouts: just the keys that differ from US, set with X8664_KEYMAP */
+/* other layouts: just the keys that differ from US, set with X22_KEYMAP */
 static const struct { int code; KeySym plain, shifted; } evdevGb[] = {
     { KEY_2, XK_2, XK_quotedbl },
     { KEY_3, XK_3, XK_sterling },
@@ -186,7 +186,7 @@ evdevOpenAll(void)
 Bool
 EvdevKeyboardAvailable(void)
 {
-    if (getenv("X8664_CONSOLE_KEYBOARD"))
+    if (getenv("X22_CONSOLE_KEYBOARD"))
 	return FALSE;
     evdevOpenAll();
     return evdevCount > 0;
@@ -214,7 +214,7 @@ EvdevKeyboardLoad(void)
     }
 
     /* a layout on top, if one was asked for */
-    layout = getenv("X8664_KEYMAP");
+    layout = getenv("X22_KEYMAP");
     for (i = 0; layout && i < sizeof evdevLayouts / sizeof evdevLayouts[0]; i++) {
 	const struct { int code; KeySym plain, shifted; } *keys = evdevLayouts[i].keys;
 	int j;
@@ -226,11 +226,11 @@ EvdevKeyboardLoad(void)
 	    k[0] = keys[j].plain;
 	    k[1] = keys[j].shifted;
 	}
-	ErrorF("x8664 evdev: %s keyboard layout\n", layout);
+	ErrorF("x22 evdev: %s keyboard layout\n", layout);
 	return;
     }
     if (layout && strcmp(layout, "us") != 0)
-	ErrorF("x8664 evdev: no layout called %s, using us\n", layout);
+	ErrorF("x22 evdev: no layout called %s, using us\n", layout);
 }
 
 static void
@@ -248,7 +248,7 @@ EvdevKeyboardRead(int fd, void *closure)
 	    if (ev[i].value == 2)
 		continue;
 	    if (evdevDebug)
-		ErrorF("x8664 evdev: key %d %s\n", ev[i].code, ev[i].value ? "down" : "up");
+		ErrorF("x22 evdev: key %d %s\n", ev[i].code, ev[i].value ? "down" : "up");
 	    KdEnqueueKeyboardEvent(ev[i].code, ev[i].value == 0);
 	}
     }
@@ -274,7 +274,7 @@ EvdevKeyboardInit(void)
     int i;
 
     evdevOpenAll();
-    evdevDebug = getenv("X8664_EVDEV_DEBUG") != NULL;
+    evdevDebug = getenv("X22_EVDEV_DEBUG") != NULL;
     if (!evdevType)
 	evdevType = KdAllocInputType();
     for (i = 0; i < evdevCount; i++) {
@@ -282,7 +282,7 @@ EvdevKeyboardInit(void)
 	EvdevKeyboardEnable(evdevFds[i], 0);
 	KdRegisterFdEnableDisable(evdevFds[i], EvdevKeyboardEnable, EvdevKeyboardDisable);
     }
-    ErrorF("x8664 evdev: %d keyboard%s\n", evdevCount, evdevCount == 1 ? "" : "s");
+    ErrorF("x22 evdev: %d keyboard%s\n", evdevCount, evdevCount == 1 ? "" : "s");
     return evdevCount > 0;
 }
 

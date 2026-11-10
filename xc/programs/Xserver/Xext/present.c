@@ -5,7 +5,7 @@
  * when frame N happens", and tells it back exactly when that was. It's how programs
  * line their drawing up with the monitor instead of guessing. XFree86 4.8 is older
  * than Present, and older than generic events (events longer than 32 bytes), which
- * Present's events are, so both are here, written for x8664.
+ * Present's events are, so both are here, written for x22.
  *
  * What's here: QueryVersion, Pixmap (copied into the window at the target frame),
  * NotifyMSC, SelectInput, QueryCapabilities, and the CompleteNotify and IdleNotify
@@ -53,7 +53,7 @@
 #include "windowstr.h"
 #include "pixmapstr.h"
 #include "gcstruct.h"
-#include "x8664present.h"
+#include "x22present.h"
 
 /* the protocol's numbers */
 #define PRESENT_MAJOR		1

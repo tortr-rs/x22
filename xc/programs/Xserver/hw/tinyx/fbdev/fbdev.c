@@ -83,8 +83,8 @@ fbdevInitialize (KdCardInfo *card, FbdevPriv *priv)
     int		    k;
     unsigned long   off;
     priv->kms = FALSE;
-    /* x8664: no /dev/fb0 on most kernels now, so the kernel's mode-setting is first */
-    if (!getenv("X8664_FBDEV") && kmsInitialize (priv))
+    /* x22: no /dev/fb0 on most kernels now, so the kernel's mode-setting is first */
+    if (!getenv("X22_FBDEV") && kmsInitialize (priv))
 	return TRUE;
     if ((priv->fd = open("/dev/fb0", O_RDWR)) < 0) {
 	perror("Error opening /dev/fb0\n");
@@ -263,11 +263,11 @@ fbdevScreenInitialize (KdScreenInfo *screen, FbdevScrPriv *scrpriv)
         screen->fb[0].pixelStride = (priv->fix.line_length * 8 / 
     				 priv->var.bits_per_pixel);
         screen->fb[0].frameBuffer = (CARD8 *) (priv->fb);
-	/* x8664: with kms and no rotation the server draws into memory of its own, and
+	/* x22: with kms and no rotation the server draws into memory of its own, and
 	 * kms.c copies what changed into the kernel's buffers. no layer, no shadow
 	 * module, so composite can move windows into pixmaps of their own */
 	priv->kmsDirect = FALSE;
-	if (priv->kms && scrpriv->randr == RR_Rotate_0 && !getenv("X8664_LAYER")) {
+	if (priv->kms && scrpriv->randr == RR_Rotate_0 && !getenv("X22_LAYER")) {
 	    priv->kmsShadow = xalloc(priv->fix.line_length * priv->var.yres);
 	    if (priv->kmsShadow) {
 		memset(priv->kmsShadow, 0, priv->fix.line_length * priv->var.yres);

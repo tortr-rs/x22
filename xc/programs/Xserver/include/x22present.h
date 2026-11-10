@@ -1,11 +1,11 @@
 /*
- * x8664present.h: what the Present extension (present.c) needs from a screen's driver,
+ * x22present.h: what the Present extension (present.c) needs from a screen's driver,
  * and what the driver calls back. A screen without hooks gets a 60 Hz clock in software.
  *
  * Copyright (c) 2026 torter and the Chamesle Linux people. MIT license, see present.c.
  */
-#ifndef X8664PRESENT_H
-#define X8664PRESENT_H
+#ifndef X22PRESENT_H
+#define X22PRESENT_H
 
 #include <stdint.h>
 #include "scrnintstr.h"

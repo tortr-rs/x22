@@ -73,7 +73,7 @@ static BitmapFileFunctionsRec readers[] = {
     { bdfReadFont, bdfReadFontInfo} ,
 #endif
 #endif
-/* x8664: pmf was xprint's font format. xprint isn't built, and its reader was
+/* x22: pmf was xprint's font format. xprint isn't built, and its reader was
  * a copy of the pcf one without the checks */
 #ifdef PMFFORMAT
     { pmfReadFont, pcfReadFontInfo} ,

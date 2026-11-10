@@ -1,5 +1,5 @@
-X8664 and the X security fixes since 2008
-=========================================
+X22 and the X security fixes since 2008
+=======================================
 
 XFree86 4.8 came out in 2008. X.Org has fixed a lot of security bugs in the X
 server since then, and most of the code they were in is code we have too. This
@@ -9,7 +9,7 @@ we did about each CVE in it.
   fixed      ported here, by hand (the code has moved on too far for the patches
              to apply), and tested in the vm
   had it     XFree86 4.8 already had a fix of its own
-  not ours   the code isn't in X8664: XInput 2, DRI2/3, glamor, GLX, Xwayland,
+  not ours   the code isn't in X22: XInput 2, DRI2/3, glamor, GLX, Xwayland,
              Xquartz, the setuid Xorg server, and so on
   to do      not looked at yet, or not done yet
 

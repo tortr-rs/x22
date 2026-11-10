@@ -1,5 +1,5 @@
 /*
- * kms.c: real screens through the kernel, for x8664.
+ * kms.c: real screens through the kernel, for x22.
  *
  * Kernels today mostly don't make /dev/fb0 any more (CONFIG_FB_DEVICE is off on
  * most distros), so the fbdev driver had nothing to open. This sets the screen up
@@ -8,7 +8,7 @@
  * and put it on the screen. Then it fills in the same fb_var/fb_fix fields
  * /dev/fb0 would have, so the rest of fbdev.c works as it always did.
  *
- * Step 2 of x8664's plan, and the start of step 3: two buffers that swap at vblank,
+ * Step 2 of x22's plan, and the start of step 3: two buffers that swap at vblank,
  * so the screen never shows half a frame. One monitor for now, that's step 6.
  *
  * Copyright (c) 2026 torter and the Chamesle Linux people
@@ -39,7 +39,7 @@
 #include <sys/ioctl.h>
 #include <drm/drm.h>
 #include <drm/drm_mode.h>
-#include "x8664present.h"
+#include "x22present.h"
 #include "damage.h"
 
 /* ioctl, again if a signal got in the way */
@@ -56,7 +56,7 @@ kmsIoctl(int fd, unsigned long req, void *arg)
 static void
 kmsSay(const char *what)
 {
-    ErrorF("x8664 kms: %s\n", what);
+    ErrorF("x22 kms: %s\n", what);
 }
 
 /* the kernel hands back lists in two calls: the first says how many, the second fills them in */
@@ -157,7 +157,7 @@ kmsInitialize(FbdevPriv *priv)
     struct drm_mode_fb_cmd fb;
     struct drm_mode_map_dumb map;
     __u32 *crtcs = NULL, *conns = NULL, *encs = NULL, *cencs = NULL;
-    const char *dev = getenv("X8664_CARD");
+    const char *dev = getenv("X22_CARD");
     char msg[160];
     int i;
     Bool found = FALSE;
@@ -236,7 +236,7 @@ kmsInitialize(FbdevPriv *priv)
     priv->kmsFb = priv->kmsFbs[1];
     priv->fb_base = priv->fb = priv->kmsMaps[1];
     priv->kmsFlipping = FALSE;
-    priv->kmsNoFlip = getenv("X8664_NO_FLIP") != NULL;
+    priv->kmsNoFlip = getenv("X22_NO_FLIP") != NULL;
 
     /* and now pretend we read all that from /dev/fb0 */
     memset(&priv->var, 0, sizeof priv->var);
@@ -349,8 +349,8 @@ kmsDpms(FbdevPriv *priv, int mode)
 	kmsSay("the monitor won't switch power modes");
 	return FALSE;
     }
-    if (getenv("X8664_EVDEV_DEBUG"))
-	ErrorF("x8664 kms: monitor %s\n", mode == 0 ? "on" : mode == 3 ? "off" : "asleep");
+    if (getenv("X22_EVDEV_DEBUG"))
+	ErrorF("x22 kms: monitor %s\n", mode == 0 ? "on" : mode == 3 ? "off" : "asleep");
     return TRUE;
 }
 

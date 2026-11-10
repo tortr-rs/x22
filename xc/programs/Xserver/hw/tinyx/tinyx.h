@@ -734,7 +734,7 @@ extern KdMouseFuncs	MsMouseFuncs;
 extern KdMouseFuncs	TsFuncs;
 #endif
 extern KdKeyboardFuncs	LinuxKeyboardFuncs;
-/* x8664: keyboards through /dev/input (linux/evdev.c) */
+/* x22: keyboards through /dev/input (linux/evdev.c) */
 extern KdKeyboardFuncs	EvdevKeyboardFuncs;
 extern KdMouseFuncs	LibinputMouseFuncs;
 int LibinputMouseAvailable (void);

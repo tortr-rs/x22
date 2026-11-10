@@ -32,7 +32,7 @@
 #define KD_KEY_OFFSET	(8 - kdMinScanCode)
 
 #define KD_MIN_KEYCODE	8
-/* x8664: all of X's keycodes, evdev keyboards use them up to 255 */
+/* x22: all of X's keycodes, evdev keyboards use them up to 255 */
 #define KD_MAX_KEYCODE	255
 #define KD_MAX_WIDTH	4
 #define KD_MAX_LENGTH	(KD_MAX_KEYCODE - KD_MIN_KEYCODE + 1)

@@ -1,4 +1,4 @@
-# little programs for poking at x8664
+# little programs for poking at x22
 all: win masks dpms present composite sync fonts
 win: win.c
 	cc -O2 -o $@ win.c -lX11

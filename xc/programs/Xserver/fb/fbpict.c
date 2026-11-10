@@ -944,7 +944,7 @@ fbComposite (CARD8      op,
 	return;
 
     /*
-     * x8664: a source without alpha, no mask: OVER is just SRC. the fast paths below
+     * x22: a source without alpha, no mask: OVER is just SRC. the fast paths below
      * took x8r8g8b8 sources for a8r8g8b8 and read alpha from the unused top byte,
      * which is 0, so OVER drew nothing. that's every ordinary window a compositor paints.
      */

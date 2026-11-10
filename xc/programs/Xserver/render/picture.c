@@ -1079,7 +1079,7 @@ SetPictureClipRects (PicturePtr	pPicture,
     return result;
 }
 
-/* x8664: from X11R6.8.2, composite and xfixes clip pictures with a region */
+/* x22: from X11R6.8.2, composite and xfixes clip pictures with a region */
 int
 SetPictureClipRegion (PicturePtr    pPicture,
                       int           xOrigin,
@@ -1124,7 +1124,7 @@ SetPictureClipRegion (PicturePtr    pPicture,
     return result;
 }
 
-/* x8664: from X11R6.8.2, with the region really copied (6.8.2 left it empty) */
+/* x22: from X11R6.8.2, with the region really copied (6.8.2 left it empty) */
 void
 CopyPicture (PicturePtr	pSrc,
 	     Mask	mask,

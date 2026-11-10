@@ -1,5 +1,5 @@
 /* win: the smallest X program there is. opens a window with a title and waits.
- * win TITLE [SECONDS] [#rrggbb]   for testing window managers on x8664 when there's no xterm around */
+ * win TITLE [SECONDS] [#rrggbb]   for testing window managers on x22 when there's no xterm around */
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>

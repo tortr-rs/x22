@@ -6,7 +6,7 @@ set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 kernel=${KERNEL:-/boot/vmlinuz-$(uname -r)}
 img=$here/initramfs.cpio.gz
-sock=$(mktemp -u /tmp/x8664-vm.XXXXXX)
+sock=$(mktemp -u /tmp/x22-vm.XXXXXX)
 [ -f "$img" ] || "$here/mkinitramfs.sh" "$img"
 accel=tcg
 [ -w /dev/kvm ] && accel=kvm

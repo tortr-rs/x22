@@ -1382,7 +1382,7 @@ OsVendorFatalError()
 
 #ifdef DPMSExtension
 /*
- * x8664: what the DPMS extension needs from us, so "xset dpms force off" and
+ * x22: what the DPMS extension needs from us, so "xset dpms force off" and
  * screensavers that use DPMS really switch the monitor off. tinyx had the per-card
  * hooks (cfuncs->dpms) but never these three, so DPMS was always left out.
  */

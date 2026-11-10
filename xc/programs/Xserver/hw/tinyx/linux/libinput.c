@@ -1,5 +1,5 @@
 /*
- * libinput.c: mice and touchpads through libinput, for x8664.
+ * libinput.c: mice and touchpads through libinput, for x22.
  *
  * The old mouse driver (mouse.c) reads /dev/input/mice, which is the kernel
  * pretending every pointer is a PS/2 mouse from 1995: a touchpad moves the
@@ -9,9 +9,9 @@
  * the pointers to it and turns what it says into tinyx mouse events.
  *
  * Settings, from the environment because tinyx has no config file:
- *   X8664_TAP=0            no tap to click on touchpads (it's on)
- *   X8664_NATURAL=1        natural scrolling, the content follows the fingers
- *   X8664_LIBINPUT=0       the old driver instead
+ *   X22_TAP=0            no tap to click on touchpads (it's on)
+ *   X22_NATURAL=1        natural scrolling, the content follows the fingers
+ *   X22_LIBINPUT=0       the old driver instead
  *
  * libinput needs udev to tell it what each device is, so this only takes over
  * when udev is running. Without it (a bare initramfs) the old driver stays.
@@ -52,7 +52,7 @@
 static struct libinput *li;
 static struct udev *liUdev;
 static int liType;
-static int liDebug;		/* X8664_LIBINPUT_DEBUG=1 prints what comes in */
+static int liDebug;		/* X22_LIBINPUT_DEBUG=1 prints what comes in */
 static unsigned long liButtons;	/* KD_BUTTON_* held down right now */
 static double liRestX, liRestY;	/* the parts of a pixel left over from the last motion */
 static double liScroll[2];	/* finger scrolling not yet worth a click, down and right */
@@ -96,16 +96,16 @@ liUdevRunning(void)
 int
 LibinputMouseAvailable(void)
 {
-    return liEnv("X8664_LIBINPUT", 1) && liUdevRunning();
+    return liEnv("X22_LIBINPUT", 1) && liUdevRunning();
 }
 
 static void
 liSetup(struct libinput_device *dev)
 {
-    int natural = liEnv("X8664_NATURAL", 0);
+    int natural = liEnv("X22_NATURAL", 0);
 
     if (libinput_device_config_tap_get_finger_count(dev) > 0) {
-	libinput_device_config_tap_set_enabled(dev, liEnv("X8664_TAP", 1) ?
+	libinput_device_config_tap_set_enabled(dev, liEnv("X22_TAP", 1) ?
 	    LIBINPUT_CONFIG_TAP_ENABLED : LIBINPUT_CONFIG_TAP_DISABLED);
 	libinput_device_config_tap_set_drag_enabled(dev, LIBINPUT_CONFIG_DRAG_ENABLED);
     }
@@ -119,7 +119,7 @@ liSetup(struct libinput_device *dev)
     if (libinput_device_config_click_get_methods(dev) & LIBINPUT_CONFIG_CLICK_METHOD_CLICKFINGER)
 	libinput_device_config_click_set_method(dev, LIBINPUT_CONFIG_CLICK_METHOD_CLICKFINGER);
     if (liDebug)
-	ErrorF("x8664 libinput: %s\n", libinput_device_get_name(dev));
+	ErrorF("x22 libinput: %s\n", libinput_device_get_name(dev));
 }
 
 static unsigned long
@@ -247,7 +247,7 @@ liRead(int fd, void *closure)
 	    break;
 	}
 	if (liDebug && type != LIBINPUT_EVENT_DEVICE_ADDED)
-	    ErrorF("x8664 libinput: event %d, buttons %02lx\n", type, liButtons);
+	    ErrorF("x22 libinput: event %d, buttons %02lx\n", type, liButtons);
 	libinput_event_destroy(ev);
     }
 }
@@ -258,7 +258,7 @@ LibinputInit(void)
     KdMouseInfo *mi;
     int fd;
 
-    liDebug = liEnv("X8664_LIBINPUT_DEBUG", 0);
+    liDebug = liEnv("X22_LIBINPUT_DEBUG", 0);
     if (!liType)
 	liType = KdAllocInputType();
     /* the first mouse tinyx set up is ours, the old driver gets none */
@@ -270,7 +270,7 @@ LibinputInit(void)
 	return 0;
     li = libinput_udev_create_context(&liInterface, NULL, liUdev);
     if (!li || libinput_udev_assign_seat(li, "seat0") != 0) {
-	ErrorF("x8664 libinput: no seat, mice and touchpads won't work\n");
+	ErrorF("x22 libinput: no seat, mice and touchpads won't work\n");
 	if (li)
 	    libinput_unref(li);
 	li = NULL;

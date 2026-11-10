@@ -58,7 +58,7 @@ SUBDIRS = module
 BDFSRCS=bdfread.c bdfutils.c
 BDFOBJS=bdfread.o bdfutils.o
 BDFDEFS=-DBDFFORMAT
-/* x8664: BDFDEFS used to be inside this #if, so leaving out snf left out bdf too */
+/* x22: BDFDEFS used to be inside this #if, so leaving out snf left out bdf too */
 #if !OmitSnfSupport
 SNFSRCS=snfread.c
 SNFOBJS=snfread.o

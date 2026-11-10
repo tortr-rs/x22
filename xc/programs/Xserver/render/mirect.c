@@ -53,7 +53,7 @@ miColorRects (PicturePtr    pDst,
 	return;
     tmpval[0] = GXcopy;
     tmpval[1] = pixel;
-    tmpval[2] = pDst->subWindowMode;	/* x8664: from 6.8.2, so IncludeInferiors works */
+    tmpval[2] = pDst->subWindowMode;	/* x22: from 6.8.2, so IncludeInferiors works */
     mask = GCFunction | GCForeground | GCSubwindowMode;
     if (pClipPict->clientClipType == CT_REGION)
     {

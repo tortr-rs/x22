@@ -1,8 +1,8 @@
-/* x8664: local build settings. first target is Xvfb, the server that draws into memory, so it can be
+/* x22: local build settings. first target is Xvfb, the server that draws into memory, so it can be
    tested without any graphics hardware. the real server comes after */
 #define BuildServersOnly		YES
 #define XVirtualFramebufferServer	YES
-/* the real-screen server: tinyx's fbdev driver, which x8664 taught kms (hw/tinyx/fbdev/kms.c) */
+/* the real-screen server: tinyx's fbdev driver, which x22 taught kms (hw/tinyx/fbdev/kms.c) */
 #define TinyXServer		YES
 #define XfbdevServer		YES
 #define XF86Server			NO
@@ -15,7 +15,7 @@
 #define BuildHtmlManPages		NO
 #define InstallXinitConfig		NO
 
-/* x8664: the font formats nobody needs any more, which is code nobody reads any more either. snf
+/* x22: the font formats nobody needs any more, which is code nobody reads any more either. snf
    is the bitmap format from before pcf, speedo and type1/cid had their own renderers and their own
    long list of bugs. x.org dropped all of them from the font library. freetype still reads type1 */
 #define OmitSnfSupport			YES
@@ -25,8 +25,8 @@
 
 /* 2008 C on a 2026 compiler: the old dialect, shared globals allowed, and the checks that are errors
    now but were warnings then turned back into warnings */
-#define X8664CompatFlags -std=gnu89 -fcommon -fno-strict-aliasing -Wno-error=incompatible-pointer-types -Wno-error=int-conversion -Wimplicit-function-declaration -Wno-error=implicit-function-declaration -Wno-error=return-mismatch -Wno-error=declaration-missing-parameter-type
-#define DefaultCCOptions X8664CompatFlags
+#define X22CompatFlags -std=gnu89 -fcommon -fno-strict-aliasing -Wno-error=incompatible-pointer-types -Wno-error=int-conversion -Wimplicit-function-declaration -Wno-error=implicit-function-declaration -Wno-error=return-mismatch -Wno-error=declaration-missing-parameter-type
+#define DefaultCCOptions X22CompatFlags
 #define OptimizedCDebugFlags -O2
 
 /* the makedepend from 2008 crashes on today's headers, gcc -M does the same job */
@@ -35,7 +35,7 @@
 /* ar's l used to mean "local", today it means "libdeps" and takes an argument */
 #define ArCmd				ArCmdBase cq
 
-/* x8664: tinyx left out most extensions to stay small. a desktop server needs some of them:
+/* x22: tinyx left out most extensions to stay small. a desktop server needs some of them:
  * DPMS (monitor off), MIT-SCREEN-SAVER, SYNC (gtk times its frames with it), DOUBLE-BUFFER,
  * RECORD, X-Resource, XFree86-Bigfont and XINERAMA (dbe and record expect it, and several
  * monitors will want it). still out: xkb and xinput (step 2's input work

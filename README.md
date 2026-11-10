@@ -1,11 +1,12 @@
-X8664
-=====
+X22
+===
 
 Our X server, for Chamesle Linux. A fork of XFree86 4.8.0, the last XFree86,
 from December 2008, brought up to date one piece at a time. The goal is X that's
 as smooth as Wayland without giving up a single X program.
 
-The name: XFree86 was free X for the 386. X8664 is X for x86-64.
+The name: it started out as X8664, X for x86-64, the way XFree86 was free X for
+the 386. It's X22 now.
 
 Where it's at
 -------------
@@ -17,7 +18,7 @@ Early, but it draws on real screens now. Two servers build:
            Tested in qemu so far, not on real hardware yet. Mouse and
            keyboard come from the old Linux console drivers for now.
 
-The plan, and the news as it happens: https://chamesle.org/x8664.html
+The plan, and the news as it happens: https://x22.chamesle.org
 
 What's in here
 --------------
@@ -62,5 +63,5 @@ XFree86's code keeps the licenses it came with, mostly the XFree86 License 1.1
 and the MIT/X11 license. dwm is MIT/X. Our changes are under the same license as
 the file they're in.
 
-XFree86 is a trademark of The XFree86 Project, Inc. X8664 is our own project and
+XFree86 is a trademark of The XFree86 Project, Inc. X22 is our own project and
 isn't made or endorsed by them.

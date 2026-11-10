@@ -99,7 +99,7 @@ SOFTWARE.
 #include <X11/extensions/xf86bigfont.h>
 #endif
 
-/* x8664 doesn't talk to font servers (xfs): fonts come from files. the font
+/* x22 doesn't talk to font servers (xfs): fonts come from files. the font
  * server client in the font library has had more than its share of security
  * bugs (CVE-2014-0210, CVE-2014-0211, CVE-2026-59679, CVE-2026-44950), and
  * nothing anyone runs today needs it. Xfbdev was already built this way */

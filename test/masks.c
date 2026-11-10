@@ -1,4 +1,4 @@
-/* masks: what the server says its colours look like. on x8664 at depth 24 this should say
+/* masks: what the server says its colours look like. on x22 at depth 24 this should say
  * r ff0000 g 00ff00 b 0000ff, and amber should come out as e0a43c. */
 #include <stdio.h>
 #include <X11/Xlib.h>

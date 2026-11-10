@@ -1,0 +1,173 @@
+/* the chamesle website. a homepage like they used to be: white, times, blue links that turn purple once
+   you've been there, links down the side, a rule between things. most of it is what the browser does anyway */
+body {
+  margin: 0;
+  background: #fff;
+  color: #000;
+  font: 16px/1.45 "Times New Roman", Times, "Liberation Serif", "Nimbus Roman", serif;
+}
+a { color: #0000ee; }
+a:visited { color: #551a8b; }
+a:active { color: #e00; }
+img { max-width: 100%; height: auto; }
+a img { border: 2px solid #0000ee; }
+a:visited img { border-color: #551a8b; }
+a.brand img, .top img, a.plain img { border: 0; }
+hr { border: 0; border-top: 1px solid #808080; border-bottom: 1px solid #fff; box-shadow: 0 1px 0 #c0c0c0; height: 0; margin: 18px 0; }
+h1 { font-size: 30px; margin: 8px 0 6px; }
+h2 { font: bold 18px/1.2 Arial, Helvetica, "Liberation Sans", sans-serif; color: #fff; background: #000080;
+     padding: 3px 8px; margin: 26px 0 8px; border-top: 1px solid #4040c0; border-bottom: 1px solid #000040; }
+h2 a, h2 a:visited { color: #ffff80; }
+h3 { font-size: 18px; margin: 20px 0 4px; color: #800000; }
+code, pre, kbd, tt { font-family: "Courier New", Courier, "Liberation Mono", monospace; font-size: 15px; }
+pre { background: #f4f4f4; border: 1px solid #999; padding: 8px 10px; overflow-x: auto; }
+address { font-size: 14px; color: #333; margin: 0 0 24px; }
+.small { font-size: 14px; color: #333; }
+ul { padding-left: 26px; }
+li { margin: 3px 0; }
+
+/* links down the left in a pale blue column, the page to the right of it */
+.layout { display: flex; align-items: stretch; min-height: 100vh; }
+.side {
+  flex: 0 0 168px;
+  background: #dfe5f6;
+  border-right: 1px solid #9aa6c8;
+  padding: 14px 12px 24px;
+  font-size: 15px;
+}
+.side .brand { display: block; text-align: center; }
+.side .name { text-align: center; font-weight: bold; margin: 4px 0 14px; line-height: 1.2; }
+.side ul { list-style: square; padding: 0 0 0 16px; margin: 0 0 12px; }
+.side li { margin: 0 0 4px; }
+.side li b { color: #000; }
+.side .head { margin: 14px -12px 6px; padding: 2px 12px; font: bold 13px Arial, Helvetica, "Liberation Sans", sans-serif;
+  color: #fff; background: #000080; }
+.side .now { margin-top: 18px; font-size: 13.5px; }
+.content { flex: 1; min-width: 0; max-width: 820px; padding: 14px 28px 0; }
+
+/* the page heading: what used to float over the page */
+.dochead h1 { margin-top: 6px; }
+.dochead .lead { margin: 0 0 4px; }
+.dochead { border-bottom: 1px solid #888; padding-bottom: 12px; margin-bottom: 8px; }
+
+/* tables with real borders, the way border=1 drew them */
+table { border-collapse: collapse; }
+.grid, .facts, main table { border: 2px outset #c0c0c0; border-spacing: 2px; border-collapse: separate; }
+.grid td, .grid th, .facts td, main td, main th { border: 1px inset #c0c0c0; padding: 4px 8px; vertical-align: top; text-align: left; }
+.grid th, .facts td:first-child { background: #dfe5f6; font-weight: bold; }
+
+/* the homepage */
+.top { display: flex; gap: 16px; align-items: center; justify-content: center; }
+.top img { flex: none; }
+.top h1 { margin: 0; font-size: 34px; }
+.top p { margin: 2px 0 0; font-style: italic; color: #800000; }
+.release { border: 2px outset #e0e0a0; background: #ffffcc; padding: 8px 12px; margin: 14px 0; }
+.release p { margin: 0 0 4px; }
+.news dt { font-weight: bold; margin-top: 10px; }
+.news dd { margin: 2px 0 0 24px; }
+.new { color: #f00; font: italic bold 13px Arial, Helvetica, "Liberation Sans", sans-serif; }
+.shots td { text-align: center; width: 25%; font-size: 14px; }
+.shots img { display: block; margin: 0 auto 4px; }
+.shots td span { color: #333; }
+
+/* under the homepage title: the main links in brackets */
+.linkbar { text-align: center; margin: 10px 0 0; font-size: 15px; }
+/* the buttons at the bottom of every page, and the box for linking here */
+.buttons { margin: 0 0 24px; }
+.buttons a img, .buttons img { border: 0; margin: 0 4px 4px 0; vertical-align: middle; image-rendering: pixelated; }
+.linkus { border: 2px outset #c0c0c0; padding: 8px 12px; margin: 10px 0; }
+.linkus img { float: left; margin: 2px 12px 4px 0; border: 0; image-rendering: pixelated; }
+.linkus pre { clear: both; margin: 8px 0 0; font-size: 13px; }
+
+/* the chess page: a plain board, cream and blue, a move list beside it */
+.chessbar { margin: 10px 0 14px; }
+.chessbar label { margin-right: 12px; white-space: nowrap; }
+.chessbar select, .chessbar button { font: inherit; margin: 0 2px 6px; }
+.chess { display: flex; gap: 18px; align-items: flex-start; flex-wrap: wrap; }
+.board { display: grid; grid-template-columns: repeat(8, 1fr); width: min(480px, calc(100vw - 32px));
+  border: 3px outset #9aa6c8; }
+.sq { aspect-ratio: 1; border: 0; margin: 0; padding: 0; position: relative; cursor: pointer; display: block; }
+.sq img { width: 100%; height: 100%; display: block; border: 0; pointer-events: none; }
+.sq.light { background: #ffffe0; }
+.sq.dark { background: #8fa4cf; }
+.sq.last { background: #e8d870; }
+.sq.picked { outline: 3px solid #0000ee; outline-offset: -3px; }
+.sq.to::after { content: ""; position: absolute; left: 38%; top: 38%; width: 24%; height: 24%; border-radius: 50%; background: rgba(0, 0, 128, .35); }
+.sq.take { box-shadow: inset 0 0 0 4px rgba(200, 0, 0, .6); }
+.sq.check { background: #ff6060; }
+.sq .file, .sq .rank { position: absolute; font: bold 11px Arial, Helvetica, sans-serif; color: #000080; }
+.sq .file { right: 3px; bottom: 2px; }
+.sq .rank { left: 3px; top: 2px; }
+.status { font-weight: bold; margin: 8px 0; }
+.status.over { color: #c00; }
+.moves { border: 2px inset #c0c0c0; padding: 6px 10px; min-width: 150px; max-height: 480px; overflow-y: auto;
+  font: 15px "Courier New", Courier, "Liberation Mono", monospace; }
+.moves ol { margin: 4px 0 0; padding-left: 30px; }
+
+.xlogo { float: right; margin: 0 0 10px 18px; border: 0; }
+
+/* what other pages already use, kept plain */
+.button { font-weight: bold; }
+.button.go::before { content: "\00bb\00a0"; }
+.box, .release-box { border: 1px solid #777; padding: 8px 12px; }
+.shot { margin: 20px 0 0; }
+.shot img { border: 1px solid #000; }
+.shot figcaption { font-size: 14px; font-style: italic; }
+.tag { font-size: 12px; font-weight: bold; color: #c00; text-transform: uppercase; }
+.tag.soon { color: #666; }
+.edition { border-bottom: 1px solid #ccc; padding-bottom: 6px; }
+.edition img { border: 1px solid #000; margin-top: 6px; }
+details { margin: 8px 0; }
+summary { cursor: pointer; font-weight: bold; }
+.dl { border: 1px solid #777; margin: 14px 0; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+.dl img { border-right: 1px solid #777; display: block; }
+.dl > div { padding: 10px 14px; }
+.dl h3 { margin-top: 0; }
+.toc { border: 1px solid #777; padding: 6px 12px; margin: 14px 0; font-size: 15px; }
+.toc h4 { margin: 0 0 4px; }
+.toc a { margin-right: 12px; }
+.timeline { padding-left: 0; list-style: none; }
+.timeline li { margin: 0 0 10px; }
+.timeline .ver { font-weight: bold; display: inline-block; min-width: 40px; }
+.timeline li.next .ver { color: #666; }
+.timeline li div { display: inline; }
+.pkgs { padding-left: 0; list-style: none; }
+.pkgs li { border-bottom: 1px solid #ddd; padding: 5px 0; }
+.posts { padding-left: 0; list-style: none; }
+.posts li { border-bottom: 1px solid #ddd; padding: 8px 0; display: flex; gap: 12px; }
+.posts h3 { margin: 0; font-size: 17px; }
+.posts p { margin: 2px 0 0; font-size: 15px; }
+.votes { min-width: 40px; text-align: center; font-size: 13px; }
+.votes span { display: block; font-size: 18px; font-weight: bold; }
+.meta { font-size: 13px; color: #333; }
+.meta img { width: 16px; height: 16px; vertical-align: -3px; }
+.cat { font-size: 12px; border: 1px solid #999; padding: 0 4px; margin-right: 4px; }
+.bar { margin: 10px 0; }
+.bar a, .bar button { margin-right: 8px; font: inherit; }
+.bar .on { font-weight: bold; }
+.post-body { white-space: pre-wrap; overflow-wrap: anywhere; }
+.form label { display: block; font-weight: bold; margin: 12px 0 2px; }
+.form input, .form select, .form textarea, input[type=search] { font: inherit; padding: 3px 4px; max-width: 100%; }
+input[type=search].big { width: 100%; font-size: 18px; }
+.cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 18px; }
+.notfound .code { font-size: 64px; font-weight: bold; margin: 0; }
+h1.banner img { max-width: 100%; }
+
+/* a phone: the links go on top, the page under them */
+@media (max-width: 760px) {
+  .layout { display: block; }
+  .side { border-right: 0; border-bottom: 1px solid #9aa6c8; padding: 10px 16px; }
+  .side .brand, .side .name { display: inline-block; vertical-align: middle; margin: 0 8px 6px 0; text-align: left; }
+  .side .brand img { width: 40px; height: 40px; }
+  .side .name br { display: none; }
+  .side ul { display: flex; flex-wrap: wrap; gap: 2px 14px; list-style: none; padding: 0; }
+  .side .head { margin: 10px -16px 6px; padding: 2px 16px; }
+  .side .now { margin-top: 8px; }
+  .content { padding: 10px 16px 0; }
+  .dl { grid-template-columns: 1fr; }
+  .dl img { border-right: 0; border-bottom: 1px solid #777; }
+  .shots, .shots tbody, .shots tr { display: block; }
+  .shots tr { display: grid; grid-template-columns: 1fr 1fr; }
+  .shots td { width: auto; }
+  table.facts { width: 100%; }
+}

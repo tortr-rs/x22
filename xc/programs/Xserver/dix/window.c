@@ -2619,7 +2619,7 @@ RealizeTree(WindowPtr pWin)
 }
 
 /*
- * x8664, as x.org does it: composite unmaps and remaps a window to move it into its
+ * x22, as x.org does it: composite unmaps and remaps a window to move it into its
  * own pixmap and back. that's not the program's doing, so window managers shouldn't
  * hear about it (dwm took the unmap as the window closing and stopped managing it).
  */

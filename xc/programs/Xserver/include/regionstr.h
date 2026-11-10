@@ -170,7 +170,7 @@ extern RegDataRec miBrokenData;
 #else /* !NEED_SCREEN_REGIONS */
 
 /* Reference _pScreen macro argument and check its type */
-#define REGION_SCREEN(_pScreen_) (void)0	/* x8664: unused, and code from x.org passes 0 */
+#define REGION_SCREEN(_pScreen_) (void)0	/* x22: unused, and code from x.org passes 0 */
 
 #define REGION_CREATE(_pScreen, _rect, _size) \
     (REGION_SCREEN(_pScreen), miRegionCreate(_rect, _size))

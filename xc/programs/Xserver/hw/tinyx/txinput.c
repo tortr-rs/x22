@@ -534,7 +534,7 @@ const KdKeySymModsRec kdKeySymMods[] = {
   {  XK_Meta_L,	Mod1Mask },
   {  XK_Meta_R,	Mod1Mask },
   {  XK_Num_Lock,	Mod2Mask },
-  /* x8664: super on mod4 and mode_switch on mod5, like every X since. dwm and friends
+  /* x22: super on mod4 and mode_switch on mod5, like every X since. dwm and friends
    * use mod4 for super; on mod3 they never saw it */
   {  XK_Super_L,	Mod4Mask },
   {  XK_Super_R,	Mod4Mask },
@@ -1349,8 +1349,8 @@ KdEnqueueKeyboardEvent(unsigned char	scan_code,
 	    return;
 	}
 	KdCheckSpecialKeys (&xE);
-	if (getenv ("X8664_EVDEV_DEBUG"))
-	    ErrorF ("x8664 input: queue keycode %d %s, modmap %02x\n", key_code,
+	if (getenv ("X22_EVDEV_DEBUG"))
+	    ErrorF ("x22 input: queue keycode %d %s, modmap %02x\n", key_code,
 		    xE.u.u.type == KeyPress ? "press" : "release",
 		    pKdKeyboard->key->modifierMap[key_code]);
 	KdHandleKeyboardEvent (&xE);

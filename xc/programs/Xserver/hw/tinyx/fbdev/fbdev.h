@@ -45,7 +45,7 @@ typedef struct _fbdevPriv {
     int				fd;
     char			*fb;
     char			*fb_base;
-    /* x8664: set when the screen came from /dev/dri (kms.c), not /dev/fb0 */
+    /* x22: set when the screen came from /dev/dri (kms.c), not /dev/fb0 */
     Bool			kms;
     __u32			kmsCrtc, kmsConn;
     struct drm_mode_modeinfo	kmsMode;

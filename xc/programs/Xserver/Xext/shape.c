@@ -85,7 +85,7 @@ RegionOperate (
 
 #define CREATE_PROC(func) RegionPtr func(WindowPtr /* pWin */)
 
-CREATE_PROC(CreateBoundingShape);	/* x8664: xfixes uses these three too */
+CREATE_PROC(CreateBoundingShape);	/* x22: xfixes uses these three too */
 CREATE_PROC(CreateClipShape);
 
 #undef CREATE_PROC

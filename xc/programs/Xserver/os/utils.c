@@ -178,7 +178,7 @@ OR PERFORMANCE OF THIS SOFTWARE.
 Bool CoreDump;
 Bool noTestExtensions;
 #ifdef COMPOSITE
-Bool noCompositeExtension = FALSE;	/* x8664: on, it's what step 4 is for */
+Bool noCompositeExtension = FALSE;	/* x22: on, it's what step 4 is for */
 #endif
 #ifdef DAMAGE
 Bool noDamageExtension = FALSE;

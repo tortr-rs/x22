@@ -14,7 +14,7 @@ trap 'rm -rf "$r"' EXIT
 mkdir -p "$r"/bin "$r"/proc "$r"/sys "$r"/dev "$r"/tmp "$r"/root "$r"/modules "$r"/fonts "$r"/etc/fonts "$r"/xfonts
 cp "$here/init" "$r/init"
 cp "$top/xc/programs/Xserver/Xfbdev" "$top/dwm/dwm" "$top/test/win" "$top/test/dpms" "$top/test/present" "$top/test/composite" "$r/bin/"
-# a compositing manager for x8664.test=composite: XCOMPMGR=/path/to/xcompmgr, or one built in ~/src
+# a compositing manager for x22.test=composite: XCOMPMGR=/path/to/xcompmgr, or one built in ~/src
 for x in "${XCOMPMGR:-$HOME/src/xcompmgr/xcompmgr-1.1.10/xcompmgr}"; do [ -x "$x" ] && cp "$x" "$r/bin/xcompmgr"; done
 # the desktop bits from torter's dwm, if they're installed
 for b in wallset dwmstat; do

@@ -1,4 +1,4 @@
-/* init: the first and only program in the x8664 test vm. there's no shell in there, so this
+/* init: the first and only program in the x22 test vm. there's no shell in there, so this
  * mounts what X needs, loads the graphics driver, starts Xfbdev and puts dwm and a few windows
  * on it. everything it does goes to the serial console, which run.sh saves. */
 #define _GNU_SOURCE
@@ -14,7 +14,7 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
-static void say(const char *m) { fprintf(stderr, "x8664-init: %s\n", m); }
+static void say(const char *m) { fprintf(stderr, "x22-init: %s\n", m); }
 
 static pid_t xpid;
 
@@ -26,7 +26,7 @@ static void reap(int sig)
 	while ((p = waitpid(-1, &st, WNOHANG)) > 0) {
 		if (p != xpid && WIFEXITED(st) && !WEXITSTATUS(st))
 			continue;
-		fprintf(stderr, "x8664-init: %s %d %s %d\n", p == xpid ? "Xfbdev" : "pid", (int) p,
+		fprintf(stderr, "x22-init: %s %d %s %d\n", p == xpid ? "Xfbdev" : "pid", (int) p,
 			WIFSIGNALED(st) ? "killed by signal" : "exited with", WIFSIGNALED(st) ? WTERMSIG(st) : WEXITSTATUS(st));
 	}
 }
@@ -48,7 +48,7 @@ static pid_t run(char *const argv[])
 	pid_t pid = fork();
 	if (pid == 0) {
 		execv(argv[0], argv);
-		fprintf(stderr, "x8664-init: can't run %s: %s\n", argv[0], strerror(errno));
+		fprintf(stderr, "x22-init: can't run %s: %s\n", argv[0], strerror(errno));
 		_exit(127);
 	}
 	return pid;
@@ -65,9 +65,9 @@ static void loadmodules(void)
 		snprintf(path, sizeof path, "/modules/%s", name);
 		int fd = open(path, O_RDONLY | O_CLOEXEC);
 		if (fd < 0 || syscall(SYS_finit_module, fd, "", 0) != 0)
-			fprintf(stderr, "x8664-init: module %s: %s\n", name, strerror(errno));
+			fprintf(stderr, "x22-init: module %s: %s\n", name, strerror(errno));
 		else
-			fprintf(stderr, "x8664-init: loaded %s\n", name);
+			fprintf(stderr, "x22-init: loaded %s\n", name);
 		if (fd >= 0) close(fd);
 	}
 	fclose(f);
@@ -112,9 +112,9 @@ int main(void)
 	setenv("DISPLAY", ":0", 1);
 	setenv("FONTCONFIG_FILE", "/etc/fonts/fonts.conf", 1);
 	setenv("XDG_CONFIG_HOME", "/tmp", 1);
-	setenv("X8664_EVDEV_DEBUG", "1", 1);
-	setenv("X8664_KEYMAP", "gb", 1);
-	setenv("X8664_LIBINPUT_DEBUG", "1", 1);
+	setenv("X22_EVDEV_DEBUG", "1", 1);
+	setenv("X22_KEYMAP", "gb", 1);
+	setenv("X22_LIBINPUT_DEBUG", "1", 1);
 
 	char *x[] = { "/bin/Xfbdev", ":0", "-ac", "-fp", "/fonts/", "vt1", NULL };
 	xpid = run(x);
@@ -136,12 +136,12 @@ int main(void)
 	run(w1); run(w2); run(w3);
 	say("dwm and three windows started");
 
-	/* extra tests, asked for on the kernel command line: x8664.test=dpms, present or composite */
+	/* extra tests, asked for on the kernel command line: x22.test=dpms, present or composite */
 	{
 		char cmd[512] = "";
 		int fd = open("/proc/cmdline", O_RDONLY);
 		if (fd >= 0) { if (read(fd, cmd, sizeof cmd - 1) < 0) cmd[0] = 0; close(fd); }
-		if (strstr(cmd, "x8664.test=composite")) {
+		if (strstr(cmd, "x22.test=composite")) {
 			char *ct[] = { "/bin/composite", NULL };
 			char *xc[] = { "/bin/xcompmgr", "-c", "-r", "14", "-o", "0.55", "-l", "-16", "-t", "-12", NULL };
 			sleep(10);
@@ -151,13 +151,13 @@ int main(void)
 			say("xcompmgr, with shadows");
 			run(xc);
 		}
-		if (strstr(cmd, "x8664.test=present")) {
+		if (strstr(cmd, "x22.test=present")) {
 			char *pr[] = { "/bin/present", NULL };
 			sleep(10);
 			say("present test");
 			run(pr);
 		}
-		if (strstr(cmd, "x8664.test=dpms")) {
+		if (strstr(cmd, "x22.test=dpms")) {
 			char *dp[] = { "/bin/dpms", "20", NULL };
 			sleep(10);
 			say("dpms test");

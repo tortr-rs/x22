@@ -1,0 +1,264 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>X22, an X server</title>
+<meta name="description" content="X22 is our X server: a fork of XFree86 4.8, brought up to date so X is as smooth as Wayland.">
+<link rel="canonical" href="https://x22.chamesle.org/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="X22">
+<meta property="og:title" content="X22, an X server">
+<meta property="og:description" content="X22 is our X server: a fork of XFree86 4.8, brought up to date so X is as smooth as Wayland.">
+<meta property="og:url" content="https://x22.chamesle.org/">
+<meta property="og:image" content="https://x22.chamesle.org/img/x22-composite.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="img/x11.svg?1">
+<link rel="stylesheet" href="style.css?1">
+</head>
+<body>
+
+<div class="layout">
+<nav class="side">
+<a class="brand" href="./"><img src="img/x11.svg?1" alt="X22" width="64" height="64"></a>
+<p class="name">X22</p>
+<ul>
+  <li><a href="#news">News</a></li>
+  <li><a href="#what">What is it?</a></li>
+  <li><a href="#plan">The plan</a></li>
+  <li><a href="#questions">Questions</a></li>
+  <li><a href="https://github.com/tortr-rs/x22/blob/main/SECURITY">Security list</a></li>
+  <li><a href="https://github.com/tortr-rs/x22">The code</a></li>
+</ul>
+<p class="head">Elsewhere</p>
+<ul>
+  <li><a href="https://chamesle.org/">Chamesle Linux</a></li>
+  <li><a href="https://github.com/tortr-rs/x22/issues">Report a bug</a></li>
+  <li><a href="https://ko-fi.com/L6N725GI1V">Ko-fi</a></li>
+</ul>
+</nav>
+<div class="content">
+
+<main>
+
+<header class="dochead">
+<img class="xlogo" src="img/x11.svg?1" alt="" width="80" height="80">
+<h1>X22</h1>
+<p class="lead">Our X server. A fork of XFree86, brought up to date for today's computers, with one goal: X that's as
+smooth as Wayland, without giving up a single X program.</p>
+</header>
+
+<div class="release">
+<p><b>Where it's at:</b> it builds, draws on a real screen through the kernel without tearing, takes
+keyboards and mice, and has the X security fixes since 2008, font library included, so far in a virtual machine. Nothing to download
+yet. Progress goes in the news below as it happens.</p>
+<p><b>This is all we're working on now.</b> Chamesle itself is on hold for a while, so every hour goes here.
+<a href="https://chamesle.org/#hold">More about that</a>.</p>
+</div>
+
+<h2 id="what">What is it?</h2>
+
+<p>X22 is an X server, the program that draws your windows and passes them your keyboard and mouse. Every
+Chamesle desktop runs on one (we <a href="https://chamesle.org/about.html#x">believe in X</a>). Right now that's X.Org's. X22 is
+going to be ours.</p>
+
+<p>It starts from <b>XFree86 4.8.0</b>, the last XFree86 release, from December 2008. XFree86 was the X server on
+nearly every Linux and BSD PC through the 90s and into the 2000s, and this whole website is dressed like its old
+homepage. We took its source as it was released, checked against XFree86's own signatures, and we're carrying it
+on.</p>
+
+<p>The name: it started out as X22, X for x86-64, the way XFree86 was free X for the 386 PCs of its day. That was
+a mouthful, so since November 10, 2026 it's X22. Same code, same plan.</p>
+
+<h2 id="news">News</h2>
+
+<dl class="news">
+<dt>November 10, 2026, evening <span class="new">NEW</span></dt>
+<dd>New name, new address. X8664 is <b>X22</b> now, and it has a site of its own here at
+<a href="https://x22.chamesle.org/">x22.chamesle.org</a>. The code moved to
+<a href="https://github.com/tortr-rs/x22">github.com/tortr-rs/x22</a> (the old address still takes you there),
+and the environment variables went with it: <code>X22_KEYMAP</code> and friends.</dd>
+<dd>And the font library is done, which finishes step 7. The server reads font files itself, so every font bug
+is a server bug: BDF fonts with glyphs too big for the numbers that hold them, PCF fonts whose glyphs point past
+the end of the file, old compressed fonts that walk off a table, a font that's really a symlink to a file you
+shouldn't be able to read. All of those are fixed, along with the three font bugs X.Org announced this summer and
+one of June's, where a long font alias was copied onto the stack. Some things we turned off instead, the way
+X.Org did: talking to font servers, the Speedo and Type1 renderers, and two bitmap formats nobody has used in
+twenty years. <code>test/fonts</code> feeds the server some broken fonts and checks it's still there after.</dd>
+<dd>One entry from June is still open: a bug in the screen saver's window that X.Org hasn't said much about yet.
+The rest of the list is in <a href="https://github.com/tortr-rs/x22/blob/main/SECURITY">SECURITY</a>.</dd>
+<dt>November 10, 2026</dt>
+<dd>X22 is what we work on now, full time. Chamesle is on hold for a while (more on the
+<a href="https://chamesle.org/#hold">home page</a>), and all of that time goes here instead.</dd>
+<dd>Security, which is step 7. X.Org has put out a lot of security fixes since 2008, and most of them are for
+code we have too, so we went through every advisory about the X server since January 2008, one by one. That's
+117 entries: 52 we fixed here by hand (the code has moved too far for X.Org's patches to just apply), 9 that
+XFree86 4.8 had already fixed its own way, and 49 for code we don't have, like XInput 2, GLX and Xwayland. Six
+are left, nearly all in the font library, which is next. The whole list, with what we did about each one, is in
+<a href="https://github.com/tortr-rs/x22/blob/main/SECURITY">SECURITY</a>.</dd>
+<dd>One fix covers a lot of them at once: the code that reads requests from clients with the other byte order
+now checks a request is long enough before it touches it. That was 382 places in 38 files.</dd>
+<dd>Testing the SYNC fixes turned up a bug XFree86 had all along: one bad request about an alarm and the
+server would spin forever the next time that alarm went off, so any program could freeze your screen. Two more
+in the same code freed an alarm twice, or while something still pointed at it. All three are fixed, and
+<code>test/sync</code> checks for them now.</dd>
+<dt>November 8, 2026, 8 pm</dt>
+<dd>Mice and touchpads go through libinput now, like keyboards already did through the kernel. Before, the server
+read <code>/dev/input/mice</code>, where the kernel makes every pointer look like a PS/2 mouse from the nineties:
+a touchpad moved the pointer and that was all. With libinput you get tap to click, two finger scrolling, palm
+detection and the rest, set up the way every other desktop sets them up. Scrolling turns into the wheel buttons X
+has always used, sideways too. In the virtual machine the mouse moves and the wheel scrolls. A real touchpad is
+next, on real hardware, which is where the rest of step 2 happens.</dd>
+<dt>November 8, 2026, 4 pm</dt>
+<dd>Compositing works, which is step 4. Windows can draw into pictures of their own, and a compositor puts them
+on the screen however it likes: with shadows, see-through, fading in and out. Below is xcompmgr, the small
+compositor from X.Org, drawing shadows under dwm's windows on X22, in the virtual machine.
+<p><img src="img/x22-composite.png?1" alt="dwm on X22 with xcompmgr running: three dark windows with soft shadows along their edges, the amber bar on top" width="640" height="400"></p>
+<p>XFree86 4.8 never had the Composite, Damage or XFixes extensions. X.Org added them in 2004, in X11R6.8, back
+when the two were still close, so we brought them over from there, along with the bits of the server
+underneath that they lean on. That also gives Present its missing XFixes.</p>
+<p>Three old bugs turned up on the way: drawing through RENDER ignored "include child windows", a common way of
+painting drew nothing at all, and the test server couldn't make 8 or 32 bit pictures. And the server now draws
+into memory of its own and copies only what changed into the next frame, which is simpler than what XFree86 did
+and is what lets a compositor's drawing reach the screen.</p></dd>
+<dt>November 8, 2026, 3 pm</dt>
+<dd>The Present extension is in, which finishes step 3. With Present a program says "put this picture in my
+window at frame 1000" or "tell me when frame 1000 happens", and the server tells it back exactly when that was.
+It's how games, video players and GTK line their drawing up with the monitor instead of guessing.
+<p>XFree86 4.8 is older than Present, and also older than the kind of long event Present sends, so both had to be
+written from nothing, about 600 lines. The frame counter comes from the kernel. QEMU's virtual card doesn't have
+one, so there the server keeps a 60 Hz clock itself, and that's what we could test today: 60 frames took
+1.000 seconds, and 20 pictures asked for 20 frames in a row went up on 20 frames in a row. The kernel's counter
+gets its first real test on real hardware.</p>
+<p>Not there yet: updating just part of a window (that needs the XFixes extension, which XFree86 also doesn't
+have), fences, and handing a whole-screen window straight to the monitor without a copy. Those come with
+steps 4 and 5.</p></dd>
+<dt>November 8, 2026, 2:50 pm</dt>
+<dd>Three smaller things. UK keyboards work (<code>X22_KEYMAP=gb</code>), and other layouts are a few lines each.
+When the screensaver says so, the monitor now really switches off, through the kernel, instead of showing black.
+And the server has the extensions a desktop expects back: XFree86's small server left out SYNC, DPMS, the screen
+saver extension, double buffering, RECORD, X-Resource and Xinerama to stay small. GTK times its frames with SYNC, so
+that one matters for step 3.</dd>
+<dt>November 8, 2026, 2:35 pm</dt>
+<dd>No more tearing. X22 now keeps two buffers: the monitor shows one while the next frame is drawn into the
+other, and the kernel swaps them at the moment the screen starts a new refresh (a <b>page flip</b>). Until it says
+the swap happened, new drawing waits for the next frame. So the screen never shows half a frame, and nothing is
+drawn faster than the monitor can show it. That's the heart of step 3. The other half, letting programs know when
+their frame was shown (the Present extension), comes next.</dd>
+<dt>November 8, 2026, 1:50 pm</dt>
+<dd>The code is on GitHub: <a href="https://github.com/tortr-rs/x22">tortr-rs/x22</a>. Also new: keyboards come
+straight from the kernel's input devices now, with the Super key working, which XFree86's small server never saw.
+dwm is all Super, so that mattered. There was one bug: the first key combo after starting did nothing. The mic
+mute key's number was one past the end of the server's key table, and writing it there marked Super as already
+held down, so the first real press looked like key repeat and got dropped. Fixed the same afternoon.</dd>
+<dt>November 8, 2026, 1:25 pm</dt>
+<dd>Real screens! Well, a real screen in a virtual machine, but it's the same road a real graphics card takes.
+<p>XFree86 4.8 came with a small server called Xfbdev, which draws on <code>/dev/fb0</code>. We tried it, and found
+out most Linux kernels don't make <code>/dev/fb0</code> any more. So we taught it the way kernels do screens now,
+<b>kernel mode-setting</b>: it opens <code>/dev/dri/card0</code>, finds the monitor, asks for its best mode, and puts
+a buffer on it. Drawing happens in ordinary memory, and only the boxes that changed get copied over and reported to
+the kernel. That's about 300 lines, and it's the first half of step 2.</p>
+<p>The test boots this computer's own kernel in QEMU with nothing in it but our server, dwm and three windows, and
+takes a picture of the screen. Next: input through libinput instead of the old console drivers, then real
+hardware.</p>
+<figure class="shot">
+<img src="img/x22-kms.png?1" alt="dwm on X22 on QEMU's virtual screen: amber bar, three tiled windows, the teal wallpaper and a mouse pointer" width="640" height="400">
+<figcaption>X22 on a screen through the kernel, inside QEMU. Note the mouse pointer: that's the server's own.</figcaption>
+</figure></dd>
+<dt>November 8, 2026, 1:10 pm</dt>
+<dd>It runs! Xvfb builds on GCC 16, and our dwm runs on it, with the gaps, the bar and the wallpaper, the same
+setup as on our own desktop. Step 1 is done.
+<p>The first bug was a funny one: dwm's amber came out blue. XFree86's Xvfb puts red in the low byte of each pixel
+and blue in the high one, the opposite of what everything since expects, so every color made from the server's
+masks came out backwards. Three lines to fix, an hour to find.</p>
+<figure class="shot">
+<img src="img/x22-dwm.png?1" alt="dwm on X22: the amber bar with tag icons, volume, battery and the time, three windows tiled with gaps over the teal Chamesle wallpaper" width="640" height="400">
+<figcaption>dwm on X22, three windows tiled. Drawn in memory and saved, since there's no screen yet.</figcaption>
+</figure></dd>
+<dt>November 8, 2026, 3 am</dt>
+<dd>Day one. XFree86 4.8.0 is in our repo, untouched, as the first commit. The first build on a 2026 compiler is
+running: 2008 C doesn't go through GCC 16 without some convincing. The first goal is small on purpose: build
+<b>Xvfb</b>, the X server that draws into memory instead of a screen, and run dwm on it. Our dwm is in the same
+repo.</dd>
+</dl>
+
+<h2 id="plan">Making X smooth</h2>
+
+<p>When people say Wayland is smoother, they're mostly right about today's X servers, and very right about
+XFree86, which is older than all of it. Here's what's missing and what we're going to do about it, roughly in
+order:</p>
+
+<table class="grid">
+<tr><th>Step</th><th>What</th><th>Why it matters</th></tr>
+<tr><td>1</td><td><b>Builds and runs on Linux today.</b> Xvfb first, with dwm on it.</td><td>Nothing else can
+happen until it runs. <b>Done</b> November 8.</td></tr>
+<tr><td>2</td><td><b>Real screens through the kernel.</b> Kernel mode-setting (KMS) for every graphics card, and
+libinput for keyboards, mice and touchpads.</td><td>XFree86's drivers program the graphics chip themselves, the 2008
+way. Today the kernel does that, for every card, and does it right. <i>Doing this now:</i> screens and keyboards
+work in a virtual machine, and mice and touchpads go through libinput. Real hardware is next.</td></tr>
+<tr><td>3</td><td><b>Every frame on time.</b> Page flips that wait for the screen's refresh, so nothing ever
+tears, and the Present extension so programs know when their frame was shown.</td><td>This is most of what
+"smooth" means. Tearing is the thing people notice first. <b>Done</b> November 8, in a virtual machine.
+Real hardware still has to say so.</td></tr>
+<tr><td>4</td><td><b>Compositing.</b> The Composite and Damage extensions.</td><td>XFree86 4.8 has neither.
+Without them there are no compositors, no shadows, no smooth window effects. <b>Done</b> November 8, in a
+virtual machine, with xcompmgr.</td></tr>
+<tr><td>5</td><td><b>Drawing on the GPU.</b> OpenGL-backed 2D drawing and DRI3, so programs and games render
+straight on the graphics card.</td><td>Faster drawing, and the same path games and browsers expect.</td></tr>
+<tr><td>6</td><td><b>Today's screens.</b> Plugging monitors in and out, several monitors, HiDPI, 144&nbsp;Hz and
+up, variable refresh.</td><td>All newer than XFree86.</td></tr>
+<tr><td>7</td><td><b>Security.</b> Going through every X security fix since 2008 and applying the ones that
+apply to us.</td><td>X has had a lot of them. A server can't be shipped until this is done. <b>Done for the
+server and the font library November 10.</b> One fix from June is left.</td></tr>
+<tr><td>8</td><td><b>Proof.</b> Frame timing and input latency, measured against X.Org and Wayland on the same
+computer, published here.</td><td>"As smooth as Wayland" is a claim. We'll show the numbers, good or bad.</td></tr>
+</table>
+
+<h2 id="questions">Questions</h2>
+
+<h3>Why fork XFree86 and not X.Org?</h3>
+<p>X.Org is XFree86 continued, with eighteen years of work on top, and it's what Chamesle runs today. We wanted
+to start from the X we remember and build it back up ourselves, knowing every piece we add and why. It's the
+harder way. It's also the way you learn how all of it works.</p>
+
+<h3>Will my programs work on it?</h3>
+<p>That's the whole idea. Anything that runs on X should run on X22, back to programs from the 80s. Programs
+that only speak Wayland won't, the same as on any X server.</p>
+
+<h3>When can I use it?</h3>
+<p>No date. When it's good enough to replace X.Org on your computer, it becomes an option in
+<a href="https://chamesle.org/docs.html">Jiggity</a>, and after that, maybe the default. Not before it's passed step 7.</p>
+
+<h3>Where's the code?</h3>
+<p>On GitHub: <a href="https://github.com/tortr-rs/x22">github.com/tortr-rs/x22</a>. The first commit is
+XFree86 4.8.0 exactly as released, and everything after it is ours, so <code>git log</code> tells the whole story.
+The README says how to build it and run it, and <code>test/vm</code> boots it in QEMU if you want to see it on a
+screen without touching your own X.</p>
+
+<h3>What license?</h3>
+<p>XFree86's code keeps the license it came with, the XFree86 License 1.1, and the other X licenses on the
+parts that have them.</p>
+
+<p class="small">XFree86 is a trademark of The XFree86 Project, Inc. X22 is our own project and isn't made or
+endorsed by them. The X logo is the X Window System's, in the public domain.</p>
+
+</main>
+
+<hr>
+<address>
+Last updated November 10, 2026.<br>
+Something wrong on this page? Tell us on the <a href="https://chamesle.org/board.html">board</a> or open an
+<a href="https://github.com/tortr-rs/x22/issues">issue</a>.<br>
+X22 is free software, under the XFree86 License 1.1 and the other X licenses.
+</address>
+<p class="buttons">
+<a class="plain" href="https://chamesle.org/"><img src="img/buttons/chamesle.png?1" alt="Chamesle Linux" width="88" height="31"></a>
+<img src="img/buttons/anybrowser.png?1" alt="Best viewed with any browser" width="88" height="31">
+<img src="img/buttons/notrackers.png?1" alt="This site has no trackers" width="88" height="31">
+</p>
+</div>
+</div>
+
+<script src="egg.js?1"></script>
+</body>
+</html>
