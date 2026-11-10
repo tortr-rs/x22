@@ -115,7 +115,9 @@ AllocatePixmap(ScreenPtr pScreen, int pixDataSize)
 
     if (((unsigned)(-1) - pScreen->totalPixmapSize) < (unsigned)pixDataSize)
 	return NullPixmap;
-    pPixmap = xalloc(pScreen->totalPixmapSize + (unsigned)pixDataSize);
+    /* zeroed: a new pixmap used to hold whatever was in that memory before,
+     * and a client could read it back (CVE-2020-14347) */
+    pPixmap = xcalloc(1, pScreen->totalPixmapSize + (unsigned)pixDataSize);
     if (!pPixmap)
 	return NullPixmap;
     ppriv = (DevUnion *)(pPixmap + 1);
@@ -133,7 +135,7 @@ AllocatePixmap(ScreenPtr pScreen, int pixDataSize)
 	    ppriv->ptr = (pointer)NULL;
     }
 #else
-    pPixmap = xalloc(sizeof(PixmapRec) + (unsigned)pixDataSize);
+    pPixmap = xcalloc(1, sizeof(PixmapRec) + (unsigned)pixDataSize);
 #endif
     return pPixmap;
 }

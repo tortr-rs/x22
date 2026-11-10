@@ -21,3 +21,4 @@ xc/config/makedepend/mkdepend._man
 xc/config/util/ccmakedep
 shots/
 dwm/dwm
+xc/programs/Xserver/X*.bak

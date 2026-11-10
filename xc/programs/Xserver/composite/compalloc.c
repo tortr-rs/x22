@@ -57,6 +57,7 @@ compRedirectWindow (ClientPtr pClient, WindowPtr pWin, int update)
     CompWindowPtr	cw = GetCompWindow (pWin);
     CompClientWindowPtr	ccw;
     Bool		wasMapped = pWin->mapped;
+    int			status = Success;
 
     /*
      * Only one Manual update is allowed
@@ -129,10 +130,12 @@ compRedirectWindow (ClientPtr pClient, WindowPtr pWin, int update)
 	cw->update = CompositeRedirectManual;
     }
 
+    /* on a failure too, map the window back before returning: it used to stay
+     * unmapped (X.Org's version of this is CVE-2025-26599) */
     if (!compCheckRedirect (pWin))
     {
 	FreeResource (ccw->id, RT_NONE);
-	return BadAlloc;
+	status = BadAlloc;
     }
     if (wasMapped && !pWin->mapped)
     {
@@ -144,7 +147,7 @@ compRedirectWindow (ClientPtr pClient, WindowPtr pWin, int update)
 	pWin->overrideRedirect = overrideRedirect;
     }
     
-    return Success;
+    return status;
 }
 
 /*

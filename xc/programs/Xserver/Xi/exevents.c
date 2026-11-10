@@ -455,7 +455,14 @@ DeviceFocusEvent(dev, type, mode, detail, pWin)
 	    }
 	}
 
-	sev = ev = (deviceStateNotify *) xalloc(evcount * sizeof(xEvent));
+	/* evcount above is wrong for a device with keys and buttons, and the
+	 * events below ran past the end of it (CVE-2024-0229). room for the
+	 * most we can write: the state, key and button events, and one for
+	 * every three valuators, and we send what was really written */
+	sev = ev = (deviceStateNotify *)
+	    xcalloc(6 + ((v ? v->numAxes : 0) + 2) / 3, sizeof(xEvent));
+	if (!sev)
+	    return;
 	FixDeviceStateNotify (dev, ev, NULL, NULL, NULL, first);
 
 	if (b != NULL) {
@@ -508,6 +515,9 @@ DeviceFocusEvent(dev, type, mode, detail, pWin)
 	    }
 	}
 
+	evcount = ev - sev;
+	if (evcount < 1)
+	    evcount = 1;
 	(void) DeliverEventsToWindow(pWin, (xEvent *)sev, evcount,
 	    DeviceStateNotifyMask, NullGrab, dev->id);
 	xfree (sev);

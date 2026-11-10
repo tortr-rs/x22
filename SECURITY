@@ -24,7 +24,7 @@ anything in it. That was 382 handlers in 38 files.
 2007-12 / 2008-01  (Jan 17 2008)
   CVE-2007-5760  XFree86-Misc out of bounds index               fixed (and the same off-by-one in TOG-CUP and DGA)
   CVE-2007-5958  security policy file existence                 had it (Fopen)
-  CVE-2007-6427  XInput memory corruption                       to do
+  CVE-2007-6427  XInput memory corruption                       had it
   CVE-2007-6428  TOG-CUP memory corruption                      fixed
   CVE-2007-6429  MIT-SHM and EVI integer overflows              had it
   CVE-2008-0006  PCF font parser overflow                       to do
@@ -59,10 +59,10 @@ anything in it. That was 382 handlers in 38 files.
   CVE-2014-8100  RENDER lengths                                 fixed
   CVE-2014-8101  RandR swapped lengths                          fixed (the swapped handlers)
   CVE-2014-8102  XFIXES swapped length                          fixed (the swapped handlers)
-  CVE-2014-8103  DRI3 and Present                               not ours / to do (our Present)
+  CVE-2014-8103  DRI3 and Present                               not ours (DRI3), and our Present is our own code: it checks every length and looks windows up by id
 
 2015
-  CVE-2015-0255  XKB GetGeometry information leak               to do
+  CVE-2015-0255  XKB GetGeometry information leak               fixed (the counted strings in SetGeometry)
   CVE-2015-1802..1804    libXfont BDF                           to do (font library)
   CVE-2015-3164  Xwayland open sockets                          not ours
 
@@ -84,7 +84,7 @@ anything in it. That was 382 handlers in 38 files.
 2020
   CVE-2020-14345 XkbSetNames bounds                             fixed
   CVE-2020-14346 XIChangeHierarchy                              not ours
-  CVE-2020-14347 uninitialised pixmap memory                    to do
+  CVE-2020-14347 uninitialised pixmap memory                    fixed (new pixmaps are zeroed)
   CVE-2020-14360 XkbSetMap lengths                              fixed (every step is checked)
   CVE-2020-14361 XkbSelectEvents underflow                      fixed
   CVE-2020-14362 RECORD RegisterClients underflow               fixed
@@ -102,20 +102,20 @@ anything in it. That was 382 handlers in 38 files.
   CVE-2022-2320  XkbSetDeviceInfo                               fixed (checked before it's applied, always was)
   CVE-2022-4283  XKB radio groups in _XkbCopyNames              not ours (no _XkbCopyNames)
   CVE-2022-46340 XTEST GenericEvent                             not ours (no GenericEvent before XI2)
-  CVE-2022-46341 XI passive grab detail                         to do
+  CVE-2022-46341 XI passive grab detail                         not ours (XI2)
   CVE-2022-46342 Xv RTVideoNotify                               fixed
   CVE-2022-46343 SCREEN-SAVER resource                          fixed
   CVE-2022-46344 XI2 ChangeProperty                             not ours
 
 2023
   CVE-2023-0494  XI DeepCopyPointerClasses                      not ours (XI2)
-  CVE-2023-1393          Composite overlay window use after free to do
+  CVE-2023-1393  Composite overlay window use after free      not ours (Composite 0.2 has no overlay window)
   CVE-2023-5367  XI2 and RandR 1.2 properties                   not ours
-  CVE-2023-5380  PointerWindows on screen switch                to do
-  CVE-2023-6377  XI XkbActions for buttons                      to do
+  CVE-2023-5380  PointerWindows on screen switch                not ours (XI2 enter/leave code)
+  CVE-2023-6377  XI XkbActions for buttons                      not ours (master devices)
   CVE-2023-6478  RandR 1.2 properties                           not ours
-  CVE-2023-6816  logical button maps                            to do
-  CVE-2024-0229  XI ButtonClass                                 to do
+  CVE-2023-6816  logical button maps                            not ours (XI2)
+  CVE-2024-0229  XI ButtonClass                                 fixed (the DeviceStateNotify part; the rest is master devices)
   CVE-2024-0408  GLX                                            not ours
   CVE-2024-0409  Xephyr/Xwayland cursor                         not ours
   CVE-2024-21885 XI2 hierarchy events                           not ours
@@ -132,33 +132,33 @@ anything in it. That was 382 handlers in 38 files.
   CVE-2025-26596 XkbSizeKeySyms                                 fixed
   CVE-2025-26597 XkbChangeTypesOfKey                            fixed
   CVE-2025-26598 XI2 barriers                                   not ours
-  CVE-2025-26599 Composite border clip                          to do
-  CVE-2025-26600 frozen device removal                          to do
-  CVE-2025-26601 SYNC alarms                                    to do
+  CVE-2025-26599 Composite border clip                          fixed (4.8 left the window unmapped instead)
+  CVE-2025-26600 frozen device removal                          not ours (nothing removes a device while running)
+  CVE-2025-26601 SYNC alarms                                    fixed
   CVE-2025-49175 RENDER animated cursors                        fixed
   CVE-2025-49176 big request length overflow                    fixed
   CVE-2025-49177 XFIXES SetClientDisconnectMode                 not ours (XFIXES 3 has no such request)
   CVE-2025-49178 input buffer ignoreBytes                       not ours (4.8 doesn't skip requests)
   CVE-2025-49179 RECORD RegisterClients overflow                fixed
   CVE-2025-49180 RandR providers in Xorg                        not ours
-  CVE-2025-62229 Present notifies                               to do
+  CVE-2025-62229 Present notifies                               not ours (our own Present, see 2014-8103)
   CVE-2025-62230 XKB interest resource                          fixed
   CVE-2025-62231 XkbSetCompatMap overflow                       fixed
 
 2026
   CVE-2026-33999 XkbSetCompatMap buffer reuse                   not ours (4.8 reallocs every time)
   CVE-2026-34000 XkbSetGeometry colour index                    fixed
-  CVE-2026-34001 SYNC fences                                    to do
+  CVE-2026-34001 SYNC fences                                    not ours (no fences in SYNC 3.0)
   CVE-2026-34002 XkbSetMap modifier map                         fixed
   CVE-2026-34003 XkbSetMap key types                            fixed
   CVE-2026-50256..50263  (Jun 2)                                to do
   CVE-2026-55999 glamor fonts                                   not ours
   CVE-2026-56000 GLX                                            not ours
   CVE-2026-56001..56003  libXfont2                              to do (font library)
-  CVE-2026-59679,        CVE-2026-44950  libXfont2 font server  to do (font library)
+  CVE-2026-59679, CVE-2026-44950  libXfont2 font server   to do (font library)
   CVE-2026-88812 XkbSetGeometry doodad text                     fixed (no text, no doodad)
-  CVE-2026-93515 Present notifies                               to do
-  CVE-2026-93516 passive grabs on removed devices               to do
+  CVE-2026-93515 Present notifies                               not ours (our own Present)
+  CVE-2026-93516 passive grabs on removed devices               not ours (nothing removes a device while running)
   CVE-2026-93517 GLX                                            not ours
   CVE-2026-93518 XKB map sizes 16 bits                          fixed
   CVE-2026-93519 XI2 barriers                                   not ours
@@ -182,3 +182,26 @@ Also fixed on the way, found while porting:
   - the screen saver used its screen data after it had been freed, in two
     places (X.Org fixed one of them in 2026)
   - RENDER AddGlyphs leaked a glyph on a short request
+  - SYNC: an alarm whose new values were refused left its trigger half
+    changed (X.Org's CVE-2025-26601 fix covers this too)
+
+
+Found here
+----------
+
+Bugs that were in XFree86 4.8 and that we found ourselves, while testing the
+fixes above. As far as we know X.Org fixed or rewrote these code paths long ago,
+so there's no CVE for them.
+
+  SYNC ChangeAlarm with a bad test type: the error went back to the client, but
+    the bad test type stayed in the alarm. With a delta of 0 it never went
+    inactive when it fired, and the server added 0 to it forever: any client
+    could hang the server. The whole request is checked now before any of it
+    goes into the alarm, and a later failure puts the alarm back how it was.
+  SYNC CreateAlarm when AddResource fails: AddResource frees the alarm itself,
+    and CreateAlarm freed it a second time. Fixed.
+  SYNC CreateAlarm failing after the alarm's trigger was put on its counter: the
+    alarm was freed and the counter kept pointing at it. It comes off the
+    counter first now.
+
+test/sync goes through all of these, and the SYNC fixes above.

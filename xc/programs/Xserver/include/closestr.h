@@ -61,7 +61,9 @@ typedef struct _OFclosure {
 
 /* ListFontsWithInfo */
 
-#define XLFDMAXFONTNAMELEN	256
+/* as long as the font library lets a name in fonts.alias be: an alias
+ * longer than 256 ran over a buffer this size in ListFonts */
+#define XLFDMAXFONTNAMELEN	1024
 typedef struct _LFWIstate {
     char	pattern[XLFDMAXFONTNAMELEN];
     int		patlen;

@@ -306,7 +306,11 @@ SyncDeleteTriggerFromCounter(SyncTrigger *pTrigger)
     if (!pTrigger->pCounter)
 	return;
 
-    for (pCur = pTrigger->pCounter->pTriglist; pCur; pCur = pCur->next)
+    /* pPrev has to move along too: it stayed NULL, and taking out any trigger
+     * but the first cut the ones before it off the list. the counter then
+     * didn't tell them when it went, and they kept pointing at it */
+    for (pCur = pTrigger->pCounter->pTriglist; pCur;
+	 pPrev = pCur, pCur = pCur->next)
     {
 	if (pCur->pTrigger == pTrigger)
 	{
@@ -339,8 +343,8 @@ SyncAddTriggerToCounter(SyncTrigger *pTrigger)
 	    return Success;
     }
 
-    if (!(pCur = (SyncTriggerList *)xalloc(sizeof(SyncTriggerList))))
-	return BadAlloc;
+    /* this can't fail: it's the last step and everything else is done */
+    pCur = (SyncTriggerList *)XNFalloc(sizeof(SyncTriggerList));
 
     pCur->pTrigger = pTrigger;
     pCur->next = pTrigger->pCounter->pTriglist;
@@ -421,12 +425,6 @@ SyncInitTrigger(ClientPtr client, SyncTrigger *pTrigger,
 	    client->errorValue = counter;
 	    return SyncErrorBase + XSyncBadCounter;
 	}
-	if (pCounter != pTrigger->pCounter)
-	{ /* new counter for trigger */
-	    SyncDeleteTriggerFromCounter(pTrigger);
-	    pTrigger->pCounter = pCounter;
-	    newcounter = TRUE;
-	}
     }
 
     /* if system counter, ask it what the current value is */
@@ -444,6 +442,38 @@ SyncInitTrigger(ClientPtr client, SyncTrigger *pTrigger,
 	{
 	    client->errorValue = pTrigger->value_type;
 	    return BadValue;
+	}
+    }
+
+    if (changes & XSyncCATestType)
+    {
+	if (pTrigger->test_type != XSyncPositiveTransition &&
+	    pTrigger->test_type != XSyncNegativeTransition &&
+	    pTrigger->test_type != XSyncPositiveComparison &&
+	    pTrigger->test_type != XSyncNegativeComparison)
+	{
+	    client->errorValue = pTrigger->test_type;
+	    return BadValue;
+	}
+    }
+
+    if (changes & (XSyncCAValueType | XSyncCAValue))
+    {
+	if (pTrigger->value_type == XSyncAbsolute)
+	    pTrigger->test_value = pTrigger->wait_value;
+	else /* relative */
+	{
+	    Bool overflow;
+	    if (pCounter == NULL)
+		return BadMatch;
+
+	    XSyncValueAdd(&pTrigger->test_value, pCounter->value, 
+			  pTrigger->wait_value, &overflow);
+	    if (overflow)
+	    {
+		client->errorValue = XSyncValueHigh32(pTrigger->wait_value);
+		return BadValue;
+	    }
 	}
     }
 
@@ -476,29 +506,18 @@ SyncInitTrigger(ClientPtr client, SyncTrigger *pTrigger,
 	}
     }
 
-    if (changes & (XSyncCAValueType | XSyncCAValue))
+    /*  only now, when nothing can fail any more, does the trigger leave its old
+     *  counter. it used to leave it at the top, and an error after that left
+     *  the trigger on a counter that didn't know about it, so the counter
+     *  could be freed under it (CVE-2025-26601)
+     */
+    if ((changes & XSyncCACounter) && pCounter != pTrigger->pCounter)
     {
-	if (pTrigger->value_type == XSyncAbsolute)
-	    pTrigger->test_value = pTrigger->wait_value;
-	else /* relative */
-	{
-	    Bool overflow;
-	    if (pCounter == NULL)
-		return BadMatch;
-
-	    XSyncValueAdd(&pTrigger->test_value, pCounter->value, 
-			  pTrigger->wait_value, &overflow);
-	    if (overflow)
-	    {
-		client->errorValue = XSyncValueHigh32(pTrigger->wait_value);
-		return BadValue;
-	    }
-	}
+	SyncDeleteTriggerFromCounter(pTrigger);
+	pTrigger->pCounter = pCounter;
+	newcounter = TRUE;
     }
 
-    /*  we wait until we're sure there are no errors before registering
-     *  a new counter on a trigger
-     */
     if (newcounter)
     {
 	if ((status = SyncAddTriggerToCounter(pTrigger)) != Success)
@@ -797,7 +816,23 @@ SyncChangeCounter(SyncCounter *pCounter, CARD64 newval)
     {
 	pnext = ptl->next;
 	if ((*ptl->pTrigger->CheckTrigger)(ptl->pTrigger, oldval))
+	{
 	    (*ptl->pTrigger->TriggerFired)(ptl->pTrigger);
+	    /* a fired Await frees all its triggers, and pnext can be one of
+	     * them: if it's not on the list any more, start again from the top.
+	     * not a loop until nothing fires, an alarm with a delta of 0 stays
+	     * on the list and would fire forever (ZDI-CAN-30164) */
+	    if (pnext)
+	    {
+		SyncTriggerList *tmp;
+
+		for (tmp = pCounter->pTriglist; tmp; tmp = tmp->next)
+		    if (tmp == pnext)
+			break;
+		if (!tmp)
+		    pnext = pCounter->pTriglist;
+	    }
+	}
     }
 
     if (IsSystemCounter(pCounter))
@@ -877,15 +912,28 @@ SyncEventSelectForAlarm(SyncAlarm *pAlarm, ClientPtr client, Bool wantevents)
 /*
  * ** SyncChangeAlarmAttributes ** This is used by CreateAlarm and ChangeAlarm
  */
-static int 
+static int
 SyncChangeAlarmAttributes(ClientPtr client, SyncAlarm *pAlarm, Mask mask,
 			  CARD32 *values)
 {
     int		   status;
     XSyncCounter   counter;
     Mask	   origmask = mask;
+    SyncTrigger	   *pTrigger = &pAlarm->trigger;
+    /* the request is read into these first and only goes into the alarm once
+     * all of it checks out. it used to go straight in, so a request that got
+     * an error still left its test type behind: an alarm with test type 99 and
+     * a delta of 0 never went inactive when it fired, and the server added 0
+     * to it forever */
+    int		   value_type = pTrigger->value_type;
+    int		   test_type = pTrigger->test_type;
+    CARD64	   wait_value = pTrigger->wait_value;
+    CARD64	   delta = pAlarm->delta;
+    int		   events = -1;
+    SyncTrigger	   old;
+    CARD64	   olddelta;
 
-    counter = pAlarm->trigger.pCounter ? pAlarm->trigger.pCounter->id : None;
+    counter = pTrigger->pCounter ? pTrigger->pCounter->id : None;
 
     while (mask)
     {
@@ -894,46 +942,48 @@ SyncChangeAlarmAttributes(ClientPtr client, SyncAlarm *pAlarm, Mask mask,
 	switch (index2)
 	{
 	  case XSyncCACounter:
-	    mask &= ~XSyncCACounter;
 	    /* sanity check in SyncInitTrigger */
 	    counter = *values++;
 	    break;
 
 	  case XSyncCAValueType:
-	    mask &= ~XSyncCAValueType;
-	    /* sanity check in SyncInitTrigger */
-	    pAlarm->trigger.value_type = *values++;
+	    value_type = *values++;
+	    if (value_type != XSyncAbsolute && value_type != XSyncRelative)
+	    {
+		client->errorValue = value_type;
+		return BadValue;
+	    }
 	    break;
 
 	  case XSyncCAValue:
-	    mask &= ~XSyncCAValue;
-	    XSyncIntsToValue(&pAlarm->trigger.wait_value, values[1], values[0]);
+	    XSyncIntsToValue(&wait_value, values[1], values[0]);
 	    values += 2;
 	    break;
 
 	  case XSyncCATestType:
-	    mask &= ~XSyncCATestType;
-	    /* sanity check in SyncInitTrigger */
-	    pAlarm->trigger.test_type = *values++;
+	    test_type = *values++;
+	    if (test_type != XSyncPositiveTransition &&
+		test_type != XSyncNegativeTransition &&
+		test_type != XSyncPositiveComparison &&
+		test_type != XSyncNegativeComparison)
+	    {
+		client->errorValue = test_type;
+		return BadValue;
+	    }
 	    break;
 
 	  case XSyncCADelta:
-	    mask &= ~XSyncCADelta;
-	    XSyncIntsToValue(&pAlarm->delta, values[1], values[0]);
+	    XSyncIntsToValue(&delta, values[1], values[0]);
 	    values += 2;
 	    break;
 
 	  case XSyncCAEvents:
-	    mask &= ~XSyncCAEvents;
 	    if ((*values != xTrue) && (*values != xFalse))
 	    {
 		client->errorValue = *values;
 		return BadValue;
 	    }
-	    status = SyncEventSelectForAlarm(pAlarm, client,
-					     (Bool)(*values++));
-	    if (status != Success)
-		return status;
+	    events = (Bool)*values++;
 	    break;
 
 	  default:
@@ -951,22 +1001,42 @@ SyncChangeAlarmAttributes(ClientPtr client, SyncAlarm *pAlarm, Mask mask,
     {
 	CARD64 zero;
 	XSyncIntToValue(&zero, 0);
-	if ((((pAlarm->trigger.test_type == XSyncPositiveComparison) ||
-	      (pAlarm->trigger.test_type == XSyncPositiveTransition))
-	     && XSyncValueLessThan(pAlarm->delta, zero))
+	if ((((test_type == XSyncPositiveComparison) ||
+	      (test_type == XSyncPositiveTransition))
+	     && XSyncValueLessThan(delta, zero))
 	    ||
-	    (((pAlarm->trigger.test_type == XSyncNegativeComparison) ||
-	      (pAlarm->trigger.test_type == XSyncNegativeTransition))
-	     && XSyncValueGreaterThan(pAlarm->delta, zero))
+	    (((test_type == XSyncNegativeComparison) ||
+	      (test_type == XSyncNegativeTransition))
+	     && XSyncValueGreaterThan(delta, zero))
 	   )
 	{
 	    return BadMatch;
 	}
     }
 
-    /* postpone this until now, when we're sure nothing else can go wrong */
-    if ((status = SyncInitTrigger(client, &pAlarm->trigger, counter,
+    /* SyncInitTrigger can still say no (a counter that isn't there, a
+     * relative value that overflows), and then the alarm goes back to how
+     * it was */
+    old = *pTrigger;
+    olddelta = pAlarm->delta;
+    pTrigger->value_type = value_type;
+    pTrigger->test_type = test_type;
+    pTrigger->wait_value = wait_value;
+    pAlarm->delta = delta;
+
+    if ((status = SyncInitTrigger(client, pTrigger, counter,
 			     origmask & XSyncCAAllTrigger)) != Success)
+    {
+	pTrigger->value_type = old.value_type;
+	pTrigger->test_type = old.test_type;
+	pTrigger->wait_value = old.wait_value;
+	pTrigger->test_value = old.test_value;
+	pAlarm->delta = olddelta;
+	return status;
+    }
+
+    if (events != -1 &&
+	(status = SyncEventSelectForAlarm(pAlarm, client, events)) != Success)
 	return status;
 
     /* XXX spec does not really say to do this - needs clarification */
@@ -1183,10 +1253,16 @@ FreeCounter(pointer env, XID id)
 
     pCounter->beingDestroyed = TRUE;
     /* tell all the counter's triggers that the counter has been destroyed */
+    /* next is read before the callback, which can free things (an Await
+     * frees all its triggers at once), and the list head moves along first
+     * so the callbacks see a good list. FreeAwait empties a trigger it frees
+     * (ZDI-CAN-30163) */
     for (ptl = pCounter->pTriglist; ptl; ptl = pnext)
     {
-	(*ptl->pTrigger->CounterDestroyed)(ptl->pTrigger);
 	pnext = ptl->next;
+	pCounter->pTriglist = pnext;
+	if (ptl->pTrigger)
+	    (*ptl->pTrigger->CounterDestroyed)(ptl->pTrigger);
 	xfree(ptl); /* destroy the trigger list as we go */
     }
     if (IsSystemCounter(pCounter))
@@ -1245,6 +1321,18 @@ FreeAwait(pointer addr, XID id)
 	SyncCounter *pCounter = pAwait->trigger.pCounter;
 	if (pCounter && !pCounter->beingDestroyed)
 	    SyncDeleteTriggerFromCounter(&pAwait->trigger);
+	else if (pCounter)
+	{
+	    /* FreeCounter is going through the list: tell it this one's gone */
+	    SyncTriggerList *ptl;
+
+	    for (ptl = pCounter->pTriglist; ptl; ptl = ptl->next)
+		if (ptl->pTrigger == &pAwait->trigger)
+		{
+		    ptl->pTrigger = NULL;
+		    break;
+		}
+	}
     }
     xfree(pAwaitUnion);
     return Success;
@@ -1786,15 +1874,17 @@ ProcSyncCreateAlarm(ClientPtr client)
 				       (CARD32 *)&stuff[1]);
     if (status != Success)
     {
+	/* it can fail after the trigger went on its counter: take it off
+	 * again, or the counter keeps a pointer to the freed alarm */
+	SyncDeleteTriggerFromCounter(&pAlarm->trigger);
 	xfree(pAlarm);
 	return status;
     }
 
+    /* when AddResource fails it has already freed the alarm through
+     * FreeAlarm, so it isn't freed again here (that was a double free) */
     if (!AddResource(stuff->id, RTAlarm, pAlarm))
-    {
-	xfree(pAlarm);
 	return BadAlloc;
-    }
 
     /*  see if alarm already triggered.  NULL counter will not trigger
      *  in CreateAlarm and sets alarm state to Inactive.
