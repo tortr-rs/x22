@@ -114,6 +114,19 @@ pcfGetINT16(FontFilePtr file, CARD32 format)
 
 #define pcfGetINT8(file, format) (position++, FontFileGetc(file))
 
+/* bytes in one glyph's bitmap, rows padded to pad bytes, or -1 if the metrics
+ * make no sense */
+static long
+pcfGlyphBytes(xCharInfo *m, int pad)
+{
+    long width = (long) m->rightSideBearing - m->leftSideBearing;
+    long height = (long) m->ascent + m->descent;
+
+    if (width < 0 || height < 0 || pad <= 0)
+	return -1;
+    return ((width + pad * 8 - 1) / (pad * 8)) * pad * height;
+}
+
 static      PCFTablePtr
 pcfReadTOC(FontFilePtr file, int *countp)
 {
@@ -294,14 +307,31 @@ pcfGetProperties(FontInfoPtr pFontInfo, FontFilePtr file,
     string_size = pcfGetINT32(file, format);
     if (string_size < 0) goto Bail;
     if (IS_EOF(file)) goto Bail;
-    strings = (char *) xalloc(string_size);
+    if (string_size == 0x7fffffff) goto Bail;
+    /* one more byte for a 0 at the end: the names and values are offsets
+     * into this, and nothing checked they were inside it or that the last
+     * one ended, so a font could make the server read past it
+     * (CVE-2017-13722) */
+    strings = (char *) xalloc(string_size + 1);
     if (!strings) {
       pcfError("pcfGetProperties(): Couldn't allocate strings (%d)\n", string_size);
 	goto Bail;
     }
     FontFileRead(file, strings, string_size);
-    if (IS_EOF(file)) goto Bail;
+    if (IS_EOF(file)) {
+	xfree(strings);
+	goto Bail;
+    }
+    strings[string_size] = '\0';
     position += string_size;
+    for (i = 0; i < nprops; i++) {
+	if (props[i].name >= string_size ||
+	    (isStringProp[i] && props[i].value >= string_size)) {
+	    pcfError("pcfGetProperties(): property outside the string table\n");
+	    xfree(strings);
+	    goto Bail;
+	}
+    }
     for (i = 0; i < nprops; i++) {
 	props[i].name = MakeAtom(strings + props[i].name,
 				 strlen(strings + props[i].name), TRUE);
@@ -490,6 +520,19 @@ pcfReadFont(FontPtr pFont, FontFilePtr file,
     if (IS_EOF(file)) goto Bail;
     position += sizebitmaps;
 
+    /* every glyph's bitmap has to be inside what was read. the offsets and
+     * the metrics come straight from the file, and nothing checked them, so a
+     * font could point the server anywhere (CVE-2008-0006, CVE-2026-56002) */
+    for (i = 0; i < nbitmaps; i++) {
+	long n = pcfGlyphBytes(&metrics[i].metrics, PCF_GLYPH_PAD(format));
+
+	if (n < 0 || offsets[i] > (CARD32) sizebitmaps ||
+	    n > (long) sizebitmaps - (long) offsets[i]) {
+	    pcfError("pcfReadFont(): glyph %d is outside the bitmaps\n", i);
+	    goto Bail;
+	}
+    }
+
     if (PCF_BIT_ORDER(format) != bit)
 	BitOrderInvert((unsigned char *)bitmaps, sizebitmaps);
     if ((PCF_BYTE_ORDER(format) == PCF_BIT_ORDER(format)) != (bit == byte)) {
@@ -511,8 +554,19 @@ pcfReadFont(FontPtr pFont, FontFilePtr file,
 	            new;
 	xCharInfo  *metric;
 
-	sizepadbitmaps = bitmapSizes[PCF_SIZE_TO_INDEX(glyph)];
-	padbitmaps = (char *) xalloc(sizepadbitmaps);
+	/* worked out from the glyphs: the file says how big this will be too,
+	 * but a file that said too little got the glyphs written past the end */
+	{
+	    long total = 0;
+
+	    for (i = 0; i < nbitmaps; i++) {
+		total += pcfGlyphBytes(&metrics[i].metrics, glyph);
+		if (total > 0x7fffffff)
+		    goto Bail;
+	    }
+	    sizepadbitmaps = total;
+	}
+	padbitmaps = (char *) xalloc(sizepadbitmaps ? sizepadbitmaps : 1);
 	if (!padbitmaps) {
           pcfError("pcfReadFont(): Couldn't allocate padbitmaps (%d)\n", sizepadbitmaps);
 	    goto Bail;
@@ -600,7 +654,8 @@ pcfReadFont(FontPtr pFont, FontFilePtr file,
     for (i = 0; i < nencoding; i++) {
 	encodingOffset = pcfGetINT16(file, format);
 	if (IS_EOF(file)) goto Bail;
-	if (encodingOffset == 0xFFFF) {
+	/* an offset past the last glyph pointed outside the metrics */
+	if (encodingOffset == 0xFFFF || encodingOffset >= nmetrics) {
 	    pFont->info.allExist = FALSE;
 	} else {
             if(!encoding[SEGMENT_MAJOR(i)]) {

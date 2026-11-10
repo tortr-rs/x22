@@ -296,8 +296,14 @@ zread(BufFilePtr zsf)
 		}
 		zs->zs_incode = zs->zs_code;
 
-		/* Special case for KwKwK string. */
+		/* Special case for KwKwK string. only the next free code can
+		 * turn up here: a bigger one walked the stack below off its end
+		 * and overflowed the buffer (CVE-2011-2895, the same fix the BSDs
+		 * made to compress) */
 		if (zs->zs_code >= zs->zs_free_ent) {
+			if (zs->zs_code > zs->zs_free_ent ||
+			    zs->zs_oldcode == -1)
+				break;	/* a broken file: stop here */
 			*zs->zs_stackp++ = zs->zs_finchar;
 			zs->zs_code = zs->zs_oldcode;
 		}
@@ -446,8 +452,10 @@ BufFilePushCompressed(BufFilePtr f)
 
 	/* max # bits/code. */
 	zs->zs_maxbits = gcode & BIT_MASK;
-	if (zs->zs_maxbits > BITS)
+	if (zs->zs_maxbits > BITS || zs->zs_maxbits < INIT_BITS) {
+		xfree(zs);
 		return 0;
+	}
 	/* Should NEVER generate this code. */
 	zs->zs_maxmaxcode = 1L << zs->zs_maxbits;
 	zs->zs_hsize = HSIZE;		/* For dynamic table sizing. */

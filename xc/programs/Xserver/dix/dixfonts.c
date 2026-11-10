@@ -99,6 +99,14 @@ SOFTWARE.
 #include <X11/extensions/xf86bigfont.h>
 #endif
 
+/* x8664 doesn't talk to font servers (xfs): fonts come from files. the font
+ * server client in the font library has had more than its share of security
+ * bugs (CVE-2014-0210, CVE-2014-0211, CVE-2026-59679, CVE-2026-44950), and
+ * nothing anyone runs today needs it. Xfbdev was already built this way */
+#ifndef NOFONTSERVERACCESS
+#define NOFONTSERVERACCESS
+#endif
+
 #define QUERYCHARINFO(pci, pr)  *(pr) = (pci)->metrics
 
 extern pointer fosNaturalParams;
@@ -728,6 +736,13 @@ doListFontsAndAliases(ClientPtr client, LFclosurePtr c)
 		 * is BadFontName, indicating the alias resolution
 		 * is complete.
 		 */
+		/* an alias's name went into this stack buffer whatever its
+		 * length (CVE-2026-50256). one that doesn't fit is skipped */
+		if (resolvedlen < 0 || resolvedlen > XLFDMAXFONTNAMELEN)
+		{
+		    err = BadFontName;
+		    goto ContBadFontName;
+		}
 		memmove(tmp_pattern, resolved, resolvedlen);
 		if (c->haveSaved)
 		{
@@ -976,6 +991,13 @@ doListFontsWithInfo(ClientPtr client, LFWIclosurePtr c)
 	 * start of the FPE looking for the specified name.  As soon as a real
 	 * font is found for the alias, pop back to the old state
 	 */
+	/* the same for ListFontsWithInfo, into c->current.pattern */
+	if (err == FontNameAlias &&
+	    (namelen < 0 || namelen > XLFDMAXFONTNAMELEN))
+	{
+	    err = BadFontName;
+	    goto ContBadFontName;
+	}
 	if (err == FontNameAlias)
  	{
 	    /*

@@ -34,6 +34,9 @@ in this Software without prior written authorization from The Open Group.
 #ifndef O_BINARY
 #define O_BINARY O_RDONLY
 #endif
+#ifndef O_NOFOLLOW
+#define O_NOFOLLOW 0
+#endif
 
 FontFilePtr
 FontFileOpen (const char *name)
@@ -42,7 +45,10 @@ FontFileOpen (const char *name)
     int		len;
     BufFilePtr	raw, cooked;
 
-    fd = open (name, O_BINARY);
+    /* not through a symlink: any client can add a directory of its own to
+     * the font path, and a link in it to a file it can't read itself got
+     * that file read by the server (CVE-2017-16611) */
+    fd = open (name, O_BINARY | O_NOFOLLOW);
     if (fd < 0)
 	return 0;
     raw = BufFileOpenRead (fd);

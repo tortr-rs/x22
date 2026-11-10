@@ -188,6 +188,9 @@ FontFileAddEntry(FontTablePtr table, FontEntryPtr prototype)
     if (table->sorted)
 	return (FontEntryPtr) 0;    /* "cannot" happen */
     if (table->used == table->size) {
+	/* the multiplication below could overflow (CVE-2014-0209) */
+	if (table->size >= (int)(0x7fffffff / sizeof(FontEntryRec)) - 100)
+	    return (FontEntryPtr) 0;
 	newsize = table->size + 100;
 	entry = (FontEntryPtr) xrealloc(table->entries,
 					   newsize * sizeof(FontEntryRec));
@@ -406,8 +409,12 @@ PatternMatch(char *pat, int patdashes, char *string, int stringdashes)
 		}
 	    }
 	case '?':
-	    if (*string++ == XK_minus)
+	    /* a ? at the end of the name stepped over the 0 and kept reading
+	     * whatever came after it (CVE-2017-13720) */
+	    if ((t = *string++) == XK_minus)
 		stringdashes--;
+	    if (!t)
+		return 0;
 	    break;
 	case '\0':
 	    return (*string == '\0');

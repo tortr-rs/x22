@@ -27,7 +27,7 @@ anything in it. That was 382 handlers in 38 files.
   CVE-2007-6427  XInput memory corruption                       had it
   CVE-2007-6428  TOG-CUP memory corruption                      fixed
   CVE-2007-6429  MIT-SHM and EVI integer overflows              had it
-  CVE-2008-0006  PCF font parser overflow                       to do
+  CVE-2008-0006  PCF font parser overflow                       fixed (every glyph has to fit in the bitmap data)
 
 2008-06  (Jun 11 2008)
   CVE-2008-1377  RECORD and SECURITY memory corruption          had it, and big requests fixed
@@ -43,7 +43,7 @@ anything in it. That was 382 handlers in 38 files.
 2013
   CVE-2013-1940          input flushed on VT switch (Xorg evdev) not ours
   CVE-2013-4396  ImageText use after free                       fixed
-  CVE-2013-6462  libXfont BDF                                   to do (font library)
+  CVE-2013-6462  libXfont BDF                                   fixed
 
 2014-12  (Dec 9 2014)
   CVE-2014-8091  RPC auth unchecked malloc                      fixed
@@ -63,7 +63,7 @@ anything in it. That was 382 handlers in 38 files.
 
 2015
   CVE-2015-0255  XKB GetGeometry information leak               fixed (the counted strings in SetGeometry)
-  CVE-2015-1802..1804    libXfont BDF                           to do (font library)
+  CVE-2015-1802..1804    libXfont BDF                           fixed
   CVE-2015-3164  Xwayland open sockets                          not ours
 
 2017
@@ -151,11 +151,21 @@ anything in it. That was 382 handlers in 38 files.
   CVE-2026-34001 SYNC fences                                    not ours (no fences in SYNC 3.0)
   CVE-2026-34002 XkbSetMap modifier map                         fixed
   CVE-2026-34003 XkbSetMap key types                            fixed
-  CVE-2026-50256..50263  (Jun 2)                                to do
+  CVE-2026-50256 font alias names                               fixed
+  CVE-2026-50257 SYNC fences                                    not ours
+  CVE-2026-50258 XKB key type levels                            fixed (with CVE-2026-34003)
+  CVE-2026-50259 XkbSetMap key types                            fixed (with CVE-2026-34003)
+  CVE-2026-50260 SYNC FreeCounter                               fixed
+  CVE-2026-50261 SYNC SyncChangeCounter                         fixed
+  CVE-2026-50262 GLX                                            not ours
+  CVE-2026-50263 screen saver window, and DRI2                  to do (DRI2 isn't ours; for the saver we
+                                                                haven't found which path it is yet)
   CVE-2026-55999 glamor fonts                                   not ours
   CVE-2026-56000 GLX                                            not ours
-  CVE-2026-56001..56003  libXfont2                              to do (font library)
-  CVE-2026-59679, CVE-2026-44950  libXfont2 font server   to do (font library)
+  CVE-2026-56001 bitmap scaler size                             fixed
+  CVE-2026-56002 PCF glyph data                                 fixed
+  CVE-2026-56003 scaled font properties                         fixed
+  CVE-2026-59679, CVE-2026-44950  libXfont2 font server   not ours (font servers are off, see below)
   CVE-2026-88812 XkbSetGeometry doodad text                     fixed (no text, no doodad)
   CVE-2026-93515 Present notifies                               not ours (our own Present)
   CVE-2026-93516 passive grabs on removed devices               not ours (nothing removes a device while running)
@@ -185,6 +195,25 @@ Also fixed on the way, found while porting:
   - SYNC: an alarm whose new values were refused left its trigger half
     changed (X.Org's CVE-2025-26601 fix covers this too)
 
+
+The font library
+----------------
+
+The server has the font library built in (xc/lib/font), so the libXfont
+advisories are ours too, the ones above and these:
+
+  CVE-2011-2895  compressed (.Z) fonts                          fixed
+  CVE-2014-0209  fonts.dir and fonts.alias sizes                fixed
+  CVE-2014-0210, CVE-2014-0211  font server replies          not ours (font servers are off)
+  CVE-2017-13720 font name patterns                             fixed
+  CVE-2017-13722 PCF property names                             fixed
+  CVE-2017-16611 symlinks in font directories                   fixed (fonts are opened with O_NOFOLLOW)
+
+Some of it is turned off rather than fixed, the way X.Org did: the font server
+client (xfs, CVE-2014-0210, 0211, CVE-2026-59679, 44950), the Speedo, Type1 and
+CID renderers, and the SNF and PMF bitmap formats. Fonts come from PCF and BDF
+files and FreeType now. test/fonts opens a bad BDF or two, a font that's a
+symlink, and a scaled bitmap font, and checks the server is still there after.
 
 Found here
 ----------

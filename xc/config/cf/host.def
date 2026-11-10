@@ -15,6 +15,14 @@
 #define BuildHtmlManPages		NO
 #define InstallXinitConfig		NO
 
+/* x8664: the font formats nobody needs any more, which is code nobody reads any more either. snf
+   is the bitmap format from before pcf, speedo and type1/cid had their own renderers and their own
+   long list of bugs. x.org dropped all of them from the font library. freetype still reads type1 */
+#define OmitSnfSupport			YES
+#define BuildSpeedo			NO
+#define BuildType1			NO
+#define BuildCID			NO
+
 /* 2008 C on a 2026 compiler: the old dialect, shared globals allowed, and the checks that are errors
    now but were warnings then turned back into warnings */
 #define X8664CompatFlags -std=gnu89 -fcommon -fno-strict-aliasing -Wno-error=incompatible-pointer-types -Wno-error=int-conversion -Wimplicit-function-declaration -Wno-error=implicit-function-declaration -Wno-error=return-mismatch -Wno-error=declaration-missing-parameter-type

@@ -105,7 +105,7 @@ ScaleFunc scale[] =
     BitmapScaleBitmaps,
 #endif
 #endif
-#ifdef	PCFFORMAT
+#ifdef	PMFFORMAT
     PrinterScaleBitmaps,
 #endif
 };
@@ -654,7 +654,7 @@ static int
 computeProps(FontPropPtr pf, char *wasStringProp, 
 	     FontPropPtr npf, char *isStringProp, 
 	     unsigned int nprops, double xfactor, double yfactor,
-	     double sXfactor, double sYfactor)
+	     double sXfactor, double sYfactor, int room)
 {
     int         n;
     int         count;
@@ -666,6 +666,10 @@ computeProps(FontPropPtr pf, char *wasStringProp,
 	for (t = fontPropTable; n && (t->atom != pf->name); n--, t++);
 	if (!n)
 	    continue;
+	/* the buffer has room for each known property once, and a font that
+	 * had one many times wrote past the end of it (CVE-2026-56003) */
+	if (count + (t->type == unscaled ? 1 : 2) > room)
+	    break;
 
 	switch (t->type) {
 	case scaledX:
@@ -813,7 +817,7 @@ ComputeScaledProperties(FontInfoPtr sourceFontInfo, /* the font to be scaled */
     n = NPROPS;
     n += computeProps(sourceFontInfo->props, sourceFontInfo->isStringProp,
 		      fp, isStringProp, sourceFontInfo->nprops, dx, dy,
-		      sdx, sdy);
+		      sdx, sdy, nProps - NPROPS);
     return n;
 }
 
@@ -1630,10 +1634,21 @@ BitmapScaleBitmaps(FontPtr pf,          /* scaled font */
 
     nchars = (lastRow - firstRow + 1) * (lastCol - firstCol + 1);
     glyph = pf->glyph;
-    for (i = 0; i < nchars; i++)
+    /* added up in 64 bits: a big enough scale overflowed the old unsigned
+     * sum, the buffer came out small and the glyphs were scaled into it
+     * anyway (CVE-2026-56001) */
     {
-	if ((pci = ACCESSENCODING(bitmapFont->encoding, i)))
-	    bytestoalloc += BYTES_FOR_GLYPH(pci, glyph);
+	unsigned long long total = 0;
+
+	for (i = 0; i < nchars; i++)
+	{
+	    if ((pci = ACCESSENCODING(bitmapFont->encoding, i)))
+		total += (unsigned long long) BYTES_PER_ROW(GLYPHWIDTHPIXELS(pci), glyph) *
+			 (unsigned long long) GLYPHHEIGHTPIXELS(pci);
+	    if (total > 0x7fffffff)
+		goto bail;
+	}
+	bytestoalloc = total;
     }
 
     /* Do we add the font malloc stuff for VALUE ADDED ? */

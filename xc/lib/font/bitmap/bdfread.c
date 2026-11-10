@@ -52,6 +52,7 @@ from The Open Group.
 
 #ifndef FONTMODULE
 #include <ctype.h>
+#include <limits.h>
 #endif
 #include "fntfilst.h"
 #include "fontutil.h"
@@ -125,8 +126,13 @@ bdfReadBitmap(CharInfoPtr pCI, FontFilePtr file, int bit, int byte,
 
 	if (inLineLen & 1) {
 	    bdfError("odd number of characters in hex encoding\n");
-	    line[inLineLen++] = '0';
-	    line[inLineLen] = '\0';
+	    /* a full line has no room for one more character: drop the odd
+	     * one instead of writing past the end of lineBuf */
+	    if (inLineLen + 1 < BDFLINELEN) {
+		line[inLineLen++] = '0';
+		line[inLineLen] = '\0';
+	    } else
+		line[--inLineLen] = '\0';
 	}
 	inLineLen >>= 1;
 	i = inLineLen;
@@ -327,7 +333,8 @@ bdfReadCharacters(FontFilePtr file, FontPtr pFont, bdfFileState *pState,
 	char        charName[100];
 	int         ignore;
 
-	if (sscanf((char *) line, "STARTCHAR %s", charName) != 1) {
+	/* %99s: the name went into charName[100] with no limit (CVE-2013-6462) */
+	if (sscanf((char *) line, "STARTCHAR %99s", charName) != 1) {
 	    bdfError("bad character name in BDF file\n");
 	    goto BAILOUT;	/* bottom of function, free and return error */
 	}
@@ -416,6 +423,16 @@ bdfReadCharacters(FontFilePtr file, FontPtr pFont, bdfFileState *pState,
 		     charName, bw, bh);
 	    goto BAILOUT;
 	}
+	/* the metrics end up in 16 bit fields, and the bitmap size is worked
+	 * out from them: numbers that don't fit made it too small for what
+	 * was read into it (CVE-2015-1804) */
+	if (bw > SHRT_MAX || bh > SHRT_MAX ||
+	    bl < SHRT_MIN || bl > SHRT_MAX || bb < SHRT_MIN || bb > SHRT_MAX ||
+	    bl + bw > SHRT_MAX || bh + bb > SHRT_MAX || bh + bb < SHRT_MIN ||
+	    -bb > SHRT_MAX || wx < SHRT_MIN || wx > SHRT_MAX) {
+	    bdfError("character '%s' has metrics out of range\n", charName);
+	    goto BAILOUT;
+	}
 	line = bdfGetLine(file, lineBuf, BDFLINELEN);
 	if ((line) && (bdfIsPrefix(line, "ATTRIBUTES"))) {
 	    for (p = line + strlen("ATTRIBUTES ");
@@ -447,7 +464,10 @@ bdfReadCharacters(FontFilePtr file, FontPtr pFont, bdfFileState *pState,
 	    ci->metrics.descent = -bb;
 	    ci->metrics.characterWidth = wx;
 	    ci->bits = NULL;
-	    bdfReadBitmap(ci, file, bit, byte, glyph, scan, bitmapsSizes);
+	    /* a bitmap that didn't read used to carry on with a bad pointer in
+	     * it (CVE-2015-1803) */
+	    if (!bdfReadBitmap(ci, file, bit, byte, glyph, scan, bitmapsSizes))
+		goto BAILOUT;
 	    ci++;
 	    ndx++;
 	} else
@@ -592,6 +612,13 @@ bdfReadProperties(FontFilePtr file, FontPtr pFont, bdfFileState *pState)
     }
     if (sscanf((char *) line, "STARTPROPERTIES %d", &nProps) != 1) {
 	bdfError("bad 'STARTPROPERTIES'\n");
+	return (FALSE);
+    }
+    /* a negative or huge count made the arrays below too small
+     * (CVE-2015-1802) */
+    if (nProps < 0 ||
+	nProps > (INT_MAX / (int) sizeof(FontPropRec)) - BDF_GENPROPS) {
+	bdfError("bad 'STARTPROPERTIES' value\n");
 	return (FALSE);
     }
     pFont->info.isStringProp = NULL;

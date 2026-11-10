@@ -40,8 +40,31 @@ in this Software without prior written authorization from The Open Group.
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <errno.h>
+#include <fcntl.h>
+#include <unistd.h>
 
 static Bool AddFileNameAliases ( FontDirectoryPtr dir );
+
+/* fopen for reading that won't follow a symlink, see FontFileOpen
+ * (CVE-2017-16611) */
+static FILE *
+fopenNoFollow(const char *name)
+{
+    int fd;
+    FILE *f;
+
+#ifdef O_NOFOLLOW
+    fd = open(name, O_RDONLY | O_NOFOLLOW);
+#else
+    fd = open(name, O_RDONLY);
+#endif
+    if (fd < 0)
+	return NULL;
+    f = fdopen(fd, "r");
+    if (!f)
+	close(fd);
+    return f;
+}
 static int ReadFontAlias ( char *directory, Bool isFile,
 			   FontDirectoryPtr *pdir );
 static int lexAlias ( FILE *file, char **lexToken );
@@ -89,7 +112,7 @@ FontFileReadDirectory (char *directory, FontDirectoryPtr *pdir)
     if (dir_file[strlen(dir_file) - 1] != '/')
 	strcat(dir_file, "/");
     strcat(dir_file, FontDirFile);
-    file = fopen(dir_file, "r");
+    file = fopenNoFollow(dir_file);
     if (file) {
 	Bool found_font = FALSE;
 	
@@ -273,7 +296,7 @@ ReadFontAlias(char *directory, Bool isFile, FontDirectoryPtr *pdir)
 	    strcat(alias_file, "/");
 	strcat(alias_file, FontAliasFile);
     }
-    file = fopen(alias_file, "r");
+    file = fopenNoFollow(alias_file);
     if (!file)
 	return ((errno == ENOENT) ? Successful : BadFontPath);
     if (!dir)
@@ -367,6 +390,9 @@ lexAlias(FILE *file, char **lexToken)
 	    int         nsize;
 	    char       *nbuf;
 
+	    /* doubling forever overflowed (CVE-2014-0209) */
+	    if (tokenSize >= (0x7fffffff >> 2))
+		return EALLOC;
 	    nsize = tokenSize ? (tokenSize << 1) : 64;
 	    nbuf = (char *) xrealloc(tokenBuf, nsize);
 	    if (!nbuf)

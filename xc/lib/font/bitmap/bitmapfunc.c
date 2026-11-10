@@ -73,7 +73,9 @@ static BitmapFileFunctionsRec readers[] = {
     { bdfReadFont, bdfReadFontInfo} ,
 #endif
 #endif
-#ifdef PCFFORMAT
+/* x8664: pmf was xprint's font format. xprint isn't built, and its reader was
+ * a copy of the pcf one without the checks */
+#ifdef PMFFORMAT
     { pmfReadFont, pcfReadFontInfo} ,
 #endif
 };
@@ -122,7 +124,7 @@ static FontRendererRec	renderers[] = {
 	CAPABILITIES },
 #endif
 #endif
-#ifdef	PCFFORMAT
+#ifdef	PMFFORMAT
     { ".pmf", 4, BitmapOpenBitmap, BitmapOpenScalable,
 	BitmapGetInfoBitmap, BitmapGetInfoScalable, 0,
 	CAPABILITIES }
