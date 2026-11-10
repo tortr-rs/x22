@@ -1371,6 +1371,33 @@ LocalClientCred(ClientPtr client, int *pUid, int *pGid)
 #endif
 }
 
+/*
+ * x22: the pid of a client on this computer, or -1 if there's no telling (a
+ * tcp client, or a system without SO_PEERCRED). X-Resource 1.2 hands it out,
+ * window managers use it to know which program a window belongs to
+ */
+int
+LocalClientPid(ClientPtr client)
+{
+#if defined(SO_PEERCRED)
+    struct ucred peercred;
+    socklen_t so_len = sizeof(peercred);
+    XtransConnInfo ci;
+
+    if (client == NULL || client->osPrivate == NULL)
+	return -1;
+    ci = ((OsCommPtr)client->osPrivate)->trans_conn;
+    if (!ci || !_XSERVTransIsLocal(ci))
+	return -1;
+    if (getsockopt(_XSERVTransGetConnectionNumber(ci), SOL_SOCKET,
+		   SO_PEERCRED, &peercred, &so_len) == -1 || peercred.pid <= 0)
+	return -1;
+    return peercred.pid;
+#else
+    return -1;
+#endif
+}
+
 static Bool
 AuthorizedClient(ClientPtr client)
 {

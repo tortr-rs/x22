@@ -7,7 +7,7 @@
 #define _XRESPROTO_H
 
 #define XRES_MAJOR_VERSION 1
-#define XRES_MINOR_VERSION 0
+#define XRES_MINOR_VERSION 2
 
 #define XRES_NAME "X-Resource"
 
@@ -15,6 +15,9 @@
 #define X_XResQueryClients            1
 #define X_XResQueryClientResources    2
 #define X_XResQueryClientPixmapBytes  3
+/* 1.2 */
+#define X_XResQueryClientIds          4
+#define X_XResQueryResourceBytes      5
 
 typedef struct {
    CARD32 resource_base;
@@ -126,5 +129,99 @@ typedef struct {
 } xXResQueryClientPixmapBytesReply;
 #define sz_xXResQueryClientPixmapBytesReply  32
 
+
+/* everything below is X-Resource 1.2, the same layout as X.Org's resourceproto */
+
+typedef enum {
+   X_XResClientXIDMask      = 0x01,
+   X_XResLocalClientPIDMask = 0x02
+} xXResClientIdMask;
+
+typedef struct {
+   CARD32 client B32;
+   CARD32 mask B32;
+} xXResClientIdSpec;
+#define sz_xXResClientIdSpec 8
+
+typedef struct {
+   xXResClientIdSpec spec;
+   CARD32 length B32;
+   /* followed by length bytes of value */
+} xXResClientIdValue;
+#define sz_xXResClientIdValue (sz_xXResClientIdSpec + 4)
+
+typedef struct {
+   CARD32 resource B32;
+   CARD32 type B32;
+} xXResResourceIdSpec;
+#define sz_xXResResourceIdSpec 8
+
+typedef struct {
+   xXResResourceIdSpec spec;
+   CARD32 bytes B32;
+   CARD32 refCount B32;
+   CARD32 useCount B32;
+} xXResResourceSizeSpec;
+#define sz_xXResResourceSizeSpec (sz_xXResResourceIdSpec + 12)
+
+typedef struct {
+   xXResResourceSizeSpec size;
+   CARD32 numCrossReferences B32;
+   /* followed by that many xXResResourceSizeSpec */
+} xXResResourceSizeValue;
+#define sz_xXResResourceSizeValue (sz_xXResResourceSizeSpec + 4)
+
+/* XResQueryClientIds */
+
+typedef struct _XResQueryClientIds {
+   CARD8   reqType;
+   CARD8   XResReqType;
+   CARD16  length B16;
+   CARD32  numSpecs B32;
+   /* followed by numSpecs xXResClientIdSpec */
+} xXResQueryClientIdsReq;
+#define sz_xXResQueryClientIdsReq 8
+
+typedef struct {
+   CARD8   type;
+   CARD8   pad1;
+   CARD16  sequenceNumber B16;
+   CARD32  length B32;
+   CARD32  numIds B32;
+   CARD32  pad2 B32;
+   CARD32  pad3 B32;
+   CARD32  pad4 B32;
+   CARD32  pad5 B32;
+   CARD32  pad6 B32;
+   /* followed by numIds xXResClientIdValue */
+} xXResQueryClientIdsReply;
+#define sz_xXResQueryClientIdsReply 32
+
+/* XResQueryResourceBytes */
+
+typedef struct _XResQueryResourceBytes {
+   CARD8   reqType;
+   CARD8   XResReqType;
+   CARD16  length B16;
+   CARD32  client B32;
+   CARD32  numSpecs B32;
+   /* followed by numSpecs xXResResourceIdSpec */
+} xXResQueryResourceBytesReq;
+#define sz_xXResQueryResourceBytesReq 12
+
+typedef struct {
+   CARD8   type;
+   CARD8   pad1;
+   CARD16  sequenceNumber B16;
+   CARD32  length B32;
+   CARD32  numSizes B32;
+   CARD32  pad2 B32;
+   CARD32  pad3 B32;
+   CARD32  pad4 B32;
+   CARD32  pad5 B32;
+   CARD32  pad6 B32;
+   /* followed by numSizes xXResResourceSizeValue */
+} xXResQueryResourceBytesReply;
+#define sz_xXResQueryResourceBytesReply 32
 
 #endif /* _XRESPROTO_H */

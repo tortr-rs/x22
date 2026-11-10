@@ -407,6 +407,7 @@ extern int InvalidHost(sockaddrPtr /*saddr*/, int /*len*/);
 extern int LocalClient(ClientPtr /* client */);
 
 extern int LocalClientCred(ClientPtr, int *, int *);
+extern int LocalClientPid(ClientPtr);
 
 extern int ChangeAccessControl(ClientPtr /*client*/, int /*fEnabled*/);
 

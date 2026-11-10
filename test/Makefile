@@ -1,5 +1,5 @@
 # little programs for poking at x22
-all: win masks dpms present composite sync fonts
+all: win masks dpms present composite sync fonts xres
 win: win.c
 	cc -O2 -o $@ win.c -lX11
 masks: masks.c
@@ -17,3 +17,6 @@ sync: sync.c
 
 fonts: fonts.c
 	cc -O2 -o $@ fonts.c -lX11
+
+xres: xres.c
+	cc -O2 -o $@ xres.c -lxcb -lxcb-res

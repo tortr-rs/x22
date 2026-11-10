@@ -73,7 +73,18 @@ a mouthful, so since November 10, 2026 it's X22. Same code, same plan.</p>
 <h2 id="news">News</h2>
 
 <dl class="news">
-<dt>November 10, 2026, evening <span class="new">NEW</span></dt>
+<dt>November 10, 2026, night <span class="new">NEW</span></dt>
+<dd>X-Resource 1.2. XFree86 4.8 had version 1.0 of this extension, which can count a program's windows and
+pixmaps but can't say which program a window belongs to. 1.2 can: ask about a window and the server tells you the
+process behind it, straight from the kernel, so a program can't lie about it. Window managers use that for
+<i>swallowing</i>, where a video or picture opened from a terminal takes the terminal's place until it's closed. Our
+dwm does that now, and on X22 it works with programs that don't put their process number on their windows
+themselves. The other half of 1.2, how much memory a program's pixmaps and windows take, is in too.</dd>
+<dd>Two old bugs in the 1.0 part turned up on the way. One reply left out the last kind of resource while
+saying it was there, which threw the client off for everything after. And for a program with the other byte
+order, two requests swapped a 32-bit number as if it were 16 bits, so they asked about the wrong program.
+<code>test/xres</code> checks all of it, from both byte orders.</dd>
+<dt>November 10, 2026, evening</dt>
 <dd>New name, new address. X8664 is <b>X22</b> now, and it has a site of its own here at
 <a href="https://x22.chamesle.org/">x22.chamesle.org</a>. The code moved to
 <a href="https://github.com/tortr-rs/x22">github.com/tortr-rs/x22</a> (the old address still takes you there),

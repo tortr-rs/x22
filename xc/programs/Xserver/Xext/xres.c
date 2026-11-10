@@ -156,7 +156,9 @@ ProcXResQueryClientResources (ClientPtr client)
     if(num_types) {
         xXResType scratch;
 
-        for(i = 0; i < lastResourceType; i++) {
+        /* <= like the counting above: with < a client holding the last type
+         * got a reply that promised one more entry than it sent */
+        for(i = 0; i <= lastResourceType; i++) {
             if(!counts[i]) continue;
 
             if(!ResourceNames[i + 1]) {
@@ -237,6 +239,265 @@ ProcXResQueryClientPixmapBytes (ClientPtr client)
 }
 
 
+/*
+ * X-Resource 1.2, written for x22. QueryClientIds says which client owns an
+ * XID and which process that client is, QueryResourceBytes how much memory a
+ * client's resources take. the replies are built in a buffer that grows, and
+ * every length a client sends is checked against client->req_len, the real
+ * size of the request
+ */
+
+typedef struct {
+    char *buf;
+    int used, size, count;
+    Bool failed;
+} ResReplyBuf;
+
+static pointer
+ResReserve(ResReplyBuf *b, int n)
+{
+    pointer at;
+
+    if (b->failed)
+	return NULL;
+    if (b->used + n > b->size) {
+	int size = b->size ? b->size : 256;
+	char *nbuf;
+
+	while (size < b->used + n) {
+	    if (size > (1 << 26)) {	/* 64M of reply is too much */
+		b->failed = TRUE;
+		return NULL;
+	    }
+	    size *= 2;
+	}
+	if (!(nbuf = xrealloc(b->buf, size))) {
+	    b->failed = TRUE;
+	    return NULL;
+	}
+	b->buf = nbuf;
+	b->size = size;
+    }
+    at = b->buf + b->used;
+    b->used += n;
+    return at;
+}
+
+static void
+ResAddClientId(ResReplyBuf *b, ClientPtr target, CARD32 mask, Bool swapped)
+{
+    xXResClientIdValue *v;
+    int n;
+
+    if (!mask || (mask & X_XResClientXIDMask)) {
+	if (!(v = ResReserve(b, sz_xXResClientIdValue)))
+	    return;
+	v->spec.client = target->clientAsMask;
+	v->spec.mask = X_XResClientXIDMask;
+	v->length = 0;
+	if (swapped) {
+	    swapl(&v->spec.client, n);
+	    swapl(&v->spec.mask, n);
+	}
+	b->count++;
+    }
+    if (mask & X_XResLocalClientPIDMask) {
+	int pid = LocalClientPid(target);
+	CARD32 *value;
+
+	if (pid == -1)
+	    return;
+	if (!(v = ResReserve(b, sz_xXResClientIdValue + 4)))
+	    return;
+	value = (CARD32 *)((char *)v + sz_xXResClientIdValue);
+	v->spec.client = target->clientAsMask;
+	v->spec.mask = X_XResLocalClientPIDMask;
+	v->length = 4;
+	*value = pid;
+	if (swapped) {
+	    swapl(&v->spec.client, n);
+	    swapl(&v->spec.mask, n);
+	    swapl(&v->length, n);
+	    swapl(value, n);
+	}
+	b->count++;
+    }
+}
+
+static int
+ProcXResQueryClientIds (ClientPtr client)
+{
+    REQUEST(xXResQueryClientIdsReq);
+    xXResQueryClientIdsReply rep;
+    xXResClientIdSpec *specs;
+    ResReplyBuf b = { NULL, 0, 0, 0, FALSE };
+    CARD32 i;
+    int c, n;
+
+    REQUEST_AT_LEAST_SIZE(xXResQueryClientIdsReq);
+    /* numSpecs is exactly what fits after the header, counted in the request's
+     * real length, so a big number can't overflow anything */
+    if (stuff->numSpecs > (client->req_len - (sz_xXResQueryClientIdsReq >> 2)) / 2 ||
+	client->req_len != (sz_xXResQueryClientIdsReq >> 2) + 2 * stuff->numSpecs)
+	return BadLength;
+    specs = (xXResClientIdSpec *)&stuff[1];
+
+    for (i = 0; i < stuff->numSpecs; i++) {
+	CARD32 id = specs[i].client, mask = specs[i].mask;
+
+	if (id == 0) {
+	    /* 0 is every client */
+	    for (c = 1; c < currentMaxClients; c++)
+		if (clients[c])
+		    ResAddClientId(&b, clients[c], mask, client->swapped);
+	} else {
+	    c = CLIENT_ID(id);
+	    if (c > 0 && c < currentMaxClients && clients[c])
+		ResAddClientId(&b, clients[c], mask, client->swapped);
+	}
+    }
+    if (b.failed) {
+	xfree(b.buf);
+	return BadAlloc;
+    }
+
+    rep.type = X_Reply;
+    rep.pad1 = 0;
+    rep.sequenceNumber = client->sequence;
+    rep.length = b.used >> 2;
+    rep.numIds = b.count;
+    rep.pad2 = rep.pad3 = rep.pad4 = rep.pad5 = rep.pad6 = 0;
+    if (client->swapped) {
+	swaps(&rep.sequenceNumber, n);
+	swapl(&rep.length, n);
+	swapl(&rep.numIds, n);
+    }
+    WriteToClient(client, sizeof(rep), (char *)&rep);
+    if (b.used)
+	WriteToClient(client, b.used, b.buf);
+    xfree(b.buf);
+    return client->noClientException;
+}
+
+typedef struct {
+    ResReplyBuf *b;
+    XID resource;
+    Atom type;
+    Bool swapped;
+} ResBytesCtx;
+
+static void
+ResAddBytes (pointer value, XID id, RESTYPE type, pointer cdata)
+{
+    ResBytesCtx *ctx = (ResBytesCtx *)cdata;
+    xXResResourceSizeValue *v;
+    Atom atom = 0;
+    unsigned long bytes = 0;
+    CARD32 refs = 1;
+    int n;
+
+    if (ctx->resource && id != ctx->resource)
+	return;
+    if ((type & TypeMask) <= lastResourceType && ResourceNames)
+	atom = ResourceNames[type & TypeMask];
+    if (ctx->type && atom != ctx->type)
+	return;
+    if (type == RT_PIXMAP) {
+	PixmapPtr pix = (PixmapPtr)value;
+	bytes = (unsigned long)pix->devKind * pix->drawable.height;
+	refs = pix->refcnt;
+    }
+    if (!(v = ResReserve(ctx->b, sz_xXResResourceSizeValue)))
+	return;
+    v->size.spec.resource = id;
+    v->size.spec.type = atom;
+    v->size.bytes = bytes > 0xffffffffUL ? 0xffffffffUL : bytes;
+    v->size.refCount = refs;
+    v->size.useCount = 1;
+    v->numCrossReferences = 0;
+    if (ctx->swapped) {
+	swapl(&v->size.spec.resource, n);
+	swapl(&v->size.spec.type, n);
+	swapl(&v->size.bytes, n);
+	swapl(&v->size.refCount, n);
+	swapl(&v->size.useCount, n);
+	swapl(&v->numCrossReferences, n);
+    }
+    ctx->b->count++;
+}
+
+static int
+ProcXResQueryResourceBytes (ClientPtr client)
+{
+    REQUEST(xXResQueryResourceBytesReq);
+    xXResQueryResourceBytesReply rep;
+    xXResResourceIdSpec *specs;
+    ResReplyBuf b = { NULL, 0, 0, 0, FALSE };
+    ResBytesCtx ctx;
+    CARD32 i;
+    int c, first, last, n;
+
+    REQUEST_AT_LEAST_SIZE(xXResQueryResourceBytesReq);
+    if (stuff->numSpecs > (client->req_len - (sz_xXResQueryResourceBytesReq >> 2)) / 2 ||
+	client->req_len != (sz_xXResQueryResourceBytesReq >> 2) + 2 * stuff->numSpecs)
+	return BadLength;
+    specs = (xXResResourceIdSpec *)&stuff[1];
+
+    /* one client, or every one when it's 0 */
+    if (stuff->client) {
+	c = CLIENT_ID(stuff->client);
+	if (c <= 0 || c >= currentMaxClients || !clients[c]) {
+	    client->errorValue = stuff->client;
+	    return BadValue;
+	}
+	first = last = c;
+    } else {
+	first = 1;
+	last = currentMaxClients - 1;
+    }
+
+    ctx.b = &b;
+    ctx.swapped = client->swapped;
+    for (i = 0; i < stuff->numSpecs; i++) {
+	ctx.resource = specs[i].resource;
+	ctx.type = specs[i].type;
+	if (ctx.type && !ValidAtom(ctx.type)) {
+	    xfree(b.buf);
+	    client->errorValue = ctx.type;
+	    return BadAtom;
+	}
+	for (c = first; c <= last; c++) {
+	    if (!clients[c])
+		continue;
+	    /* a resource lives with the client its id says */
+	    if (ctx.resource && CLIENT_ID(ctx.resource) != c)
+		continue;
+	    FindAllClientResources(clients[c], ResAddBytes, &ctx);
+	}
+    }
+    if (b.failed) {
+	xfree(b.buf);
+	return BadAlloc;
+    }
+
+    rep.type = X_Reply;
+    rep.pad1 = 0;
+    rep.sequenceNumber = client->sequence;
+    rep.length = b.used >> 2;
+    rep.numSizes = b.count;
+    rep.pad2 = rep.pad3 = rep.pad4 = rep.pad5 = rep.pad6 = 0;
+    if (client->swapped) {
+	swaps(&rep.sequenceNumber, n);
+	swapl(&rep.length, n);
+	swapl(&rep.numSizes, n);
+    }
+    WriteToClient(client, sizeof(rep), (char *)&rep);
+    if (b.used)
+	WriteToClient(client, b.used, b.buf);
+    xfree(b.buf);
+    return client->noClientException;
+}
+
 static void
 ResResetProc (ExtensionEntry *extEntry) { }
 
@@ -253,10 +514,59 @@ ProcResDispatch (ClientPtr client)
         return ProcXResQueryClientResources(client);
     case X_XResQueryClientPixmapBytes:
         return ProcXResQueryClientPixmapBytes(client);
+    case X_XResQueryClientIds:
+        return ProcXResQueryClientIds(client);
+    case X_XResQueryResourceBytes:
+        return ProcXResQueryResourceBytes(client);
     default: break;
     }
 
     return BadRequest;
+}
+
+/* the other byte order: the counts are swapped first, then checked against
+ * the request's length before a single spec in it is touched */
+static int
+SProcXResQueryClientIds (ClientPtr client)
+{
+    REQUEST(xXResQueryClientIdsReq);
+    xXResClientIdSpec *specs;
+    CARD32 i;
+    int n;
+
+    REQUEST_AT_LEAST_SIZE(xXResQueryClientIdsReq);
+    swapl(&stuff->numSpecs, n);
+    if (stuff->numSpecs > (client->req_len - (sz_xXResQueryClientIdsReq >> 2)) / 2 ||
+	client->req_len != (sz_xXResQueryClientIdsReq >> 2) + 2 * stuff->numSpecs)
+	return BadLength;
+    specs = (xXResClientIdSpec *)&stuff[1];
+    for (i = 0; i < stuff->numSpecs; i++) {
+	swapl(&specs[i].client, n);
+	swapl(&specs[i].mask, n);
+    }
+    return ProcXResQueryClientIds(client);
+}
+
+static int
+SProcXResQueryResourceBytes (ClientPtr client)
+{
+    REQUEST(xXResQueryResourceBytesReq);
+    xXResResourceIdSpec *specs;
+    CARD32 i;
+    int n;
+
+    REQUEST_AT_LEAST_SIZE(xXResQueryResourceBytesReq);
+    swapl(&stuff->client, n);
+    swapl(&stuff->numSpecs, n);
+    if (stuff->numSpecs > (client->req_len - (sz_xXResQueryResourceBytesReq >> 2)) / 2 ||
+	client->req_len != (sz_xXResQueryResourceBytesReq >> 2) + 2 * stuff->numSpecs)
+	return BadLength;
+    specs = (xXResResourceIdSpec *)&stuff[1];
+    for (i = 0; i < stuff->numSpecs; i++) {
+	swapl(&specs[i].resource, n);
+	swapl(&specs[i].type, n);
+    }
+    return ProcXResQueryResourceBytes(client);
 }
 
 static int
@@ -278,7 +588,7 @@ SProcXResQueryClientResources (ClientPtr client)
     int n;
 
     REQUEST_SIZE_MATCH (xXResQueryClientResourcesReq);
-    swaps(&stuff->xid,n);
+    swapl(&stuff->xid,n);
     return ProcXResQueryClientResources(client);
 }
 
@@ -289,7 +599,7 @@ SProcXResQueryClientPixmapBytes (ClientPtr client)
     int n;
 
     REQUEST_SIZE_MATCH (xXResQueryClientPixmapBytesReq);
-    swaps(&stuff->xid,n);
+    swapl(&stuff->xid,n);
     return ProcXResQueryClientPixmapBytes(client);
 }
 
@@ -311,6 +621,10 @@ SProcResDispatch (ClientPtr client)
         return SProcXResQueryClientResources(client);
     case X_XResQueryClientPixmapBytes:
         return SProcXResQueryClientPixmapBytes(client);
+    case X_XResQueryClientIds:
+        return SProcXResQueryClientIds(client);
+    case X_XResQueryResourceBytes:
+        return SProcXResQueryResourceBytes(client);
     default: break;
     }
 
