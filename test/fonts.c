@@ -1,8 +1,4 @@
-/* fonts: the font library with good fonts and bad ones. the good ones have to open,
- * also scaled to a size nobody drew, and the bad ones have to be turned down without
- * taking the server with them: a bdf whose glyph box doesn't fit in a short, a bdf
- * that claims a billion properties, and a font that's a symlink to a file the server
- * shouldn't read for a client. prints "fonts: ok" if it all went right */
+/* fonts: a scaled font, then broken BDFs and a symlinked font. the server has to survive them. prints "fonts: ok" */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

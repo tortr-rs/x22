@@ -239,13 +239,7 @@ ProcXResQueryClientPixmapBytes (ClientPtr client)
 }
 
 
-/*
- * X-Resource 1.2, written for x22. QueryClientIds says which client owns an
- * XID and which process that client is, QueryResourceBytes how much memory a
- * client's resources take. the replies are built in a buffer that grows, and
- * every length a client sends is checked against client->req_len, the real
- * size of the request
- */
+/* X-Resource 1.2: QueryClientIds (which client, which pid) and QueryResourceBytes */
 
 typedef struct {
     char *buf;
@@ -265,7 +259,7 @@ ResReserve(ResReplyBuf *b, int n)
 	char *nbuf;
 
 	while (size < b->used + n) {
-	    if (size > (1 << 26)) {	/* 64M of reply is too much */
+	    if (size > (1 << 26)) {
 		b->failed = TRUE;
 		return NULL;
 	    }
@@ -335,8 +329,6 @@ ProcXResQueryClientIds (ClientPtr client)
     int c, n;
 
     REQUEST_AT_LEAST_SIZE(xXResQueryClientIdsReq);
-    /* numSpecs is exactly what fits after the header, counted in the request's
-     * real length, so a big number can't overflow anything */
     if (stuff->numSpecs > (client->req_len - (sz_xXResQueryClientIdsReq >> 2)) / 2 ||
 	client->req_len != (sz_xXResQueryClientIdsReq >> 2) + 2 * stuff->numSpecs)
 	return BadLength;
@@ -346,7 +338,6 @@ ProcXResQueryClientIds (ClientPtr client)
 	CARD32 id = specs[i].client, mask = specs[i].mask;
 
 	if (id == 0) {
-	    /* 0 is every client */
 	    for (c = 1; c < currentMaxClients; c++)
 		if (clients[c])
 		    ResAddClientId(&b, clients[c], mask, client->swapped);
@@ -443,7 +434,6 @@ ProcXResQueryResourceBytes (ClientPtr client)
 	return BadLength;
     specs = (xXResResourceIdSpec *)&stuff[1];
 
-    /* one client, or every one when it's 0 */
     if (stuff->client) {
 	c = CLIENT_ID(stuff->client);
 	if (c <= 0 || c >= currentMaxClients || !clients[c]) {
@@ -469,7 +459,6 @@ ProcXResQueryResourceBytes (ClientPtr client)
 	for (c = first; c <= last; c++) {
 	    if (!clients[c])
 		continue;
-	    /* a resource lives with the client its id says */
 	    if (ctx.resource && CLIENT_ID(ctx.resource) != c)
 		continue;
 	    FindAllClientResources(clients[c], ResAddBytes, &ctx);
@@ -524,8 +513,7 @@ ProcResDispatch (ClientPtr client)
     return BadRequest;
 }
 
-/* the other byte order: the counts are swapped first, then checked against
- * the request's length before a single spec in it is touched */
+/* swap the counts first, check them against req_len, then the specs */
 static int
 SProcXResQueryClientIds (ClientPtr client)
 {

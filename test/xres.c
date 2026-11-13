@@ -1,7 +1,4 @@
-/* xres: X-Resource 1.2. the server has to say which process owns a window (that's
- * what dwm's swallowing asks), how big a pixmap is, turn down requests whose
- * counts don't match their length, and do all of it for a client with the other
- * byte order too, which goes through different code. prints "xres: ok" */
+/* xres: X-Resource 1.2, from both byte orders. prints "xres: ok" */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -32,7 +29,7 @@ static unsigned pid_of(xcb_connection_t *c, xcb_window_t w)
 	return pid;
 }
 
-/* the other byte order, by hand: xcb only ever talks the machine's own */
+/* the other byte order by hand, xcb only speaks the machine's own */
 static unsigned short be16(const unsigned char *p) { return p[0] << 8 | p[1]; }
 static unsigned be32(const unsigned char *p) { return (unsigned)p[0] << 24 | p[1] << 16 | p[2] << 8 | p[3]; }
 static void put16(unsigned char *p, unsigned v) { p[0] = v >> 8; p[1] = v; }
@@ -75,8 +72,6 @@ static void swapped(const char *display, int opcode, unsigned want_pid)
 	base = be32(setup + 4);
 	free(setup);
 
-	/* 1. QueryClientIds asking for the pid of the first test client's window
-	 * owner: the server says this connection's pid since we ask about our own base */
 	memset(b, 0, 20);
 	b[0] = opcode; b[1] = 4; put16(b + 2, 4);	/* 4 words: header + one spec */
 	put32(b + 4, 1);
@@ -90,8 +85,7 @@ static void swapped(const char *display, int opcode, unsigned want_pid)
 	if (be32(b + 4) != 2 || be32(b + 8) != 4 || be32(b + 12) != want_pid)
 		FAIL("swapped QueryClientIds said pid %u, not %u", be32(b + 12), want_pid);
 
-	/* 2. a count that doesn't fit the request: has to be BadLength (16), and
-	 * the connection has to go on working after */
+	/* a count that doesn't fit the request is BadLength (16) */
 	memset(b, 0, 8);
 	b[0] = opcode; b[1] = 4; put16(b + 2, 2);
 	put32(b + 4, 0x40000000);
@@ -99,7 +93,6 @@ static void swapped(const char *display, int opcode, unsigned want_pid)
 	if (readn(fd, b, 32) || b[0] != 0 || b[1] != 16)
 		FAIL("swapped QueryClientIds with a bad count gave %d/%d, not BadLength", b[0], b[1]);
 
-	/* 3. QueryResourceBytes for all of this client's resources: none yet, but a reply */
 	memset(b, 0, 12);
 	b[0] = opcode; b[1] = 5; put16(b + 2, 3);
 	put32(b + 4, base); put32(b + 8, 0);
@@ -171,8 +164,6 @@ int main(void)
 		free(r);
 	}
 
-	/* no specs at all is fine, an empty reply. (xcb won't send a count that lies
-	 * about the length, the swapped test below does that by hand) */
 	{
 		xcb_res_resource_id_spec_t spec = { 0, 0 };
 		xcb_generic_error_t *e = NULL;
